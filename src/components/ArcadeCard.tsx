@@ -23,11 +23,11 @@ const ArcadeCard = ({ title, image, color, level, index, onClick }: ArcadeCardPr
       style={{ boxShadow: `0 20px 40px -10px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)` }}
     >
       {/* Game Image */}
-      <div className="aspect-square rounded-[20px] bg-secondary mb-4 overflow-hidden flex items-center justify-center">
+      <div className="aspect-video rounded-[20px] bg-secondary mb-4 overflow-hidden">
         <img
           src={image}
           alt={title}
-          className="w-3/4 h-3/4 object-contain group-hover:scale-110 transition-transform duration-500"
+          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
         />
       </div>
 
