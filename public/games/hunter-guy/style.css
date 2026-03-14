@@ -95,7 +95,7 @@ canvas {
   pointer-events: auto;
   position: absolute;
   left: 50%;
-  bottom: 24px;
+  top: 78px;
   transform: translateX(-50%);
   display: flex;
   gap: 10px;
@@ -296,6 +296,12 @@ body.touch-mode #fire-btn {
     padding: 8px 10px;
   }
 
+  #belt {
+    top: 70px;
+    width: min(94vw, 560px);
+    gap: 8px;
+  }
+
   .belt-item {
     font-size: 12px;
     padding: 8px 10px;
@@ -309,8 +315,8 @@ body.touch-mode #fire-btn {
   }
 
   body.touch-mode #belt {
-    bottom: 120px;
-    width: min(96vw, 420px);
+    top: 70px;
+    width: min(94vw, 420px);
     gap: 8px;
   }
 
