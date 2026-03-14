@@ -7,6 +7,7 @@ This repo owns:
 - the homepage shell at `https://viggo.games/`
 - the hosted game code under `https://viggo.games/games/<slug>/`
 - the GitHub Pages deploy for the custom domain
+- current live games/slots: `chicken-hop`, `hunter-guy`, `burb`
 
 Do not treat the old single-game repos as deploy targets anymore. The game code that matters now lives here.
 
@@ -44,6 +45,8 @@ Then port the changes intentionally. Do not blindly overwrite repo-specific wiri
   - full Chicken Hop source
 - `public/games/hunter-guy/`
   - full Hunter Guy source
+- `public/games/burb/`
+  - Burb placeholder page; replace with full source when ready
 - `public/CNAME`
   - custom domain for GitHub Pages
 - `.github/workflows/pages.yml`

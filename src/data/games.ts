@@ -1,3 +1,4 @@
+import burbImg from "@/assets/burb.png";
 import chickenHopImg from "@/assets/chicken-hop.png";
 import hunterGuyImg from "@/assets/hunter-guy.png";
 import { withBasePath } from "@/lib/app-base";
@@ -27,6 +28,14 @@ export const games: Game[] = [
     color: "#22C55E",
     level: "Level 02",
     url: withBasePath("/games/hunter-guy/"),
+  },
+  {
+    id: "burb",
+    title: "Burb",
+    image: burbImg,
+    color: "#FF7A99",
+    level: "Level 03",
+    url: withBasePath("/games/burb/"),
   },
 ];
 

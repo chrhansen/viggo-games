@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Burb</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg-0: #060816;
+        --bg-1: #10182d;
+        --panel: rgba(11, 16, 34, 0.78);
+        --line: rgba(255, 145, 173, 0.34);
+        --accent: #ff8fa8;
+        --accent-2: #9defff;
+        --text: #f5f7ff;
+        --muted: rgba(245, 247, 255, 0.68);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+        font-family: "Trebuchet MS", "Avenir Next", sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top, rgba(157, 239, 255, 0.18), transparent 34%),
+          radial-gradient(circle at bottom, rgba(255, 143, 168, 0.2), transparent 38%),
+          linear-gradient(160deg, var(--bg-0), var(--bg-1));
+      }
+
+      body::before,
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+      }
+
+      body::before {
+        background:
+          linear-gradient(90deg, transparent 0, transparent calc(50% - 1px), rgba(157, 239, 255, 0.06) calc(50% - 1px), rgba(157, 239, 255, 0.06) calc(50% + 1px), transparent calc(50% + 1px)),
+          linear-gradient(transparent 0, transparent calc(50% - 1px), rgba(255, 143, 168, 0.05) calc(50% - 1px), rgba(255, 143, 168, 0.05) calc(50% + 1px), transparent calc(50% + 1px));
+      }
+
+      body::after {
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        background-size: 56px 56px;
+        mask-image: linear-gradient(to bottom, transparent, black 16%, black 84%, transparent);
+      }
+
+      main {
+        width: min(92vw, 760px);
+        padding: 32px;
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        background: var(--panel);
+        backdrop-filter: blur(18px);
+        box-shadow:
+          0 30px 90px rgba(0, 0, 0, 0.45),
+          0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+          0 0 80px rgba(255, 143, 168, 0.16);
+      }
+
+      .eyebrow {
+        margin: 0 0 12px;
+        font: 700 12px/1.2 "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        color: var(--accent-2);
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(52px, 13vw, 112px);
+        line-height: 0.92;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--text);
+        text-shadow:
+          0 0 20px rgba(255, 143, 168, 0.32),
+          0 0 48px rgba(157, 239, 255, 0.16);
+      }
+
+      p {
+        margin: 18px 0 0;
+        max-width: 34rem;
+        font-size: clamp(16px, 2vw, 19px);
+        line-height: 1.6;
+        color: var(--muted);
+      }
+
+      .status {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 26px;
+        padding: 10px 14px;
+        border: 1px solid rgba(157, 239, 255, 0.22);
+        border-radius: 999px;
+        background: rgba(157, 239, 255, 0.08);
+        font: 700 12px/1.2 "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--accent-2);
+      }
+
+      .status::before {
+        content: "";
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: var(--accent);
+        box-shadow: 0 0 18px var(--accent);
+      }
+
+      a {
+        display: inline-block;
+        margin-top: 26px;
+        color: var(--text);
+        text-decoration: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        padding-bottom: 4px;
+      }
+
+      @media (max-width: 640px) {
+        main {
+          padding: 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">Level 03</p>
+      <h1>Burb</h1>
+      <p>
+        Neon sprint rider. Cycling game slot is live on the arcade now. Full game code drops next.
+      </p>
+      <div class="status">Track Opening Soon</div>
+      <a href="../../" target="_top" rel="noreferrer">Back to viggo.games</a>
+    </main>
+  </body>
+</html>
