@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Chicken Hop: House Run</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="wrap">
+      <header class="topbar" aria-hidden="true">
+        <div class="brand">Chicken Hop</div>
+        <div class="hint">Arrows / WASD + Space • Touch controls on phone/tablet • 1/2/3 speed • Enter start • P pause • R restart</div>
+      </header>
+
+      <section class="stage" aria-label="Game">
+        <canvas id="game" width="960" height="540" aria-label="Chicken Hop game canvas"></canvas>
+
+		        <div class="hud" aria-hidden="true">
+		          <div class="pill pillHealth">
+		            <span class="label">Lives</span>
+			            <span class="hearts" title="Lives">
+			              <span class="heart">
+			                <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+			                  <defs>
+			                    <clipPath id="hpClip1" clipPathUnits="userSpaceOnUse">
+			                      <rect id="hpRect1" x="0" y="0" width="24" height="24"></rect>
+			                    </clipPath>
+			                  </defs>
+			                  <path class="heartBack" fill="rgba(255,75,58,0.14)" d="M12 21s-7.6-4.35-9.5-8.9C.7 8 .95 4.9 3.2 3.1 5.5 1.25 8.55 1.8 10.6 4c.55.6 1.08 1.25 1.4 1.75.32-.5.85-1.15 1.4-1.75 2.05-2.2 5.1-2.75 7.4-.9 2.25 1.8 2.5 4.9.7 9-1.9 4.55-9.5 8.9-9.5 8.9z"></path>
+			                  <g clip-path="url(#hpClip1)">
+			                    <path id="hpFill1" class="heartFill" fill="#ff3b30" d="M12 21s-7.6-4.35-9.5-8.9C.7 8 .95 4.9 3.2 3.1 5.5 1.25 8.55 1.8 10.6 4c.55.6 1.08 1.25 1.4 1.75.32-.5.85-1.15 1.4-1.75 2.05-2.2 5.1-2.75 7.4-.9 2.25 1.8 2.5 4.9.7 9-1.9 4.55-9.5 8.9-9.5 8.9z"></path>
+			                  </g>
+			                  <path class="heartStroke" fill="none" stroke="rgba(255,255,255,0.60)" stroke-width="1.5" d="M12 21s-7.6-4.35-9.5-8.9C.7 8 .95 4.9 3.2 3.1 5.5 1.25 8.55 1.8 10.6 4c.55.6 1.08 1.25 1.4 1.75.32-.5.85-1.15 1.4-1.75 2.05-2.2 5.1-2.75 7.4-.9 2.25 1.8 2.5 4.9.7 9-1.9 4.55-9.5 8.9-9.5 8.9z"></path>
+			                </svg>
+			              </span>
+			              <span class="heart">
+			                <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+			                  <defs>
+			                    <clipPath id="hpClip2" clipPathUnits="userSpaceOnUse">
+			                      <rect id="hpRect2" x="0" y="0" width="24" height="24"></rect>
+			                    </clipPath>
+			                  </defs>
+			                  <path class="heartBack" fill="rgba(255,75,58,0.14)" d="M12 21s-7.6-4.35-9.5-8.9C.7 8 .95 4.9 3.2 3.1 5.5 1.25 8.55 1.8 10.6 4c.55.6 1.08 1.25 1.4 1.75.32-.5.85-1.15 1.4-1.75 2.05-2.2 5.1-2.75 7.4-.9 2.25 1.8 2.5 4.9.7 9-1.9 4.55-9.5 8.9-9.5 8.9z"></path>
+			                  <g clip-path="url(#hpClip2)">
+			                    <path id="hpFill2" class="heartFill" fill="#ff3b30" d="M12 21s-7.6-4.35-9.5-8.9C.7 8 .95 4.9 3.2 3.1 5.5 1.25 8.55 1.8 10.6 4c.55.6 1.08 1.25 1.4 1.75.32-.5.85-1.15 1.4-1.75 2.05-2.2 5.1-2.75 7.4-.9 2.25 1.8 2.5 4.9.7 9-1.9 4.55-9.5 8.9-9.5 8.9z"></path>
+			                  </g>
+			                  <path class="heartStroke" fill="none" stroke="rgba(255,255,255,0.60)" stroke-width="1.5" d="M12 21s-7.6-4.35-9.5-8.9C.7 8 .95 4.9 3.2 3.1 5.5 1.25 8.55 1.8 10.6 4c.55.6 1.08 1.25 1.4 1.75.32-.5.85-1.15 1.4-1.75 2.05-2.2 5.1-2.75 7.4-.9 2.25 1.8 2.5 4.9.7 9-1.9 4.55-9.5 8.9-9.5 8.9z"></path>
+			                </svg>
+			              </span>
+			            </span>
+			          </div>
+		          <div class="pill"><span class="label">Speed</span> <span id="speedMode">Normal</span></div>
+		          <div class="pill"><span class="label">Score</span> <span id="score">0</span></div>
+		          <div class="pill"><span class="label">Best</span> <span id="best">0</span></div>
+		          <div class="pill"><span class="label">Corn</span> <span id="corn">0</span></div>
+		        </div>
+
+        <div class="overlay" id="overlay" role="status" aria-live="polite">
+	          <div class="card">
+	            <h1 class="title">Chicken Hop</h1>
+	            <p class="subtitle">Steer a brave chicken through a cozy house. Jump the clutter. Grab the corn.</p>
+		            <div class="nameRow" aria-label="Chicken name">
+		              <label class="nameLabel" for="nameInput">Name your chicken</label>
+		              <div class="nameControls">
+		                <input id="nameInput" class="nameInput" type="text" inputmode="text" maxlength="14" autocomplete="off" spellcheck="false" placeholder="Nugget" />
+		                <button id="nameRandom" class="nameRandom" type="button">Random</button>
+		              </div>
+		            </div>
+		            <div class="pickRow" aria-label="Chicken look">
+		              <div class="pickGroup">
+		                <div class="pickLabel">Design</div>
+		                <div class="pickBtns" id="designBtns">
+		                  <button class="pickBtn" type="button" data-design="classic" aria-pressed="true">Classic</button>
+		                  <button class="pickBtn" type="button" data-design="spots" aria-pressed="false">Spots</button>
+		                  <button class="pickBtn" type="button" data-design="flame" aria-pressed="false">Flame</button>
+		                  <button class="pickBtn" type="button" data-design="robot" aria-pressed="false">Robot</button>
+		                </div>
+		              </div>
+		              <div class="pickGroup">
+		                <div class="pickLabel">Color</div>
+		                <div class="swatches" id="colorBtns">
+		                  <button class="swatch" type="button" data-color="butter" style="--sw:#fff7ea" aria-label="Butter" aria-pressed="true"></button>
+		                  <button class="swatch" type="button" data-color="red" style="--sw:#ff3b30" aria-label="Red" aria-pressed="false"></button>
+		                  <button class="swatch" type="button" data-color="blue" style="--sw:#4cc9f0" aria-label="Blue" aria-pressed="false"></button>
+		                  <button class="swatch" type="button" data-color="green" style="--sw:#2ee59d" aria-label="Green" aria-pressed="false"></button>
+		                  <button class="swatch" type="button" data-color="grape" style="--sw:#9b5de5" aria-label="Grape" aria-pressed="false"></button>
+		                  <button class="swatch" type="button" data-color="charcoal" style="--sw:#34324a" aria-label="Charcoal" aria-pressed="false"></button>
+		                </div>
+		              </div>
+		            </div>
+		            <div class="controls">
+		              <div class="k">Move: <b>← →</b> or <b>A D</b></div>
+		              <div class="k">Jump: <b>Space</b> (or tap <b>↑</b>/<b>W</b>)</div>
+		              <div class="k">Fly: hold <b>↑</b>/<b>W</b> (5 seconds)</div>
+		              <div class="k">Speed: <b>1</b> slow • <b>2</b> normal • <b>3</b> fast</div>
+		              <div class="k">Drop: <b>↓</b> or <b>S</b> (from shelves)</div>
+		              <div class="k">Pause: <b>P</b> • Restart: <b>R</b></div>
+		            </div>
+            <button class="cta" id="cta" type="button">Press <b>Enter</b> to start</button>
+            <div class="tiny">Tip: staying near the middle makes it easier.</div>
+          </div>
+        </div>
+
+        <div class="touchControls" id="touchControls" aria-label="Touch controls" aria-hidden="true">
+          <div class="touchPad touchMove">
+            <button id="touchLeft" class="touchBtn" type="button" data-touch="left" aria-label="Move left">◀</button>
+            <button id="touchRight" class="touchBtn" type="button" data-touch="right" aria-label="Move right">▶</button>
+          </div>
+          <div class="touchPad touchAir">
+            <button id="touchJump" class="touchBtn touchBtnJump" type="button" data-touch="jump" aria-label="Jump and fly">▲</button>
+            <button id="touchDown" class="touchBtn" type="button" data-touch="down" aria-label="Drop down">▼</button>
+          </div>
+          <div class="touchPad touchMeta">
+            <button id="touchPause" class="touchBtn touchBtnMeta" type="button" aria-label="Pause or resume">Pause</button>
+            <button id="touchRestart" class="touchBtn touchBtnMeta" type="button" aria-label="Restart run">Restart</button>
+          </div>
+        </div>
+      </section>
+
+      <footer class="bottombar" aria-hidden="true">
+        <div class="tiny">Made for keyboard and touch play. No ads. No timers. Just chicken.</div>
+      </footer>
+    </main>
+
+    <script src="./game.js"></script>
+  </body>
+</html>

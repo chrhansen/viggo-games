@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hunter Guy</title>
+    <link rel="stylesheet" href="style.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div id="game-root"></div>
+
+    <div id="hud">
+      <div id="top-bar">
+        <div id="status-text">Click to enter forest</div>
+        <div id="score">Animals tagged: 0</div>
+      </div>
+      <div id="crosshair"></div>
+      <div id="belt">
+        <button class="belt-item active" data-weapon="rifle" data-key="1">1 Rifle</button>
+        <button class="belt-item" data-weapon="bow" data-key="2">2 Bow</button>
+        <button class="belt-item" data-weapon="knife" data-key="3">3 Knife</button>
+        <button class="belt-item" data-weapon="squirt" data-key="4">4 Squirt Gun</button>
+      </div>
+      <div id="controls-card">
+        <p id="controls-text"><strong>Controls:</strong> Click to lock cursor, mouse look is limited up/down, W/Up = forward, S/Down = backward, A-D or Left-Right = turn, 1-4 to switch gear, left click to use tool.</p>
+      </div>
+      <div id="touch-controls">
+        <div id="touch-dpad">
+          <div class="dpad-arrow up">▲</div>
+          <div class="dpad-arrow right">▶</div>
+          <div class="dpad-arrow down">▼</div>
+          <div class="dpad-arrow left">◀</div>
+          <div id="dpad-thumb"></div>
+        </div>
+        <button id="fire-btn" type="button">Use Tool</button>
+      </div>
+    </div>
+
+    <div id="start-overlay">
+      <h1>Hunter Guy</h1>
+      <p>Walk the woods with your hunting belt and track foxes, deer, and bears.</p>
+      <button id="start-btn">Start Hunt</button>
+    </div>
+
+    <script type="module" src="game.js"></script>
+  </body>
+</html>

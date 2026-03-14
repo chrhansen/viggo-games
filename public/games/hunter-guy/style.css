@@ -1,0 +1,350 @@
+:root {
+  --ink: #10251a;
+  --panel: rgba(237, 245, 229, 0.9);
+  --panel-strong: rgba(225, 238, 212, 0.97);
+  --accent: #c35e16;
+  --accent-soft: #e8b37c;
+  --forest-dark: #11331f;
+  --forest-mid: #2b5d34;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  color: var(--ink);
+  background: radial-gradient(circle at 20% 10%, #597b4f 0%, #26452f 45%, #102116 100%);
+}
+
+body.touch-mode {
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+#game-root {
+  width: 100%;
+  height: 100%;
+}
+
+canvas {
+  display: block;
+  touch-action: none;
+}
+
+#hud {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+}
+
+#top-bar {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: min(90vw, 540px);
+  padding: 10px 14px;
+  border: 2px solid rgba(16, 37, 26, 0.18);
+  border-radius: 14px;
+  background: var(--panel);
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+#crosshair {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  transform: translate(-50%, -50%);
+}
+
+#crosshair::before,
+#crosshair::after {
+  content: "";
+  position: absolute;
+  background: rgba(247, 251, 239, 0.95);
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.38);
+}
+
+#crosshair::before {
+  width: 2px;
+  height: 18px;
+  left: 8px;
+}
+
+#crosshair::after {
+  width: 18px;
+  height: 2px;
+  top: 8px;
+}
+
+#belt {
+  pointer-events: auto;
+  position: absolute;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: min(96vw, 780px);
+}
+
+.belt-item {
+  border: 2px solid rgba(17, 51, 31, 0.24);
+  border-radius: 12px;
+  background: var(--panel);
+  color: var(--ink);
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+.belt-item.active {
+  background: var(--panel-strong);
+  border-color: var(--accent);
+  box-shadow: 0 5px 14px rgba(16, 37, 26, 0.2);
+  transform: translateY(-2px);
+}
+
+#controls-card {
+  position: absolute;
+  left: 14px;
+  bottom: 16px;
+  max-width: min(94vw, 390px);
+  border-radius: 12px;
+  padding: 10px 12px;
+  border: 2px solid rgba(17, 51, 31, 0.24);
+  background: rgba(233, 243, 221, 0.8);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+#controls-card p {
+  margin: 0;
+}
+
+#touch-controls {
+  display: none;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+body.touch-mode #touch-controls {
+  display: none;
+}
+
+body.touch-mode.session-active #touch-controls {
+  display: block;
+}
+
+#touch-dpad,
+#fire-btn {
+  display: none;
+}
+
+body.touch-mode #touch-dpad,
+body.touch-mode #fire-btn {
+  display: block;
+}
+
+#touch-dpad {
+  pointer-events: auto;
+  position: absolute;
+  left: 16px;
+  bottom: 20px;
+  width: 142px;
+  height: 142px;
+  border-radius: 30px;
+  border: 2px solid rgba(17, 51, 31, 0.28);
+  background:
+    linear-gradient(145deg, rgba(244, 249, 236, 0.82), rgba(199, 218, 182, 0.7)),
+    radial-gradient(circle at 40% 35%, rgba(255, 255, 255, 0.45), transparent 54%);
+  box-shadow: 0 14px 28px rgba(5, 15, 9, 0.26);
+  backdrop-filter: blur(4px);
+}
+
+#touch-dpad.active {
+  border-color: var(--accent);
+  box-shadow: 0 16px 32px rgba(5, 15, 9, 0.34);
+}
+
+.dpad-arrow {
+  position: absolute;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  color: rgba(16, 37, 26, 0.72);
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.dpad-arrow.up {
+  left: 53px;
+  top: 10px;
+}
+
+.dpad-arrow.right {
+  right: 10px;
+  top: 53px;
+}
+
+.dpad-arrow.down {
+  left: 53px;
+  bottom: 10px;
+}
+
+.dpad-arrow.left {
+  left: 10px;
+  top: 53px;
+}
+
+#dpad-thumb {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 42px;
+  height: 42px;
+  border-radius: 16px;
+  border: 2px solid rgba(17, 51, 31, 0.22);
+  background: linear-gradient(145deg, rgba(245, 249, 240, 0.95), rgba(223, 236, 210, 0.9));
+  box-shadow: 0 8px 20px rgba(5, 15, 9, 0.18);
+  transform: translate(-50%, -50%);
+  transition: transform 80ms ease-out;
+}
+
+#fire-btn {
+  pointer-events: auto;
+  position: absolute;
+  right: 18px;
+  bottom: 28px;
+  width: 94px;
+  height: 94px;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 249, 243, 0.55);
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255, 222, 194, 0.92), rgba(193, 94, 22, 0.96));
+  color: #fff9f3;
+  font-size: 14px;
+  font-weight: 800;
+  box-shadow: 0 16px 30px rgba(5, 15, 9, 0.32);
+}
+
+#fire-btn:active {
+  transform: scale(0.96);
+}
+
+#start-overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at center, rgba(12, 27, 16, 0.45), rgba(5, 12, 8, 0.85));
+  text-align: center;
+  color: #f0f8e8;
+}
+
+#start-overlay.hidden {
+  display: none;
+}
+
+#start-overlay h1 {
+  margin: 0 0 10px;
+  font-size: clamp(34px, 6vw, 64px);
+}
+
+#start-overlay p {
+  margin: 0 0 20px;
+  font-size: clamp(15px, 2.5vw, 20px);
+}
+
+#start-btn {
+  pointer-events: auto;
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  background: linear-gradient(135deg, #ce7b30, #b14f12);
+  color: #fff9f3;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+@media (max-width: 780px) {
+  #top-bar {
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+
+  .belt-item {
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+
+  #controls-card {
+    font-size: 11px;
+    left: 10px;
+    right: 10px;
+    max-width: none;
+  }
+
+  body.touch-mode #belt {
+    bottom: 120px;
+    width: min(96vw, 420px);
+    gap: 8px;
+  }
+
+  body.touch-mode .belt-item {
+    padding: 8px 9px;
+    min-width: 0;
+  }
+
+  body.touch-mode #controls-card {
+    bottom: 176px;
+    right: auto;
+    max-width: min(52vw, 220px);
+    background: rgba(233, 243, 221, 0.72);
+  }
+
+  body.touch-mode #touch-dpad {
+    width: 128px;
+    height: 128px;
+  }
+
+  body.touch-mode .dpad-arrow.up,
+  body.touch-mode .dpad-arrow.down {
+    left: 46px;
+  }
+
+  body.touch-mode .dpad-arrow.left,
+  body.touch-mode .dpad-arrow.right {
+    top: 46px;
+  }
+
+  body.touch-mode #fire-btn {
+    width: 86px;
+    height: 86px;
+    bottom: 32px;
+    font-size: 13px;
+  }
+}

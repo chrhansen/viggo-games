@@ -12,14 +12,15 @@ interface ArcadeCardProps {
 
 const ArcadeCard = ({ title, image, color, level, index, onClick }: ArcadeCardProps) => {
   return (
-    <motion.div
+    <motion.button
+      type="button"
       initial={{ y: 40, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ delay: index * 0.15, duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
       whileHover={{ y: -10, scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      className="relative group bg-card rounded-[32px] p-4 overflow-hidden border border-foreground/10"
+      className="relative group bg-card rounded-[32px] p-4 overflow-hidden border border-foreground/10 text-left"
       style={{ boxShadow: `0 20px 40px -10px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)` }}
     >
       {/* Game Image */}
@@ -49,7 +50,7 @@ const ArcadeCard = ({ title, image, color, level, index, onClick }: ArcadeCardPr
         className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-500 blur-3xl -z-10"
         style={{ backgroundColor: color }}
       />
-    </motion.div>
+    </motion.button>
   );
 };
 

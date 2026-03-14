@@ -1,36 +1,7 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import ArcadeCard from "@/components/ArcadeCard";
-import chickenHopImg from "@/assets/chicken-hop.png";
-import hunterGuyImg from "@/assets/hunter-guy.png";
-
-interface Game {
-  id: string;
-  title: string;
-  image: string;
-  color: string;
-  level: string;
-  url: string;
-}
-
-const games: Game[] = [
-  {
-    id: "chicken-hop",
-    title: "Chicken Hop",
-    image: chickenHopImg,
-    color: "#FF4B4B",
-    level: "Level 01",
-    url: "", // Add the game URL here
-  },
-  {
-    id: "hunter-guy",
-    title: "Hunter Guy",
-    image: hunterGuyImg,
-    color: "#22C55E",
-    level: "Level 02",
-    url: "", // Add the game URL here
-  },
-];
+import { games } from "@/data/games";
 
 const Index = () => {
   const navigate = useNavigate();

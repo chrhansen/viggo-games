@@ -1,0 +1,435 @@
+:root {
+  --bg0: #0f1020;
+  --bg1: #1f1a33;
+  --ink: #121024;
+  --paper: #fff7ea;
+  --paper2: #fde6c5;
+  --accent: #ff6a3d;
+  --accent2: #2ee59d;
+  --shadow: rgba(0, 0, 0, 0.35);
+  --glass: rgba(255, 255, 255, 0.12);
+  --stroke: rgba(255, 255, 255, 0.22);
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  color: var(--paper);
+  background:
+    radial-gradient(1200px 600px at 30% 10%, rgba(255, 106, 61, 0.22), transparent 55%),
+    radial-gradient(900px 500px at 75% 25%, rgba(46, 229, 157, 0.14), transparent 55%),
+    radial-gradient(800px 800px at 50% 90%, rgba(255, 247, 234, 0.08), transparent 60%),
+    linear-gradient(180deg, var(--bg0), var(--bg1));
+  font-family: "Chalkboard SE", "Comic Sans MS", "Marker Felt", ui-rounded, cursive;
+  overflow: hidden;
+}
+
+.wrap {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 14px;
+  padding: 14px;
+}
+
+.topbar, .bottombar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.06));
+  border: 1px solid var(--stroke);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.22);
+}
+
+.brand {
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #fff7ea;
+  text-shadow: 0 3px 0 rgba(0, 0, 0, 0.18);
+}
+
+.hint {
+  opacity: 0.9;
+  font-size: 14px;
+}
+
+.stage {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background:
+    radial-gradient(900px 500px at 20% 20%, rgba(255, 255, 255, 0.14), transparent 55%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.35);
+}
+
+#game {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.hud {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  pointer-events: none;
+}
+
+.pill {
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(18, 16, 36, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.28);
+  font-size: 14px;
+}
+
+.pill .label {
+  opacity: 0.8;
+  margin-right: 6px;
+}
+
+.pillHealth {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hearts {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.heart {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+}
+
+.heart svg { display: block; }
+
+.heartBack {
+  fill: rgba(255, 75, 58, 0.14);
+}
+
+.heartFill {
+  fill: #ff3b30;
+}
+
+.heartStroke {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.60);
+  stroke-width: 1.5;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background:
+    radial-gradient(700px 420px at 50% 40%, rgba(18, 16, 36, 0.62), rgba(18, 16, 36, 0.85));
+}
+
+.overlay.hidden {
+  display: none;
+}
+
+.card {
+  width: min(620px, 96vw);
+  border-radius: 18px;
+  padding: 18px 18px 16px;
+  background: linear-gradient(180deg, rgba(255, 247, 234, 0.10), rgba(255, 247, 234, 0.06));
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.45);
+}
+
+.title {
+  margin: 0 0 6px;
+  font-size: 44px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #fff7ea;
+}
+
+.subtitle {
+  margin: 0 0 12px;
+  font-size: 16px;
+  opacity: 0.95;
+  line-height: 1.3;
+}
+
+.controls {
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(18, 16, 36, 0.35);
+  border: 1px dashed rgba(255, 255, 255, 0.22);
+}
+
+.nameRow {
+  margin: 10px 0 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.nameLabel {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.nameControls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.nameInput {
+  flex: 1;
+  min-width: 140px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(18, 16, 36, 0.42);
+  color: #fff7ea;
+  font: inherit;
+  font-size: 18px;
+  outline: none;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.10);
+}
+
+.nameInput::placeholder {
+  color: rgba(255, 247, 234, 0.55);
+}
+
+.nameInput:focus {
+  border-color: rgba(255, 106, 61, 0.60);
+  box-shadow: 0 0 0 4px rgba(255, 106, 61, 0.16);
+}
+
+.nameRandom {
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(46, 229, 157, 0.55);
+  background: linear-gradient(180deg, rgba(46, 229, 157, 0.24), rgba(46, 229, 157, 0.12));
+  color: #fff7ea;
+  font: inherit;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.nameRandom:active {
+  transform: translateY(1px);
+}
+
+.pickRow {
+  margin: 10px 0 12px;
+  display: grid;
+  gap: 12px;
+}
+
+.pickGroup {
+  display: grid;
+  gap: 8px;
+}
+
+.pickLabel {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.pickBtns {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pickBtn {
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(18, 16, 36, 0.34);
+  color: #fff7ea;
+  font: inherit;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.pickBtn[aria-pressed="true"] {
+  border-color: rgba(255, 106, 61, 0.55);
+  background: linear-gradient(180deg, rgba(255, 106, 61, 0.22), rgba(255, 106, 61, 0.12));
+  box-shadow: 0 14px 30px rgba(255, 106, 61, 0.10);
+}
+
+.swatches {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.22), rgba(0,0,0,0.12)), var(--sw);
+  cursor: pointer;
+}
+
+.swatch[aria-pressed="true"] {
+  border-color: rgba(255, 255, 255, 0.70);
+  box-shadow: 0 0 0 4px rgba(255, 106, 61, 0.16);
+}
+
+.k {
+  font-size: 15px;
+}
+
+.k b {
+  color: #fff;
+  background: rgba(255, 106, 61, 0.20);
+  border: 1px solid rgba(255, 106, 61, 0.45);
+  padding: 0 8px;
+  border-radius: 999px;
+}
+
+.cta {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255, 106, 61, 0.25), rgba(255, 106, 61, 0.14));
+  border: 1px solid rgba(255, 106, 61, 0.55);
+  box-shadow: 0 18px 40px rgba(255, 106, 61, 0.12);
+  font-size: 18px;
+  transform-origin: 50% 50%;
+  animation: thump 1.25s ease-in-out infinite;
+  color: #fff7ea;
+  font: inherit;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+}
+
+@keyframes thump {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+.tiny {
+  margin-top: 10px;
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+.touchControls {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 6;
+  display: none;
+  justify-content: space-between;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.touchPad {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  pointer-events: auto;
+}
+
+.touchAir {
+  align-items: stretch;
+}
+
+.touchMeta {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.touchBtn {
+  min-width: 62px;
+  min-height: 56px;
+  padding: 0 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: linear-gradient(180deg, rgba(18, 16, 36, 0.82), rgba(18, 16, 36, 0.58));
+  color: #fff7ea;
+  font: inherit;
+  font-size: 24px;
+  line-height: 1;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.30);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.touchBtnJump {
+  min-width: 74px;
+  min-height: 80px;
+  font-size: 30px;
+  border-color: rgba(46, 229, 157, 0.55);
+  background: linear-gradient(180deg, rgba(46, 229, 157, 0.30), rgba(18, 16, 36, 0.65));
+}
+
+.touchBtnMeta {
+  min-width: 92px;
+  min-height: 44px;
+  font-size: 15px;
+}
+
+.touchBtn.active,
+.touchBtn:active {
+  transform: translateY(1px) scale(0.98);
+  border-color: rgba(255, 106, 61, 0.85);
+  background: linear-gradient(180deg, rgba(255, 106, 61, 0.45), rgba(18, 16, 36, 0.72));
+}
+
+body.touch-mode .touchControls {
+  display: flex;
+}
+
+body.touch-mode .stage {
+  touch-action: none;
+}
+
+@media (max-width: 720px) {
+  .hint { display: none; }
+  .title { font-size: 38px; }
+  .touchBtn {
+    min-width: 56px;
+    min-height: 52px;
+  }
+  .touchBtnJump {
+    min-width: 68px;
+    min-height: 74px;
+  }
+  .touchBtnMeta {
+    min-width: 82px;
+    min-height: 40px;
+    font-size: 14px;
+  }
+}
+
+@media (max-height: 760px) {
+  .bottombar {
+    display: none;
+  }
+}
