@@ -1,7 +1,6 @@
-import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import ArcadeCard from "@/components/ArcadeCard";
-import GameView from "@/components/GameView";
 import chickenHopImg from "@/assets/chicken-hop.png";
 import hunterGuyImg from "@/assets/hunter-guy.png";
 
@@ -34,23 +33,11 @@ const games: Game[] = [
 ];
 
 const Index = () => {
-  const [activeGame, setActiveGame] = useState<Game | null>(null);
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-svh flex flex-col justify-center p-6 md:p-8">
-      <AnimatePresence>
-        {activeGame && (
-          <GameView
-            title={activeGame.title}
-            gameUrl={activeGame.url}
-            onClose={() => setActiveGame(null)}
-          />
-        )}
-      </AnimatePresence>
-
       <motion.div
-        animate={activeGame ? { scale: 0.9, opacity: 0 } : { scale: 1, opacity: 1 }}
-        transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
         className="max-w-6xl mx-auto w-full"
       >
         {/* Header */}
@@ -83,7 +70,7 @@ const Index = () => {
               color={game.color}
               level={game.level}
               index={i}
-              onClick={() => setActiveGame(game)}
+              onClick={() => navigate(`/${game.id}`)}
             />
           ))}
         </div>
