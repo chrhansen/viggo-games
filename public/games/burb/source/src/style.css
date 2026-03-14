@@ -1,0 +1,183 @@
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;700&display=swap');
+
+:root {
+  color-scheme: light;
+  --panel: rgba(12, 19, 23, 0.52);
+  --panel-strong: rgba(8, 12, 15, 0.66);
+  --line: rgba(255, 255, 255, 0.18);
+  --ink: #f4f1ea;
+  --accent: #ffd45a;
+  --accent-2: #9ee36d;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app,
+.shell {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  overflow: hidden;
+  font-family: 'Chakra Petch', sans-serif;
+  background:
+    radial-gradient(circle at top, rgba(255, 214, 128, 0.2), transparent 32%),
+    linear-gradient(180deg, #88c7ef 0%, #dcefc4 100%);
+  color: var(--ink);
+}
+
+.shell {
+  position: relative;
+}
+
+.scene {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+}
+
+.hud {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-content: start;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.title,
+.meter,
+.touch-controls button {
+  backdrop-filter: blur(18px);
+}
+
+.badge {
+  display: inline-flex;
+  justify-self: start;
+  align-self: start;
+  width: max-content;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel-strong);
+  overflow: hidden;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.title {
+  width: min(34rem, calc(100vw - 2rem));
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: 1.25rem;
+  background:
+    linear-gradient(135deg, rgba(255, 212, 90, 0.18), transparent 45%),
+    var(--panel);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+}
+
+.title h1 {
+  margin: 0 0 0.4rem;
+  font-size: clamp(1.3rem, 2vw, 2rem);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.title p {
+  margin: 0;
+  max-width: 32rem;
+  color: rgba(244, 241, 234, 0.82);
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.meter {
+  justify-self: end;
+  align-self: start;
+  min-width: 9rem;
+  padding: 0.95rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 1.2rem;
+  background:
+    linear-gradient(145deg, rgba(158, 227, 109, 0.18), transparent 55%),
+    var(--panel-strong);
+  text-align: right;
+}
+
+.meter span {
+  display: block;
+  color: rgba(244, 241, 234, 0.68);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.meter strong {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--accent);
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
+  line-height: 1;
+}
+
+.touch-controls {
+  position: absolute;
+  inset: auto 1rem 1rem 1rem;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.touch-controls button {
+  appearance: none;
+  padding: 0.95rem 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 1rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04)),
+    var(--panel);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.touch-controls button:active {
+  transform: translateY(1px) scale(0.99);
+  background:
+    linear-gradient(180deg, rgba(255, 212, 90, 0.24), rgba(255, 212, 90, 0.08)),
+    var(--panel-strong);
+}
+
+@media (min-width: 880px) and (pointer: fine) {
+  .touch-controls {
+    left: auto;
+    width: min(28rem, calc(100vw - 2rem));
+  }
+}
+
+@media (max-width: 760px) {
+  .hud {
+    grid-template-columns: 1fr;
+  }
+
+  .meter {
+    justify-self: start;
+    text-align: left;
+  }
+
+  .title {
+    width: auto;
+  }
+}

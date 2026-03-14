@@ -16,6 +16,7 @@ Do not treat the old single-game repos as deploy targets anymore. The game code 
 - Homepage UI source started in `chrhansen/viggo-games-lovable`
 - Chicken Hop source was copied in from `chrhansen/chicken-hop`
 - Hunter Guy source was copied in from `chrhansen/hunter-guy`
+- Burb source was copied in from local prototype folder `~/dev/burb`
 
 This repo is now the place to edit and deploy all of it.
 
@@ -46,7 +47,8 @@ Then port the changes intentionally. Do not blindly overwrite repo-specific wiri
 - `public/games/hunter-guy/`
   - full Hunter Guy source
 - `public/games/burb/`
-  - Burb placeholder page; replace with full source when ready
+  - deploy-ready Burb build at folder root
+  - editable Burb source under `public/games/burb/source/`
 - `public/CNAME`
   - custom domain for GitHub Pages
 - `.github/workflows/pages.yml`

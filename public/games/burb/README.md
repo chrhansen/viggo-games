@@ -1,6 +1,6 @@
 # Burb
 
-Cycling game slot. Placeholder page live now. Full source/code still pending.
+Browser cycling game. Live deploy files at this folder root. Editable app source in `source/`.
 
 ## Deployment
 
@@ -11,8 +11,47 @@ Cycling game slot. Placeholder page live now. Full source/code still pending.
 - Deploy workflow: `/Users/chrh/dev/viggo-games/.github/workflows/pages.yml`
 - Trigger: push to `main` in `chrhansen/viggo-games`
 
-## Current State
+## Folder Layout
 
-- Homepage card wired in `src/data/games.ts`
-- Hosted placeholder page lives in `index.html`
-- Replace this folder with the real game source when ready
+- `index.html`
+  - deploy entrypoint served by GitHub Pages
+- `assets/`
+  - built JS/CSS emitted by Vite with relative asset paths
+- `source/`
+  - TypeScript + Three.js source copied from `~/dev/burb`
+
+## Local Dev
+
+Use the source app:
+
+```bash
+cd /Users/chrh/dev/viggo-games/public/games/burb/source
+npm install
+npm run dev
+```
+
+## Rebuild Deploy Files
+
+Build from `source/` with a relative base so the game works from `/games/burb/`:
+
+```bash
+cd /Users/chrh/dev/viggo-games/public/games/burb/source
+npm run build -- --base ./ --outDir /tmp/burb-dist
+```
+
+Then copy `/tmp/burb-dist/index.html` plus `/tmp/burb-dist/assets/` into `/Users/chrh/dev/viggo-games/public/games/burb/`.
+
+## Controls
+
+- `W` / `ArrowUp`: faster
+- `S` / `ArrowDown`: slower
+- `A` / `ArrowLeft`: steer left
+- `D` / `ArrowRight`: steer right
+- Touch: `Left`, `Right`, `Fast`, `Slow`
+
+## Source Notes
+
+- Original source README lives at `source/README.md`
+- The homepage card art/registry live outside this folder in:
+  - `/Users/chrh/dev/viggo-games/src/assets/burb.png`
+  - `/Users/chrh/dev/viggo-games/src/data/games.ts`
