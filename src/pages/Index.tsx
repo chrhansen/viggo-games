@@ -1,7 +1,6 @@
-import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import ArcadeCard from "@/components/ArcadeCard";
-import GameView from "@/components/GameView";
 import chickenHopImg from "@/assets/chicken-hop.png";
 import hunterGuyImg from "@/assets/hunter-guy.png";
 
