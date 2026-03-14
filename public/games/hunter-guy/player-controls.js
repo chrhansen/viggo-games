@@ -22,6 +22,7 @@ export function createPlayerControls({
   setMessage,
   warmupAudio,
   onUseWeapon,
+  onSessionActiveChange,
 }) {
   const touchUiEnabled =
     window.matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints > 0;
@@ -121,6 +122,7 @@ export function createPlayerControls({
     sessionActive = active;
     document.body.classList.toggle("session-active", active);
     overlay.classList.toggle("hidden", active);
+    onSessionActiveChange?.(active);
     if (!active) {
       clearMovementState();
     }

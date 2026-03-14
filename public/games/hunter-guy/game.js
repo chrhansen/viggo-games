@@ -15,11 +15,14 @@ const overlay = document.getElementById("start-overlay");
 const startBtn = document.getElementById("start-btn");
 const statusText = document.getElementById("status-text");
 const scoreText = document.getElementById("score");
+const controlsCard = document.getElementById("controls-card");
+const controlsCloseBtn = document.getElementById("controls-close");
 const controlsText = document.getElementById("controls-text");
 const beltButtons = Array.from(document.querySelectorAll(".belt-item"));
 const touchDpad = document.getElementById("touch-dpad");
 const dpadThumb = document.getElementById("dpad-thumb");
 const fireBtn = document.getElementById("fire-btn");
+const CONTROLS_CARD_TIMEOUT_MS = 10000;
 
 const scene = new THREE.Scene();
 scene.fog = new THREE.Fog(0x9fc3a3, 55, 320);
@@ -195,6 +198,8 @@ let selectedWeapon = "rifle";
 let score = 0;
 let fireCooldown = 0;
 let messageTimer = 0;
+let controlsCardTimer = null;
+let controlsCardDismissed = false;
 
 const raycaster = new THREE.Raycaster();
 const centerVector = new THREE.Vector2(0, 0);
@@ -205,6 +210,34 @@ function setMessage(text, seconds = 1.2) {
   statusText.textContent = text;
   messageTimer = seconds;
 }
+
+function hideControlsCard() {
+  controlsCard.classList.add("hidden");
+}
+
+function showControlsCard() {
+  if (controlsCardDismissed) {
+    return;
+  }
+  controlsCard.classList.remove("hidden");
+}
+
+function startControlsCardTimer() {
+  if (controlsCardDismissed) {
+    return;
+  }
+  showControlsCard();
+  window.clearTimeout(controlsCardTimer);
+  controlsCardTimer = window.setTimeout(() => {
+    hideControlsCard();
+  }, CONTROLS_CARD_TIMEOUT_MS);
+}
+
+controlsCloseBtn.addEventListener("click", () => {
+  controlsCardDismissed = true;
+  window.clearTimeout(controlsCardTimer);
+  hideControlsCard();
+});
 
 function setWeapon(weaponName) {
   selectedWeapon = weaponName;
@@ -333,6 +366,14 @@ const controls = createPlayerControls({
   setMessage,
   warmupAudio: () => weaponSoundEffects.warmup(),
   onUseWeapon: tryUseWeapon,
+  onSessionActiveChange: (active) => {
+    if (active) {
+      startControlsCardTimer();
+      return;
+    }
+    window.clearTimeout(controlsCardTimer);
+    showControlsCard();
+  },
 });
 
 const clock = new THREE.Clock();

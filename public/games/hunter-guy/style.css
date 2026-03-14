@@ -124,16 +124,40 @@ canvas {
 }
 
 #controls-card {
+  pointer-events: auto;
   position: absolute;
   left: 14px;
   bottom: 16px;
   max-width: min(94vw, 390px);
   border-radius: 12px;
-  padding: 10px 12px;
+  padding: 12px 40px 10px 12px;
   border: 2px solid rgba(17, 51, 31, 0.24);
   background: rgba(233, 243, 221, 0.8);
   font-size: 12px;
   line-height: 1.35;
+}
+
+#controls-card.hidden {
+  display: none;
+}
+
+#controls-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(17, 51, 31, 0.1);
+  color: var(--ink);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+#controls-close:active {
+  transform: scale(0.94);
 }
 
 #controls-card p {
