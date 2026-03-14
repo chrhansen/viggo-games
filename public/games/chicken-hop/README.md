@@ -2,6 +2,8 @@
 
 Tiny browser game. Keyboard + touch. No build step.
 
+Source of truth: this folder inside `chrhansen/viggo-games`.
+
 ## Play
 
 1. Open `index.html` in a browser.
@@ -10,7 +12,7 @@ Tiny browser game. Keyboard + touch. No build step.
 If your browser blocks audio when opened from a file, run a local server:
 
 ```bash
-cd /Users/chrh/dev/chicken-hop
+cd /Users/chrh/dev/viggo-games/public/games/chicken-hop
 python3 -m http.server 5173
 ```
 
@@ -18,13 +20,12 @@ Then open `http://localhost:5173`.
 
 ## Deployment
 
-- Production URL (custom domain): `https://viggo.games`
-- GitHub Pages URL: `https://chrhansen.github.io/chicken-hop/` (redirects to `https://viggo.games/`)
-- Hosting: GitHub Pages
-- Deployment: GitHub Actions workflow at `.github/workflows/pages.yml`
-- Trigger: every push to `main` (or manual `workflow_dispatch`)
-- Flow: checkout -> configure Pages -> upload repo as artifact -> deploy with `actions/deploy-pages`
-- Custom domain: GitHub Pages is configured to serve this project on `viggo.games`
+- Production URL: `https://viggo.games/games/chicken-hop/`
+- Embedded on homepage route: `https://viggo.games/chicken-hop`
+- Repo owner: `chrhansen/viggo-games`
+- Hosting: GitHub Pages from the umbrella repo
+- Deploy workflow: `/Users/chrh/dev/viggo-games/.github/workflows/pages.yml`
+- Trigger: push to `main` in `chrhansen/viggo-games`
 
 ## Controls
 
@@ -96,12 +97,14 @@ Eggs:
 ## Code Map
 
 - `index.html`
-  - Canvas + HUD + overlay UI.
+  - Canvas + HUD + overlay UI
+  - stage fills the full iframe viewport; no extra in-game top bar/footer chrome
   - Start screen inputs: chicken name, design, color.
 - `styles.css`
-  - UI styling only.
+  - UI styling only
+  - safe-area handling for phone HUD / touch controls
 - `game.js`
-  - Everything else: input, state, physics, spawning, collisions, render, audio.
+  - Everything else: input, state, physics, spawning, collisions, render, audio
 
 ## How The Code Fits Together (`game.js`)
 

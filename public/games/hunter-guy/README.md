@@ -5,6 +5,8 @@ Player in forest.
 Tools on belt.
 Targets: foxes, deer, bears.
 
+Source of truth: this folder inside `chrhansen/viggo-games`.
+
 ## Stack
 
 - Vanilla HTML/CSS/JS
@@ -17,11 +19,21 @@ Targets: foxes, deer, bears.
 Use a local server (not `file://`):
 
 ```bash
+cd /Users/chrh/dev/viggo-games/public/games/hunter-guy
 python3 -m http.server 4173
 ```
 
 Open `http://127.0.0.1:4173`.
 If behavior looks stale, hard refresh (`Cmd+Shift+R`).
+
+## Deployment
+
+- Production URL: `https://viggo.games/games/hunter-guy/`
+- Embedded on homepage route: `https://viggo.games/hunter-guy`
+- Repo owner: `chrhansen/viggo-games`
+- Hosting: GitHub Pages from the umbrella repo
+- Deploy workflow: `/Users/chrh/dev/viggo-games/.github/workflows/pages.yml`
+- Trigger: push to `main` in `chrhansen/viggo-games`
 
 ## Controls
 
@@ -42,6 +54,12 @@ If behavior looks stale, hard refresh (`Cmd+Shift+R`).
   - `Use Tool`: use selected tool
   - Belt buttons: switch belt tool
 
+## UI Notes
+
+- Weapon belt lives at the top of the screen to avoid overlap with mobile touch controls
+- Controls helper card can be closed with `x`
+- Controls helper card auto-hides about 10 seconds after a hunt session starts
+
 ## Gameplay Rules
 
 - Fox: 1 hit to tag
@@ -59,15 +77,19 @@ If behavior looks stale, hard refresh (`Cmd+Shift+R`).
   - import map for `three` and addons
 - `style.css`
   - UI styling (HUD, crosshair, overlay, belt, touch controls)
+  - top-positioned weapon belt
+  - dismissible controls helper card
 - `game.js`
   - Scene/camera/lights/terrain/trees
   - Raycast hit handling and score updates
   - Dense tree population with a small spawn clearing
   - Main animation loop
+  - controls card auto-hide timing
 - `player-controls.js`
   - Desktop pointer-lock look + keyboard movement
   - Touch D-pad movement + drag-to-look
   - Device orientation look offset on supported phones/tablets
+  - session active hook used by helper-card timing
 - `wildlife.js`
   - Animal models/spawn counts
   - Animal roaming behavior
