@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>Gunny</title>
+    <script type="module" crossorigin src="./assets/index-BjhV3JsJ.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-BQAsvL5K.css">
+  </head>
+  <body>
+    <div class="shell">
+      <canvas id="game"></canvas>
+
+      <div class="reticle" aria-hidden="true"></div>
+
+      <header class="hud">
+        <div class="hud__block hud__block--title">
+          <p class="eyebrow">Gunny</p>
+          <h1>Raider Run</h1>
+          <p class="mission">Drop 12 raiders. Miss the satellites.</p>
+        </div>
+
+        <div class="hud__block hud__block--stats">
+          <div class="stat">
+            <span class="stat__label">Hull</span>
+            <span class="stat__value" id="healthValue">100%</span>
+          </div>
+          <div class="stat">
+            <span class="stat__label">Score</span>
+            <span class="stat__value" id="scoreValue">0</span>
+          </div>
+          <div class="stat">
+            <span class="stat__label">Raiders</span>
+            <span class="stat__value" id="killsValue">0 / 12</span>
+          </div>
+          <div class="stat">
+            <span class="stat__label">Range</span>
+            <span class="stat__value" id="distanceValue">0 km</span>
+          </div>
+        </div>
+      </header>
+
+      <aside class="controls">
+        <p><kbd>WASD</kbd> or <kbd>Arrows</kbd> steer</p>
+        <p><kbd>Space</kbd> or hold mouse/tap <span>fire</span></p>
+      </aside>
+
+      <section class="panel" id="introPanel">
+        <p class="eyebrow">Browser flight toy</p>
+        <h2>Gunny</h2>
+        <p>
+          Fly past Earth and the moon. Blast the red ships. Thread between the
+          satellites.
+        </p>
+        <button id="launchButton" type="button">Launch mission</button>
+      </section>
+
+      <section class="panel panel--hidden" id="statusPanel">
+        <p class="eyebrow" id="statusEyebrow">Mission status</p>
+        <h2 id="statusTitle">Sector clear</h2>
+        <p id="statusMessage">You flew clean.</p>
+        <button id="restartButton" type="button">Fly again</button>
+      </section>
+
+      <div class="touch-controls" id="touchControls">
+        <div class="touch-controls__pad">
+          <button class="touch" data-action="up" aria-label="Move up">▲</button>
+          <div class="touch-controls__row">
+            <button class="touch" data-action="left" aria-label="Move left">◀</button>
+            <button class="touch" data-action="down" aria-label="Move down">▼</button>
+            <button class="touch" data-action="right" aria-label="Move right">▶</button>
+          </div>
+        </div>
+        <button class="touch touch--fire" data-action="fire" aria-label="Fire">
+          Fire
+        </button>
+      </div>
+    </div>
+
+  </body>
+</html>

@@ -7,7 +7,7 @@ This repo owns:
 - the homepage shell at `https://viggo.games/`
 - the hosted game code under `https://viggo.games/games/<slug>/`
 - the GitHub Pages deploy for the custom domain
-- current live games/slots: `chicken-hop`, `hunter-guy`, `burb`
+- current live games/slots: `chicken-hop`, `hunter-guy`, `burb`, `gunny`
 
 Do not treat the old single-game repos as deploy targets anymore. The game code that matters now lives here.
 
@@ -17,6 +17,7 @@ Do not treat the old single-game repos as deploy targets anymore. The game code 
 - Chicken Hop source was copied in from `chrhansen/chicken-hop`
 - Hunter Guy source was copied in from `chrhansen/hunter-guy`
 - Burb source is synced in from local authoring folder `/Users/chrh/dev/burb`
+- Gunny source is synced in from local authoring folder `/Users/chrh/dev/gunny`
 
 This repo is now the place to edit and deploy all of it.
 
@@ -31,30 +32,48 @@ Then port the changes intentionally. Do not blindly overwrite repo-specific wiri
 
 ## Repo map
 
-- `src/`
-  - React/Vite homepage app
-  - game hub cards
-  - fullscreen game wrapper route
-- `src/data/games.ts`
-  - registry for games shown on the homepage
-  - slug, label, image, color, hosted URL
-- `src/lib/app-base.ts`
-  - base-path handling so the site works on both the custom domain and the GitHub Pages fallback URL
-- `src/assets/`
-  - card art / homepage assets
+- `.github/`
+  - GitHub Actions config
+  - Pages deploy workflow lives in `.github/workflows/pages.yml`
+- `public/`
+  - static files shipped as-is
+  - custom domain file lives in `public/CNAME`
+- `public/games/`
+  - hosted game payloads grouped by slug
 - `public/games/chicken-hop/`
   - full Chicken Hop source
 - `public/games/hunter-guy/`
   - full Hunter Guy source
 - `public/games/burb/`
   - deploy-ready Burb build at folder root
-  - editable Burb source under `public/games/burb/source/`
-- `public/CNAME`
-  - custom domain for GitHub Pages
-- `.github/workflows/pages.yml`
-  - build + deploy workflow
-- `scripts/prepare-pages.mjs`
-  - copies `dist/index.html` to `dist/404.html` so SPA routes work on GitHub Pages
+- `public/games/burb/source/`
+  - editable Burb source snapshot synced from `/Users/chrh/dev/burb`
+- `public/games/gunny/`
+  - deploy-ready Gunny build at folder root
+- `public/games/gunny/source/`
+  - editable Gunny source snapshot synced from `/Users/chrh/dev/gunny`
+- `scripts/`
+  - build/deploy helper scripts
+  - `prepare-pages.mjs` copies `dist/index.html` to `dist/404.html`
+- `src/`
+  - React/Vite homepage app
+  - routing, cards, iframe wrapper
+- `src/assets/`
+  - homepage card art, including `gunny.png`
+- `src/components/`
+  - homepage UI components
+- `src/data/`
+  - game registry data
+  - `src/data/games.ts` defines slug, label, image, color, hosted URL
+- `src/hooks/`
+  - shared React hooks
+- `src/lib/`
+  - shared utilities
+  - `src/lib/app-base.ts` handles custom-domain vs GitHub Pages base paths
+- `src/pages/`
+  - homepage route, game wrapper route, not-found route
+- `src/test/`
+  - Vitest setup and app tests
 - `dist/`
   - build output only; do not edit by hand
 
@@ -64,6 +83,7 @@ Then port the changes intentionally. Do not blindly overwrite repo-specific wiri
   - edit files in `src/`
 - Game-specific logic, controls, art, tuning:
   - edit files inside that game's folder under `public/games/<slug>/`
+  - for bundled games like `burb` and `gunny`, edit `public/games/<slug>/source/` and rebuild the deploy files at folder root
 - Game-specific docs:
   - keep them in `public/games/<slug>/README.md`
   - do not put game-specific operating notes in this top-level README
@@ -110,9 +130,33 @@ npm run build -- --base ./ --outDir /tmp/burb-dist
 
 Copy `/tmp/burb-dist/index.html` and `/tmp/burb-dist/assets/` into `/Users/chrh/dev/viggo-games/public/games/burb/`.
 
+## Gunny Sync
+
+Local Gunny work currently starts in `/Users/chrh/dev/gunny`.
+
+To refresh the vendored source snapshot in this repo:
+
+```sh
+rsync -a --delete \
+  --exclude .git \
+  --exclude node_modules \
+  --exclude dist \
+  /Users/chrh/dev/gunny/ \
+  /Users/chrh/dev/viggo-games/public/games/gunny/source/
+```
+
+Then rebuild the deploy files with relative asset paths:
+
+```sh
+cd /Users/chrh/dev/viggo-games/public/games/gunny/source
+npm run build -- --base ./ --outDir /tmp/gunny-dist
+```
+
+Copy `/tmp/gunny-dist/index.html` and `/tmp/gunny-dist/assets/` into `/Users/chrh/dev/viggo-games/public/games/gunny/`.
+
 ## Adding a new game
 
-1. Copy the full game source into `public/games/<slug>/`
+1. Copy the full game source into `public/games/<slug>/` or `public/games/<slug>/source/` if the game needs a build step
 2. Add or update `public/games/<slug>/README.md` with game-specific instructions
 3. Add homepage artwork to `src/assets/`
 4. Register the game in `src/data/games.ts`
@@ -124,6 +168,7 @@ Copy `/tmp/burb-dist/index.html` and `/tmp/burb-dist/assets/` into `/Users/chrh/
 Rules:
 
 - Copy source, not just a production build
+- If the game uses Vite or another bundler, keep deploy files at `public/games/<slug>/` and source under `public/games/<slug>/source/`
 - Prefer relative asset paths inside each game folder so static hosting from `/games/<slug>/` works
 - Keep each game's behavior/docs self-contained in its own folder
 
@@ -165,6 +210,7 @@ Pages/domain notes:
 - `chicken-hop` and `hunter-guy` are hosted from subfolders here
 - Root homepage code and game source code are intentionally separate
 - Burb authoring source lives at `/Users/chrh/dev/burb`; sync it into `public/games/burb/source/` before rebuilding deploy files
+- Gunny authoring source lives at `/Users/chrh/dev/gunny`; sync it into `public/games/gunny/source/` before rebuilding deploy files
 - If syncing new Lovable work, diff it first and preserve repo-specific files like:
   - `src/data/games.ts`
   - `src/lib/app-base.ts`
