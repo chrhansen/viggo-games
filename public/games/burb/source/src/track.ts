@@ -12,13 +12,22 @@ import {
   Vector3,
 } from 'three';
 
+export const GROUND_LEVEL = 0;
+export const SHOULDER_SURFACE_LIFT = 0.006;
+export const ROAD_SURFACE_LIFT = 0.012;
+
 const ROAD_WIDTH = 14;
 const SHOULDER_WIDTH = ROAD_WIDTH + 6.5;
 const UP = new Vector3(0, 1, 0);
 
 export function createRoad(curvePath: CatmullRomCurve3, anisotropy: number) {
   const group = new Group();
-  const shoulderGeometry = createRoadGeometry(curvePath, 520, SHOULDER_WIDTH, 0.03);
+  const shoulderGeometry = createRoadGeometry(
+    curvePath,
+    520,
+    SHOULDER_WIDTH,
+    SHOULDER_SURFACE_LIFT,
+  );
   const shoulderTexture = createShoulderTexture();
   shoulderTexture.anisotropy = anisotropy;
   const shoulder = new Mesh(
@@ -30,7 +39,7 @@ export function createRoad(curvePath: CatmullRomCurve3, anisotropy: number) {
       metalness: 0,
     }),
   );
-  const roadGeometry = createRoadGeometry(curvePath, 520, ROAD_WIDTH, 0.09);
+  const roadGeometry = createRoadGeometry(curvePath, 520, ROAD_WIDTH, ROAD_SURFACE_LIFT);
   const roadTexture = createRoadTexture();
   roadTexture.anisotropy = anisotropy;
   const road = new Mesh(
@@ -63,7 +72,7 @@ export function createGround(anisotropy: number) {
   );
 
   ground.rotation.x = -Math.PI * 0.5;
-  ground.position.y = -0.02;
+  ground.position.y = GROUND_LEVEL;
   return ground;
 }
 
@@ -104,8 +113,8 @@ function createRoadGeometry(
     }
 
     const vertex = step * 2;
-    indices.push(vertex, vertex + 1, vertex + 2);
-    indices.push(vertex + 1, vertex + 3, vertex + 2);
+    indices.push(vertex, vertex + 2, vertex + 1);
+    indices.push(vertex + 1, vertex + 2, vertex + 3);
   }
 
   const geometry = new BufferGeometry();

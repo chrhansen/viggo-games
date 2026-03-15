@@ -16,7 +16,7 @@ Do not treat the old single-game repos as deploy targets anymore. The game code 
 - Homepage UI source started in `chrhansen/viggo-games-lovable`
 - Chicken Hop source was copied in from `chrhansen/chicken-hop`
 - Hunter Guy source was copied in from `chrhansen/hunter-guy`
-- Burb source was copied in from local prototype folder `~/dev/burb`
+- Burb source is synced in from local authoring folder `/Users/chrh/dev/burb`
 
 This repo is now the place to edit and deploy all of it.
 
@@ -86,6 +86,30 @@ This serves the React shell. The static games are loaded from `public/games/...`
 
 If a specific game has its own preferred local workflow, use that game's README.
 
+## Burb Sync
+
+Local Burb work currently starts in `/Users/chrh/dev/burb`.
+
+To refresh the vendored source snapshot in this repo:
+
+```sh
+rsync -a --delete \
+  --exclude .git \
+  --exclude node_modules \
+  --exclude dist \
+  /Users/chrh/dev/burb/ \
+  /Users/chrh/dev/viggo-games/public/games/burb/source/
+```
+
+Then rebuild the deploy files with relative asset paths:
+
+```sh
+cd /Users/chrh/dev/viggo-games/public/games/burb/source
+npm run build -- --base ./ --outDir /tmp/burb-dist
+```
+
+Copy `/tmp/burb-dist/index.html` and `/tmp/burb-dist/assets/` into `/Users/chrh/dev/viggo-games/public/games/burb/`.
+
 ## Adding a new game
 
 1. Copy the full game source into `public/games/<slug>/`
@@ -140,6 +164,7 @@ Pages/domain notes:
 - This repo is the deploy target
 - `chicken-hop` and `hunter-guy` are hosted from subfolders here
 - Root homepage code and game source code are intentionally separate
+- Burb authoring source lives at `/Users/chrh/dev/burb`; sync it into `public/games/burb/source/` before rebuilding deploy files
 - If syncing new Lovable work, diff it first and preserve repo-specific files like:
   - `src/data/games.ts`
   - `src/lib/app-base.ts`

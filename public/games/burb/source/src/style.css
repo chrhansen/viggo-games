@@ -75,6 +75,8 @@ body {
 }
 
 .title {
+  pointer-events: auto;
+  position: relative;
   width: min(34rem, calc(100vw - 2rem));
   padding: 1rem 1.1rem;
   border: 1px solid var(--line);
@@ -83,6 +85,29 @@ body {
     linear-gradient(135deg, rgba(255, 212, 90, 0.18), transparent 45%),
     var(--panel);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+}
+
+.title-dismiss {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  appearance: none;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  background: rgba(8, 12, 15, 0.34);
+  color: rgba(244, 241, 234, 0.86);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.title-dismiss:hover {
+  background: rgba(255, 212, 90, 0.18);
+  color: var(--ink);
 }
 
 .title h1 {

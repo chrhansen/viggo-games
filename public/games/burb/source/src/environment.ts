@@ -6,6 +6,7 @@ import {
   Color,
   ConeGeometry,
   CylinderGeometry,
+  DoubleSide,
   Group,
   IcosahedronGeometry,
   MathUtils,
@@ -17,6 +18,7 @@ import {
   SRGBColorSpace,
   Vector3,
 } from 'three';
+import { GROUND_LEVEL } from './track';
 
 const ROAD_WIDTH = 14;
 const UP = new Vector3(0, 1, 0);
@@ -141,6 +143,7 @@ export function createScenery(curvePath: CatmullRomCurve3) {
           );
 
     tree.position.copy(point).addScaledVector(right, side * offset);
+    tree.position.y = GROUND_LEVEL;
     tree.rotation.y = hash(index * 9.2) * Math.PI * 2;
     tree.rotation.z = (hash(index * 6.8) - 0.5) * 0.06 * side;
     group.add(tree);
@@ -154,7 +157,7 @@ export function createScenery(curvePath: CatmullRomCurve3) {
       shrub.position.copy(tree.position);
       shrub.position.x += Math.cos(localAngle) * localRadius;
       shrub.position.z += Math.sin(localAngle) * localRadius;
-      shrub.position.y = 0.22;
+      shrub.position.y = GROUND_LEVEL + 0.22;
       shrub.rotation.y = hash(index * 1.3 + shrubIndex) * Math.PI * 2;
       group.add(shrub);
     }
@@ -170,11 +173,13 @@ export function createScenery(curvePath: CatmullRomCurve3) {
       const reflector = new Mesh(reflectorGeometry, reflectorMaterial);
 
       post.position.copy(point).addScaledVector(right, side * (ROAD_WIDTH * 0.58 + 0.85));
-      post.position.y = 0.45;
-      reflector.position.set(post.position.x, 0.58, post.position.z + side * 0.02);
+      post.position.y = GROUND_LEVEL + 0.45;
+      reflector.position.set(post.position.x, GROUND_LEVEL + 0.58, post.position.z + side * 0.02);
       group.add(post, reflector);
     }
   }
+
+  group.add(createSpeedSign(curvePath));
 
   return group;
 }
@@ -187,7 +192,7 @@ export function createMountains() {
     const radius = 275 + hash(index * 7.4) * 95;
     const mountain = createMountain(index);
 
-    mountain.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
+    mountain.position.set(Math.cos(angle) * radius, GROUND_LEVEL, Math.sin(angle) * radius);
     mountain.rotation.y = hash(index * 6.8) * Math.PI;
     group.add(mountain);
 
@@ -195,7 +200,7 @@ export function createMountains() {
       const shoulder = createMountain(index + 40, 0.68);
       shoulder.position.set(
         Math.cos(angle + 0.06) * (radius - 18),
-        0,
+        GROUND_LEVEL,
         Math.sin(angle + 0.06) * (radius - 18),
       );
       shoulder.rotation.y = hash(index * 5.2) * Math.PI;
@@ -361,6 +366,50 @@ function createMountainGeometry(baseRadius: number, height: number, seed: number
   return geometry;
 }
 
+function createSpeedSign(curvePath: CatmullRomCurve3) {
+  const t = 0.08;
+  const side = 1;
+  const point = curvePath.getPointAt(t);
+  const tangent = curvePath.getTangentAt(t).normalize();
+  const right = new Vector3().crossVectors(UP, tangent).normalize();
+  const signForward = right.clone().multiplyScalar(-side);
+  const group = new Group();
+
+  const postMaterial = new MeshStandardMaterial({
+    color: '#6e4a2e',
+    roughness: 0.94,
+    flatShading: true,
+  });
+  const frameMaterial = new MeshStandardMaterial({
+    color: '#cfd5dc',
+    roughness: 0.82,
+    metalness: 0.08,
+  });
+  const faceMaterial = new MeshStandardMaterial({
+    map: createSpeedSignTexture(),
+    roughness: 0.9,
+    metalness: 0.02,
+    side: DoubleSide,
+  });
+
+  const leftPost = new Mesh(new BoxGeometry(0.18, 4.2, 0.18), postMaterial);
+  const rightPost = new Mesh(new BoxGeometry(0.18, 4.2, 0.18), postMaterial);
+  const frame = new Mesh(new BoxGeometry(6.3, 4.1, 0.24), frameMaterial);
+  const face = new Mesh(new PlaneGeometry(5.8, 3.6), faceMaterial);
+
+  leftPost.position.set(-2.15, 2.1, 0);
+  rightPost.position.set(2.15, 2.1, 0);
+  frame.position.set(0, 4.65, -0.03);
+  face.position.set(0, 4.65, 0.1);
+
+  group.add(leftPost, rightPost, frame, face);
+  group.position.copy(point).addScaledVector(right, side * (ROAD_WIDTH * 0.5 + 7.5));
+  group.position.y = GROUND_LEVEL;
+  group.rotation.y = Math.atan2(signForward.x, signForward.z);
+
+  return group;
+}
+
 function createSkyTexture() {
   const canvasTexture = document.createElement('canvas');
   canvasTexture.width = 1024;
@@ -448,6 +497,37 @@ function createCloudTexture() {
     context.arc(x, y, radius, 0, Math.PI * 2);
     context.fill();
   }
+
+  const texture = new CanvasTexture(canvasTexture);
+  texture.colorSpace = SRGBColorSpace;
+  return texture;
+}
+
+function createSpeedSignTexture() {
+  const canvasTexture = document.createElement('canvas');
+  canvasTexture.width = 1024;
+  canvasTexture.height = 640;
+  const context = canvasTexture.getContext('2d');
+
+  if (!context) {
+    throw new Error('Canvas 2D context unavailable for speed sign texture.');
+  }
+
+  context.fillStyle = '#f7f2d7';
+  context.fillRect(0, 0, canvasTexture.width, canvasTexture.height);
+
+  context.strokeStyle = '#232629';
+  context.lineWidth = 26;
+  context.strokeRect(34, 34, canvasTexture.width - 68, canvasTexture.height - 68);
+
+  context.fillStyle = '#232629';
+  context.font = 'bold 210px sans-serif';
+  context.textAlign = 'center';
+  context.textBaseline = 'middle';
+  context.fillText('67 mph', canvasTexture.width * 0.5, 255);
+
+  context.font = 'bold 94px sans-serif';
+  context.fillText('haha', canvasTexture.width * 0.5, 465);
 
   const texture = new CanvasTexture(canvasTexture);
   texture.colorSpace = SRGBColorSpace;

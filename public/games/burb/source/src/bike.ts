@@ -1,4 +1,5 @@
 import {
+  Box3,
   BoxGeometry,
   CatmullRomCurve3,
   CylinderGeometry,
@@ -12,6 +13,8 @@ import {
 
 export type HandlebarRig = {
   group: Group;
+  restPosition: Vector3;
+  referencePoint: Mesh;
   steerPivot: Group;
 };
 
@@ -133,7 +136,39 @@ export function createHandlebars(): HandlebarRig {
 
   group.add(headTube, steerPivot);
 
-  return { group, steerPivot };
+  return {
+    group,
+    restPosition: group.position.clone(),
+    referencePoint: crossbar,
+    steerPivot,
+  };
+}
+
+export function fitHandlebarRig(rig: HandlebarRig, eyeHeight: number) {
+  const bounds = new Box3();
+  const referencePosition = new Vector3();
+  const targetBottomY = -eyeHeight + 0.02;
+  const targetReferenceY = -0.38;
+  const targetReferenceZ = -1.08;
+
+  rig.group.updateMatrixWorld(true);
+  bounds.setFromObject(rig.group);
+  rig.referencePoint.getWorldPosition(referencePosition);
+
+  const currentVerticalSpan = referencePosition.y - bounds.min.y;
+  const targetVerticalSpan = targetReferenceY - targetBottomY;
+
+  if (currentVerticalSpan > 0.001) {
+    const scale = targetVerticalSpan / currentVerticalSpan;
+    rig.group.scale.setScalar(scale);
+    rig.group.updateMatrixWorld(true);
+    bounds.setFromObject(rig.group);
+    rig.referencePoint.getWorldPosition(referencePosition);
+  }
+
+  rig.group.position.y += targetBottomY - bounds.min.y;
+  rig.group.position.z += targetReferenceZ - referencePosition.z;
+  rig.restPosition.copy(rig.group.position);
 }
 
 function createBarSide(

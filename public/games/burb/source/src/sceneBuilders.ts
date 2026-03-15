@@ -1,3 +1,3 @@
-export { createHandlebars } from './bike';
+export { createHandlebars, fitHandlebarRig } from './bike';
 export { createMountains, createScenery, createSky } from './environment';
-export { createGround, createRoad } from './track';
+export { createGround, createRoad, GROUND_LEVEL, ROAD_SURFACE_LIFT } from './track';

@@ -18,7 +18,20 @@ Browser cycling game. Live deploy files at this folder root. Editable app source
 - `assets/`
   - built JS/CSS emitted by Vite with relative asset paths
 - `source/`
-  - TypeScript + Three.js source copied from `~/dev/burb`
+  - vendored TypeScript + Three.js source snapshot synced from `/Users/chrh/dev/burb`
+
+## Sync From Local Burb
+
+Refresh the vendored source copy from the local authoring folder:
+
+```bash
+rsync -a --delete \
+  --exclude .git \
+  --exclude node_modules \
+  --exclude dist \
+  /Users/chrh/dev/burb/ \
+  /Users/chrh/dev/viggo-games/public/games/burb/source/
+```
 
 ## Local Dev
 

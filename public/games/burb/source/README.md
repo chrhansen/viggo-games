@@ -5,12 +5,22 @@ Small browser cycling game prototype. First-person road riding, visible cockpit,
 ## What we have
 
 - Vite + TypeScript + Three.js app
-- First-person camera with mild camera lean
-- Detailed bike cockpit with steering bars, fork, wheel, cables, and computer mount
-- Raised asphalt road with bright lane markings and gravel shoulders
-- Irregular 3D road loop with mixed bends
-- Varied trees, roadside posts, mountains, clouds, and sky dome
+- Free first-person riding with world-space steering
+- Detailed bike cockpit with bars, fork, wheel, cables, computer mount, and fitted ride height
+- Asphalt road loop with lane markings and gravel shoulders
+- Shared ground plane for grass, road, trees, posts, mountains, and rider position
+- Varied low-poly trees, shrubs, roadside posts, mountains, clouds, and sky dome
+- Large roadside signboard that says `67 mph` with a small `haha`
+- HUD speed meter plus a dismissible helper card
 - Keyboard + touch controls
+
+## How It Works
+
+- The visible road is built from a closed spline, but rider movement is not locked to the spline.
+- The bike moves freely over the world in any heading while the road remains a visual route through the map.
+- A single shared ground level anchors terrain and scenery so props do not float above or sink below the scene.
+- The cockpit rig is attached to the camera and fitted so the lowest bike geometry sits on top of the ground plane.
+- Road, grass, sky, clouds, and sign graphics are generated procedurally with simple geometry and canvas textures.
 
 ## Start
 
@@ -63,11 +73,12 @@ Touch:
 
 ## Current behavior
 
-- Steering yaws the cockpit left/right around a vertical axis
-- Bike stays visually upright; the camera can lean slightly while steering
-- Steering biases your line across the road, then recenters when released
-- Riding far enough off the asphalt slows you down
-- The route is a closed loop with a wider, clearer road surface than the original prototype
+- Steering rotates the bike freely in world space with no heading clamp
+- Bike can ride anywhere on the map instead of snapping to a lane
+- Handlebar visuals follow steering while keeping the riding direction logic separate
+- Camera can lean slightly while steering
+- The route is a visible closed road loop built on the shared ground plane
+- The helper panel in the top-right corner can be dismissed with `X`
 
 ## Build
 

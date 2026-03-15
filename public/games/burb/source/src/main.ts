@@ -22,6 +22,9 @@ import {
   createRoad,
   createScenery,
   createSky,
+  fitHandlebarRig,
+  GROUND_LEVEL,
+  ROAD_SURFACE_LIFT,
 } from './sceneBuilders';
 
 type InputState = {
@@ -31,10 +34,15 @@ type InputState = {
   right: boolean;
 };
 
+type RoadSample = {
+  position: Vector3;
+  surfaceHeight: number;
+};
+
 const ROAD_WIDTH = 14;
 const EYE_HEIGHT = 1.45;
-const MAX_HEADING_OFFSET = 0.62;
 const MAX_CAMERA_ROLL = 0.1;
+const TURN_RATE = 1.55;
 const UP = new Vector3(0, 1, 0);
 const lookMatrix = new Matrix4();
 
@@ -50,8 +58,9 @@ app.innerHTML = `
     <div class="hud">
       <div class="badge">BURB RIDE</div>
       <div class="title">
+        <button type="button" class="title-dismiss" data-dismiss-title aria-label="Dismiss help">X</button>
         <h1>Road loop. Bars up front. Fast corners.</h1>
-        <p>W/S or arrows for speed. A/D or arrows for lane position. Tap buttons on touch screens.</p>
+        <p>W/S or arrows for speed. A/D or arrows to steer. Ride anywhere on the map.</p>
       </div>
       <div class="meter">
         <span>Speed</span>
@@ -69,10 +78,16 @@ app.innerHTML = `
 
 const canvas = document.querySelector<HTMLCanvasElement>('.scene');
 const speedValue = document.querySelector<HTMLElement>('[data-speed]');
+const titlePanel = document.querySelector<HTMLElement>('.title');
+const dismissTitleButton = document.querySelector<HTMLButtonElement>('[data-dismiss-title]');
 
-if (!canvas || !speedValue) {
+if (!canvas || !speedValue || !titlePanel || !dismissTitleButton) {
   throw new Error('UI elements missing.');
 }
+
+dismissTitleButton.addEventListener('click', () => {
+  titlePanel.remove();
+});
 
 const renderer = new WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -102,39 +117,42 @@ scene.add(sun);
 scene.add(createSky());
 
 const roadPoints = [
-  new Vector3(0, 0, 0),
-  new Vector3(20, 0.5, 28),
-  new Vector3(58, 1.3, 64),
-  new Vector3(108, 2.1, 54),
-  new Vector3(146, 1.4, 6),
-  new Vector3(136, 0.6, -52),
-  new Vector3(92, 0, -92),
-  new Vector3(28, 0.7, -86),
-  new Vector3(-22, 1.6, -54),
-  new Vector3(-72, 2.3, -70),
-  new Vector3(-128, 1.1, -36),
-  new Vector3(-146, 0.3, 30),
-  new Vector3(-116, 0.9, 92),
-  new Vector3(-56, 1.8, 118),
-  new Vector3(8, 2.5, 96),
-  new Vector3(54, 1.8, 132),
-  new Vector3(112, 0.9, 162),
-  new Vector3(170, 1.4, 126),
-  new Vector3(192, 2, 58),
-  new Vector3(170, 1.1, -16),
-  new Vector3(118, 0.2, -82),
-  new Vector3(42, -0.2, -126),
-  new Vector3(-42, 0.4, -118),
-  new Vector3(-118, 1.5, -88),
-  new Vector3(-188, 1, -12),
-  new Vector3(-174, 0.5, 82),
-  new Vector3(-100, 1.4, 150),
-  new Vector3(-6, 2.1, 176),
-  new Vector3(88, 1.2, 154),
-];
+  [0, 0],
+  [20, 28],
+  [58, 64],
+  [108, 54],
+  [146, 6],
+  [136, -52],
+  [92, -92],
+  [28, -86],
+  [-22, -54],
+  [-72, -70],
+  [-128, -36],
+  [-146, 30],
+  [-116, 92],
+  [-56, 118],
+  [8, 96],
+  [54, 132],
+  [112, 162],
+  [170, 126],
+  [192, 58],
+  [170, -16],
+  [118, -82],
+  [42, -126],
+  [-42, -118],
+  [-118, -88],
+  [-188, -12],
+  [-174, 82],
+  [-100, 150],
+  [-6, 176],
+  [88, 154],
+].map(([x, z]) => new Vector3(x, GROUND_LEVEL, z));
 
 const curve = new CatmullRomCurve3(roadPoints, true, 'centripetal', 0.45);
-const curveLength = curve.getLength();
+const startProgress = 0.02;
+const startPoint = curve.getPointAt(startProgress);
+const startTangent = curve.getTangentAt(startProgress).normalize();
+const roadSamples = buildRoadSamples(curve, 720);
 
 scene.add(createGround(renderer.capabilities.getMaxAnisotropy()));
 scene.add(createRoad(curve, renderer.capabilities.getMaxAnisotropy()));
@@ -142,6 +160,7 @@ scene.add(createScenery(curve));
 scene.add(createMountains());
 
 const handlebarRig = createHandlebars();
+fitHandlebarRig(handlebarRig, EYE_HEIGHT);
 camera.add(handlebarRig.group);
 
 const input: InputState = {
@@ -190,12 +209,11 @@ for (const button of document.querySelectorAll<HTMLButtonElement>('[data-control
 
 const state = {
   elapsed: 0,
-  progress: 0.02,
   speed: 12,
-  laneOffset: 0,
-  headingOffset: 0,
+  heading: Math.atan2(startTangent.x, startTangent.z),
   roll: 0,
   steer: 0,
+  position: startPoint.clone(),
 };
 
 const clock = new Clock();
@@ -204,34 +222,14 @@ renderer.setAnimationLoop(() => {
   const delta = Math.min(clock.getDelta(), 0.05);
   state.elapsed += delta;
 
-  const steerInput = Number(input.left) - Number(input.right);
+  const steerInput = Number(input.right) - Number(input.left);
   const throttleInput = Number(input.accelerate) - Number(input.brake);
   const targetSpeed = MathUtils.clamp(12 + throttleInput * 6.5, 5, 20);
   state.steer = MathUtils.damp(state.steer, steerInput, 6.5, delta);
-
-  const offRoadDrag = MathUtils.clamp(
-    Math.max(0, Math.abs(state.laneOffset) - ROAD_WIDTH * 0.5) / (ROAD_WIDTH * 0.9),
-    0,
-    0.45,
-  );
-
-  state.speed = MathUtils.damp(state.speed, targetSpeed * (1 - offRoadDrag), 3.6, delta);
-  state.headingOffset = MathUtils.damp(
-    state.headingOffset,
-    state.steer * MAX_HEADING_OFFSET,
-    5.4,
-    delta,
-  );
-  state.laneOffset = MathUtils.damp(
-    state.laneOffset,
-    state.headingOffset * ROAD_WIDTH * 0.55,
-    2.8,
-    delta,
-  );
-  state.progress = MathUtils.euclideanModulo(
-    state.progress +
-      ((state.speed * Math.max(0.62, Math.cos(state.headingOffset))) * delta) / curveLength,
-    1,
+  state.speed = MathUtils.damp(state.speed, targetSpeed, 3.6, delta);
+  state.heading = MathUtils.euclideanModulo(
+    state.heading - state.steer * TURN_RATE * delta,
+    Math.PI * 2,
   );
   state.roll = MathUtils.damp(
     state.roll,
@@ -243,14 +241,14 @@ renderer.setAnimationLoop(() => {
   const bobPhase = state.elapsed * (state.speed * 1.18);
   const bobLift = Math.sin(bobPhase) * 0.03;
   const bobSide = Math.sin(bobPhase * 0.5) * 0.018;
-  const renderPoint = curve.getPointAt(state.progress);
-  const renderTangent = curve.getTangentAt(state.progress).normalize();
-  const renderRight = new Vector3().crossVectors(UP, renderTangent).normalize();
-  const bikeForward = renderTangent.clone().applyAxisAngle(UP, state.headingOffset).normalize();
+  const bikeForward = new Vector3(Math.sin(state.heading), 0, Math.cos(state.heading));
+  const renderRight = new Vector3().crossVectors(UP, bikeForward).normalize();
+  state.position.addScaledVector(bikeForward, state.speed * delta);
+  state.position.y = getSurfaceHeight(state.position, roadSamples);
 
   camera.position
-    .copy(renderPoint)
-    .addScaledVector(renderRight, state.laneOffset + bobSide)
+    .copy(state.position)
+    .addScaledVector(renderRight, bobSide)
     .addScaledVector(UP, EYE_HEIGHT + bobLift);
 
   lookMatrix.lookAt(camera.position, camera.position.clone().add(bikeForward), UP);
@@ -258,9 +256,10 @@ renderer.setAnimationLoop(() => {
   camera.rotateZ(-state.roll);
 
   handlebarRig.group.rotation.set(0, 0, 0);
-  handlebarRig.steerPivot.rotation.set(0, state.steer * 0.42, 0);
-  handlebarRig.group.position.y = -0.75 + bobLift * 0.22;
-  handlebarRig.group.position.x = bobSide * 0.35;
+  handlebarRig.steerPivot.rotation.set(0, -state.steer * 0.42, 0);
+  handlebarRig.group.position.x = handlebarRig.restPosition.x + bobSide * 0.35;
+  handlebarRig.group.position.y = handlebarRig.restPosition.y + bobLift * 0.22;
+  handlebarRig.group.position.z = handlebarRig.restPosition.z;
 
   const targetFov = 74 + (state.speed - 12) * 0.75;
   camera.fov = MathUtils.damp(camera.fov, targetFov, 3.2, delta);
@@ -286,4 +285,38 @@ function updateKeyState(event: KeyboardEvent, active: boolean) {
 
   event.preventDefault();
   input[control] = active;
+}
+
+function buildRoadSamples(curvePath: CatmullRomCurve3, sampleCount: number) {
+  const samples: RoadSample[] = [];
+
+  for (let index = 0; index < sampleCount; index += 1) {
+    const point = curvePath.getPointAt(index / sampleCount);
+    samples.push({
+      position: point,
+      surfaceHeight: point.y + ROAD_SURFACE_LIFT,
+    });
+  }
+
+  return samples;
+}
+
+function getSurfaceHeight(worldPosition: Vector3, roadSamplePoints: RoadSample[]) {
+  let nearestDistanceSquared = Number.POSITIVE_INFINITY;
+  let nearestRoadHeight = 0;
+
+  for (const sample of roadSamplePoints) {
+    const dx = worldPosition.x - sample.position.x;
+    const dz = worldPosition.z - sample.position.z;
+    const distanceSquared = dx * dx + dz * dz;
+
+    if (distanceSquared < nearestDistanceSquared) {
+      nearestDistanceSquared = distanceSquared;
+      nearestRoadHeight = sample.surfaceHeight;
+    }
+  }
+
+  const nearestDistance = Math.sqrt(nearestDistanceSquared);
+  const roadBlend = 1 - MathUtils.smoothstep(nearestDistance, ROAD_WIDTH * 0.45, ROAD_WIDTH * 0.95);
+  return MathUtils.lerp(GROUND_LEVEL, nearestRoadHeight, roadBlend);
 }
