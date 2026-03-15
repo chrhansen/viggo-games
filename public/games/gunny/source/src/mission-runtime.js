@@ -97,6 +97,9 @@ export const runtimeMethods = {
 
     this.earth.position.z = playerZ - 430;
     this.earth.rotation.y += delta * 0.03;
+    if (this.earth.userData.clouds) {
+      this.earth.userData.clouds.rotation.y += delta * 0.05;
+    }
     this.moon.position.z = playerZ - 350;
     this.moon.rotation.y += delta * 0.02;
   },
@@ -108,24 +111,24 @@ export const runtimeMethods = {
     if (this.enemySpawnTimer <= 0) {
       this.spawnEnemy();
       this.enemySpawnTimer = THREE.MathUtils.lerp(
-        1.5,
-        0.8,
+        2.4,
+        1.45,
         Math.min(this.waveIntensity - 1, 0.75)
       );
     }
 
     if (this.satelliteSpawnTimer <= 0) {
       this.spawnSatellite();
-      this.satelliteSpawnTimer = 1.2 + Math.random() * 0.9;
+      this.satelliteSpawnTimer = 2.2 + Math.random() * 1.4;
     }
   },
 
   spawnEnemy() {
     const mesh = createEnemyShip();
     mesh.position.set(
-      (Math.random() - 0.5) * 44,
-      (Math.random() - 0.5) * 24,
-      this.player.mesh.position.z - (140 + Math.random() * 120)
+      (Math.random() - 0.5) * 50,
+      (Math.random() - 0.5) * 28,
+      this.player.mesh.position.z - (180 + Math.random() * 170)
     );
     this.scene.add(mesh);
 
@@ -145,9 +148,9 @@ export const runtimeMethods = {
     const scale = 0.85 + Math.random() * 0.65;
     mesh.scale.setScalar(scale);
     mesh.position.set(
-      (Math.random() - 0.5) * 42,
-      (Math.random() - 0.5) * 26,
-      this.player.mesh.position.z - (110 + Math.random() * 140)
+      (Math.random() - 0.5) * 56,
+      (Math.random() - 0.5) * 34,
+      this.player.mesh.position.z - (165 + Math.random() * 210)
     );
     mesh.rotation.set(Math.random(), Math.random(), Math.random());
     this.scene.add(mesh);
@@ -211,10 +214,10 @@ export const runtimeMethods = {
       enemy.fireCooldown -= delta;
       if (
         enemy.fireCooldown <= 0 &&
-        enemy.mesh.position.distanceTo(this.player.mesh.position) < 125
+        enemy.mesh.position.distanceTo(this.player.mesh.position) < 105
       ) {
         this.fireEnemyShot(enemy);
-        enemy.fireCooldown = 1.2 + Math.random() * 1.4;
+        enemy.fireCooldown = 1.8 + Math.random() * 1.6;
       }
 
       if (enemy.mesh.position.z > this.player.mesh.position.z + 25) {
@@ -246,7 +249,7 @@ export const runtimeMethods = {
         satellite.mesh.position.distanceTo(this.player.mesh.position) <
         satellite.radius + 2.6
       ) {
-        this.damagePlayer(42);
+        this.damagePlayer(20);
         this.spawnExplosion(satellite.mesh.position, 0xffcc7d, 4.4);
         this.removeSatellite(index);
       }
@@ -293,7 +296,7 @@ export const runtimeMethods = {
       shot.mesh.position.addScaledVector(shot.velocity, delta);
 
       if (shot.mesh.position.distanceTo(this.player.mesh.position) < shot.radius + 2.1) {
-        this.damagePlayer(12);
+        this.damagePlayer(6);
         this.spawnExplosion(shot.mesh.position, 0xff7e5d, 1.7);
         this.removeEnemyShot(index);
         continue;
