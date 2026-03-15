@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
@@ -13,12 +13,21 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { gamesById } from "@/data/games";
+import { trackGameExit, trackGameStart } from "@/lib/analytics";
 
 const GamePage = () => {
   const { gameId } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
   const game = gameId ? gamesById[gameId] : null;
   const [showExitDialog, setShowExitDialog] = useState(false);
+
+  useEffect(() => {
+    if (!game) {
+      return;
+    }
+
+    trackGameStart(game);
+  }, [game]);
 
   if (!game) {
     return <Navigate to="/" replace />;
@@ -57,7 +66,14 @@ const GamePage = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => navigate("/")}>Exit Game</AlertDialogAction>
+            <AlertDialogAction
+              onClick={() => {
+                trackGameExit(game);
+                navigate("/");
+              }}
+            >
+              Exit Game
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

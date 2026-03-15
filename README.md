@@ -106,6 +106,14 @@ This serves the React shell. The static games are loaded from `public/games/...`
 
 If a specific game has its own preferred local workflow, use that game's README.
 
+## Analytics
+
+- Plausible is installed at the shell level in `index.html`
+- SPA pageviews are handled by the Plausible script
+- Custom events currently tracked from the React shell:
+  - `Game Start`
+  - `Game Exit`
+
 ## Burb Sync
 
 Local Burb work currently starts in `/Users/chrh/dev/burb`.
