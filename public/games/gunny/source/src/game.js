@@ -104,6 +104,7 @@ export class GunnyGame {
 
     this.dom.launchButton.addEventListener("click", this.startMission);
     this.dom.restartButton.addEventListener("click", this.startMission);
+    this.dom.dismissTitleCard?.addEventListener("click", this.dismissMissionCard);
 
     this.dom.touchControls
       .querySelectorAll("[data-action]")
@@ -184,6 +185,10 @@ export class GunnyGame {
     this.resetMission();
     this.started = true;
     this.clock.start();
+  };
+
+  dismissMissionCard = () => {
+    this.dom.missionCard?.classList.add("hud__block--hidden");
   };
 
   onResize = () => {

@@ -3,8 +3,10 @@ import { GunnyGame } from "./game.js";
 
 new GunnyGame({
   canvas: document.querySelector("#game"),
+  missionCard: document.querySelector("#missionCard"),
   introPanel: document.querySelector("#introPanel"),
   statusPanel: document.querySelector("#statusPanel"),
+  dismissTitleCard: document.querySelector("#dismissTitleCard"),
   launchButton: document.querySelector("#launchButton"),
   restartButton: document.querySelector("#restartButton"),
   statusEyebrow: document.querySelector("#statusEyebrow"),

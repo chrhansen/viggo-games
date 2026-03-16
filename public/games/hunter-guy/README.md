@@ -50,9 +50,16 @@ If behavior looks stale, hard refresh (`Cmd+Shift+R`).
   - Tap `Start Hunt`
   - Left D-pad: move forward/back/strafe
   - Drag on the view: look around
-  - Turn phone/tablet: extra look input when motion access is allowed
+  - Turn phone/tablet: extra relative look input when motion access is allowed
   - `Use Tool`: use selected tool
   - Belt buttons: switch belt tool
+
+## Motion Look
+
+- Motion look is additive on touch devices: drag sets the main aim, device motion adds extra yaw/pitch on top.
+- Motion input is relative to the device pose when the session starts.
+- Portrait/landscape changes recenter the motion baseline, then continue from the new pose.
+- Pitch still respects the game look clamp; motion helps with fine aim, not full free-fly roll.
 
 ## UI Notes
 
@@ -89,6 +96,7 @@ If behavior looks stale, hard refresh (`Cmd+Shift+R`).
   - Desktop pointer-lock look + keyboard movement
   - Touch D-pad movement + drag-to-look
   - Device orientation look offset on supported phones/tablets
+  - Relative motion baseline + rotation-aware device look handling
   - session active hook used by helper-card timing
 - `wildlife.js`
   - Animal models/spawn counts

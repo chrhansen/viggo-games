@@ -4,6 +4,14 @@ const DESKTOP_LOOK_SENSITIVITY = 0.0024;
 const TOUCH_LOOK_SENSITIVITY = 0.0042;
 const TOUCH_DPAD_DEAD_ZONE = 0.3;
 const TOUCH_DPAD_THUMB_TRAVEL = 34;
+const DEVICE_FORWARD = new THREE.Vector3(0, 0, -1);
+const DEVICE_SCREEN_AXIS = new THREE.Vector3(0, 0, 1);
+const DEVICE_ORIENTATION_FIX = new THREE.Quaternion(
+  -Math.sqrt(0.5),
+  0,
+  0,
+  Math.sqrt(0.5)
+);
 
 export function createPlayerControls({
   camera,
@@ -46,11 +54,18 @@ export function createPlayerControls({
   };
   const deviceLook = {
     attached: false,
-    baseline: null,
+    baselineActive: false,
+    baselineScreenAngle: 0,
+    baselineInverseQuaternion: new THREE.Quaternion(),
+    orientationQuaternion: new THREE.Quaternion(),
+    relativeQuaternion: new THREE.Quaternion(),
+    relativeForward: new THREE.Vector3(),
     yaw: 0,
     pitch: 0,
     permissionTried: false,
   };
+  const deviceOrientationEuler = new THREE.Euler(0, 0, 0, "YXZ");
+  const screenOrientationQuaternion = new THREE.Quaternion();
 
   let sessionActive = false;
   let manualYaw = 0;
@@ -66,12 +81,29 @@ export function createPlayerControls({
     return THREE.MathUtils.clamp(value, -lookRangeRadians, lookRangeRadians);
   }
 
-  function normalizeDeltaDegrees(value) {
-    return THREE.MathUtils.euclideanModulo(value + 180, 360) - 180;
+  function normalizeDeltaRadians(value) {
+    return THREE.MathUtils.euclideanModulo(value + Math.PI, Math.PI * 2) - Math.PI;
   }
 
   function getScreenAngle() {
     return window.screen?.orientation?.angle ?? window.orientation ?? 0;
+  }
+
+  function setDeviceOrientationQuaternion(alpha, beta, gamma, screenAngle) {
+    deviceOrientationEuler.set(
+      THREE.MathUtils.degToRad(beta),
+      THREE.MathUtils.degToRad(alpha),
+      THREE.MathUtils.degToRad(-gamma),
+      "YXZ"
+    );
+    deviceLook.orientationQuaternion.setFromEuler(deviceOrientationEuler);
+    deviceLook.orientationQuaternion.multiply(DEVICE_ORIENTATION_FIX);
+    deviceLook.orientationQuaternion.multiply(
+      screenOrientationQuaternion.setFromAxisAngle(
+        DEVICE_SCREEN_AXIS,
+        -THREE.MathUtils.degToRad(screenAngle)
+      )
+    );
   }
 
   function showStartPrompt() {
@@ -129,7 +161,7 @@ export function createPlayerControls({
   }
 
   function resetDeviceLook() {
-    deviceLook.baseline = null;
+    deviceLook.baselineActive = false;
     deviceLook.yaw = 0;
     deviceLook.pitch = 0;
     applyCameraRotation();
@@ -172,27 +204,39 @@ export function createPlayerControls({
     }
 
     const screenAngle = getScreenAngle();
-    const pitchSample = Math.abs(screenAngle) === 90 ? gamma : beta;
-    if (!deviceLook.baseline || deviceLook.baseline.screenAngle !== screenAngle) {
-      deviceLook.baseline = {
-        alpha,
-        pitchSample,
-        screenAngle,
-      };
+    setDeviceOrientationQuaternion(alpha, beta, gamma, screenAngle);
+
+    if (!deviceLook.baselineActive || deviceLook.baselineScreenAngle !== screenAngle) {
+      deviceLook.baselineActive = true;
+      deviceLook.baselineScreenAngle = screenAngle;
+      deviceLook.baselineInverseQuaternion
+        .copy(deviceLook.orientationQuaternion)
+        .invert();
       deviceLook.yaw = 0;
       deviceLook.pitch = 0;
       applyCameraRotation();
       return;
     }
 
-    const targetYaw = THREE.MathUtils.degToRad(
-      normalizeDeltaDegrees(alpha - deviceLook.baseline.alpha)
-    );
-    const targetPitch = clampPitch(
-      THREE.MathUtils.degToRad(pitchSample - deviceLook.baseline.pitchSample)
+    deviceLook.relativeQuaternion
+      .copy(deviceLook.baselineInverseQuaternion)
+      .multiply(deviceLook.orientationQuaternion);
+    deviceLook.relativeForward.copy(DEVICE_FORWARD).applyQuaternion(
+      deviceLook.relativeQuaternion
     );
 
-    deviceLook.yaw = THREE.MathUtils.lerp(deviceLook.yaw, targetYaw, 0.28);
+    const horizontalLengthSq =
+      deviceLook.relativeForward.x * deviceLook.relativeForward.x +
+      deviceLook.relativeForward.z * deviceLook.relativeForward.z;
+    const targetYaw =
+      horizontalLengthSq > 1e-6
+        ? Math.atan2(-deviceLook.relativeForward.x, -deviceLook.relativeForward.z)
+        : deviceLook.yaw;
+    const targetPitch = clampPitch(
+      Math.asin(THREE.MathUtils.clamp(deviceLook.relativeForward.y, -1, 1))
+    );
+
+    deviceLook.yaw += normalizeDeltaRadians(targetYaw - deviceLook.yaw) * 0.28;
     deviceLook.pitch = THREE.MathUtils.lerp(deviceLook.pitch, targetPitch, 0.32);
     applyCameraRotation();
   }

@@ -42,6 +42,7 @@ You pilot one ship through open space while the camera follows from behind. Enem
 - Earth, moon, stars, fog, cinematic lighting.
 - Forward fill lighting keeps raiders and satellites readable in-flight.
 - Detailed player ship, raider ships, and satellites.
+- Compact dismissible mission card leaves more screen space for play.
 - Procedural textures for planets and solar panels.
 - HUD for hull, score, kills, and distance.
 - Start screen and restart flow.

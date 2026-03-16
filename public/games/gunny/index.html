@@ -7,8 +7,8 @@
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
     <title>Gunny</title>
-    <script type="module" crossorigin src="./assets/index-Cb8q-Qr9.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-BQAsvL5K.css">
+    <script type="module" crossorigin src="./assets/index-D3XJm_yz.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-XvyH4IXf.css">
   </head>
   <body>
     <div class="shell">
@@ -17,9 +17,16 @@
       <div class="reticle" aria-hidden="true"></div>
 
       <header class="hud">
-        <div class="hud__block hud__block--title">
+        <div class="hud__block hud__block--title" id="missionCard">
+          <button
+            class="hud__dismiss"
+            id="dismissTitleCard"
+            type="button"
+            aria-label="Dismiss mission card"
+          >
+            ×
+          </button>
           <p class="eyebrow">Gunny</p>
-          <h1>Raider Run</h1>
           <p class="mission">Drop 12 raiders. Miss the satellites.</p>
         </div>
 
