@@ -71,7 +71,7 @@ Then port the changes intentionally. Do not blindly overwrite repo-specific wiri
   - shared utilities
   - `src/lib/app-base.ts` handles custom-domain vs GitHub Pages base paths
 - `src/pages/`
-  - homepage route, game wrapper route, not-found route
+  - homepage route, about route, game wrapper route, not-found route
 - `src/test/`
   - Vitest setup and app tests
 - `dist/`

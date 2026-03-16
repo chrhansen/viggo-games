@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { appBasePath } from "@/lib/app-base";
 import Index from "./pages/Index.tsx";
+import About from "./pages/About.tsx";
 import GamePage from "./pages/GamePage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
@@ -18,6 +19,7 @@ const App = () => (
       <BrowserRouter basename={appBasePath || "/"}>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/about" element={<About />} />
           <Route path="/:gameId" element={<GamePage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

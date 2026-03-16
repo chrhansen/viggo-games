@@ -55,6 +55,20 @@ const Index = () => {
         >
           Insert Coin · High Score: 0000
         </motion.p>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.68 }}
+          className="text-center text-[10px] font-mono text-muted-foreground uppercase tracking-widest mt-2"
+        >
+          <button
+            type="button"
+            onClick={() => navigate("/about")}
+            className="hover:text-primary transition-colors underline underline-offset-4"
+          >
+            About
+          </button>
+        </motion.p>
       </motion.div>
     </div>
   );
