@@ -10,6 +10,7 @@ Small browser cycling game prototype. First-person road riding, visible cockpit,
 - Asphalt road loop with lane markings and gravel shoulders
 - Shared ground plane for grass, road, trees, posts, mountains, and rider position
 - Varied low-poly trees, shrubs, roadside posts, mountains, clouds, and sky dome
+- Foliage placement keeps clear of the full road loop, including tight nearby segments
 - Large roadside signboard that says `67 mph` with a small `haha`
 - HUD speed meter plus a dismissible helper card
 - Keyboard + touch controls
@@ -19,6 +20,7 @@ Small browser cycling game prototype. First-person road riding, visible cockpit,
 - The visible road is built from a closed spline, but rider movement is not locked to the spline.
 - The bike moves freely over the world in any heading while the road remains a visual route through the map.
 - A single shared ground level anchors terrain and scenery so props do not float above or sink below the scene.
+- Roadside foliage checks clearance against the full road loop and moves outward or skips placement when it would overlap the asphalt.
 - The cockpit rig is attached to the camera and fitted so the lowest bike geometry sits on top of the ground plane.
 - Road, grass, sky, clouds, and sign graphics are generated procedurally with simple geometry and canvas textures.
 
@@ -43,7 +45,7 @@ npm run dev
 
 Open the local URL printed by Vite.
 
-If you want the same fixed URL used during testing:
+If you want the same fixed URL used during testing or while collaborating on live edits:
 
 ```bash
 npm run dev -- --host 127.0.0.1 --port 4173 --strictPort
@@ -54,6 +56,8 @@ Then open:
 ```text
 http://127.0.0.1:4173/
 ```
+
+`--strictPort` keeps the URL stable. If port `4173` is busy, Vite exits instead of silently moving to a different port.
 
 ## Controls
 

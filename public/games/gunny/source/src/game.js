@@ -54,8 +54,19 @@ export class GunnyGame {
     rim.position.set(-120, -50, -320);
     const cockpitFill = new THREE.PointLight(0x7fcfff, 10, 90, 2);
     cockpitFill.position.set(0, 8, 12);
+    const forwardFill = new THREE.SpotLight(
+      0xc7e6ff,
+      120,
+      240,
+      Math.PI / 4.8,
+      0.68,
+      1.5
+    );
+    forwardFill.position.set(0, 5.4, 20);
+    forwardFill.target.position.set(0, 0.8, -120);
 
-    this.scene.add(hemi, sun, rim, cockpitFill);
+    this.scene.add(hemi, sun, rim, cockpitFill, forwardFill, forwardFill.target);
+    this.forwardFill = forwardFill;
 
     this.player = {
       mesh: createPlayerShip(),

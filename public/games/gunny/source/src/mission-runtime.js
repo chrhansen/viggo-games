@@ -80,8 +80,21 @@ export const runtimeMethods = {
       this.player.mesh.position.y * 0.18 + 4.2,
       this.player.mesh.position.z + 16
     );
+    const fillTarget = new THREE.Vector3(
+      this.player.mesh.position.x * 0.28,
+      this.player.mesh.position.y * 0.18 + 5.4,
+      this.player.mesh.position.z + 20
+    );
+    const fillLookTarget = new THREE.Vector3(
+      this.player.mesh.position.x * 0.34,
+      this.player.mesh.position.y * 0.24 + 0.9,
+      this.player.mesh.position.z - 125
+    );
 
     this.camera.position.lerp(cameraTarget, 0.08 + delta);
+    this.forwardFill.position.lerp(fillTarget, 0.14 + delta);
+    this.forwardFill.target.position.lerp(fillLookTarget, 0.18 + delta);
+    this.forwardFill.target.updateMatrixWorld();
     this.camera.lookAt(
       this.player.mesh.position.x,
       this.player.mesh.position.y + 1.1,

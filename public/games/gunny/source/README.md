@@ -40,6 +40,7 @@ You pilot one ship through open space while the camera follows from behind. Enem
 
 - Third-person 3D browser flight.
 - Earth, moon, stars, fog, cinematic lighting.
+- Forward fill lighting keeps raiders and satellites readable in-flight.
 - Detailed player ship, raider ships, and satellites.
 - Procedural textures for planets and solar panels.
 - HUD for hull, score, kills, and distance.
@@ -61,7 +62,7 @@ npm install
 npm run dev
 ```
 
-Open the local Vite URL in a browser.
+Open the local Vite URL in a browser. Default: `http://localhost:5173/`.
 
 ## Build
 

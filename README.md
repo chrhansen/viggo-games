@@ -14,8 +14,8 @@ Do not treat the old single-game repos as deploy targets anymore. The game code 
 ## Where code comes from
 
 - Homepage UI source started in `chrhansen/viggo-games-lovable`
-- Chicken Hop source was copied in from `chrhansen/chicken-hop`
-- Hunter Guy source was copied in from `chrhansen/hunter-guy`
+- Chicken Hop source was copied in from `chrhansen/chicken-hop`; local sibling repo: `/Users/chrh/dev/chicken-hop`
+- Hunter Guy source was copied in from `chrhansen/hunter-guy`; local sibling repo: `/Users/chrh/dev/hunter-guy`
 - Burb source is synced in from local authoring folder `/Users/chrh/dev/burb`
 - Gunny source is synced in from local authoring folder `/Users/chrh/dev/gunny`
 
@@ -215,6 +215,10 @@ Pages/domain notes:
 ## Notes For Future Agents
 
 - This repo is the deploy target
+- Local sibling repo for Chicken Hop: `/Users/chrh/dev/chicken-hop`
+- Local sibling repo for Hunter Guy: `/Users/chrh/dev/hunter-guy`
+- Local sibling repo for Burb: `/Users/chrh/dev/burb`
+- Local sibling repo for Gunny: `/Users/chrh/dev/gunny`
 - `chicken-hop` and `hunter-guy` are hosted from subfolders here
 - Root homepage code and game source code are intentionally separate
 - Burb authoring source lives at `/Users/chrh/dev/burb`; sync it into `public/games/burb/source/` before rebuilding deploy files

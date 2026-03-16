@@ -21,6 +21,12 @@ import {
 import { GROUND_LEVEL } from './track';
 
 const ROAD_WIDTH = 14;
+const ROAD_HALF_WIDTH = ROAD_WIDTH * 0.5;
+const FOLIAGE_ROAD_SAMPLE_COUNT = 2048;
+const FOLIAGE_OFFSET_STEP = 4;
+const FOLIAGE_OFFSET_ATTEMPTS = 8;
+const FOLIAGE_ROADSIDE_MARGIN = 2.5;
+const MAX_SHRUB_REACH = 3.5;
 const UP = new Vector3(0, 1, 0);
 
 export function createSky() {
@@ -64,6 +70,7 @@ export function createSky() {
 
 export function createScenery(curvePath: CatmullRomCurve3) {
   const group = new Group();
+  const roadSamplePoints = sampleRoadPoints(curvePath, FOLIAGE_ROAD_SAMPLE_COUNT);
   const trunkMaterial = new MeshStandardMaterial({
     color: '#6d4728',
     roughness: 1,
@@ -119,8 +126,24 @@ export function createScenery(curvePath: CatmullRomCurve3) {
     const side = hash(index * 1.7) > 0.5 ? 1 : -1;
     const offset = ROAD_WIDTH * 0.72 + 5.5 + hash(index * 3.3) * 19;
     const scale = 0.85 + hash(index * 4.9) * 1.35;
+    const broadleafTree = hash(index * 2.4) > 0.48;
+    const treeFootprintRadius = (broadleafTree ? 2.1 : 1.85) * scale + 0.35;
+    const treeClearance = ROAD_HALF_WIDTH + Math.max(treeFootprintRadius, MAX_SHRUB_REACH) + FOLIAGE_ROADSIDE_MARGIN;
+    const treePosition = findClearRoadsidePosition(
+      point,
+      right,
+      side,
+      offset,
+      treeClearance,
+      roadSamplePoints,
+    );
+
+    if (!treePosition) {
+      continue;
+    }
+
     const tree =
-      hash(index * 2.4) > 0.48
+      broadleafTree
         ? createBroadleafTree(
             scale,
             trunkGeometry,
@@ -142,7 +165,7 @@ export function createScenery(curvePath: CatmullRomCurve3) {
             pineLightMaterial,
           );
 
-    tree.position.copy(point).addScaledVector(right, side * offset);
+    tree.position.copy(treePosition);
     tree.position.y = GROUND_LEVEL;
     tree.rotation.y = hash(index * 9.2) * Math.PI * 2;
     tree.rotation.z = (hash(index * 6.8) - 0.5) * 0.06 * side;
@@ -150,13 +173,21 @@ export function createScenery(curvePath: CatmullRomCurve3) {
 
     const shrubCount = hash(index * 8.6) > 0.42 ? 2 : 1;
     for (let shrubIndex = 0; shrubIndex < shrubCount; shrubIndex += 1) {
-      const shrub = createShrub(0.7 + hash(index * 5.4 + shrubIndex) * 0.7, shrubGeometry, shrubMaterial);
+      const shrubScale = 0.7 + hash(index * 5.4 + shrubIndex) * 0.7;
+      const shrub = createShrub(shrubScale, shrubGeometry, shrubMaterial);
       const localAngle = hash(index * 7.2 + shrubIndex) * Math.PI * 2;
       const localRadius = 1.1 + hash(index * 4.2 + shrubIndex * 2.1) * 1.35;
 
       shrub.position.copy(tree.position);
       shrub.position.x += Math.cos(localAngle) * localRadius;
       shrub.position.z += Math.sin(localAngle) * localRadius;
+
+      const shrubClearance = ROAD_HALF_WIDTH + shrubScale * 0.75 + FOLIAGE_ROADSIDE_MARGIN;
+
+      if (!hasRoadClearance(shrub.position, shrubClearance, roadSamplePoints)) {
+        continue;
+      }
+
       shrub.position.y = GROUND_LEVEL + 0.22;
       shrub.rotation.y = hash(index * 1.3 + shrubIndex) * Math.PI * 2;
       group.add(shrub);
@@ -338,6 +369,62 @@ function createMountain(seed: number, scale = 1) {
   }
 
   return group;
+}
+
+function sampleRoadPoints(curvePath: CatmullRomCurve3, sampleCount: number) {
+  return Array.from({ length: sampleCount + 1 }, (_, index) => curvePath.getPointAt(index / sampleCount));
+}
+
+function findClearRoadsidePosition(
+  point: Vector3,
+  right: Vector3,
+  side: number,
+  startingOffset: number,
+  roadClearance: number,
+  roadSamplePoints: Vector3[],
+) {
+  const candidate = new Vector3();
+
+  for (let attempt = 0; attempt < FOLIAGE_OFFSET_ATTEMPTS; attempt += 1) {
+    candidate.copy(point).addScaledVector(right, side * (startingOffset + attempt * FOLIAGE_OFFSET_STEP));
+
+    if (hasRoadClearance(candidate, roadClearance, roadSamplePoints)) {
+      return candidate.clone();
+    }
+  }
+
+  return null;
+}
+
+function hasRoadClearance(position: Vector3, roadClearance: number, roadSamplePoints: Vector3[]) {
+  return getRoadDistanceSquared(position, roadSamplePoints) >= roadClearance * roadClearance;
+}
+
+function getRoadDistanceSquared(position: Vector3, roadSamplePoints: Vector3[]) {
+  let nearestDistanceSquared = Number.POSITIVE_INFINITY;
+
+  for (let index = 0; index < roadSamplePoints.length - 1; index += 1) {
+    const start = roadSamplePoints[index];
+    const end = roadSamplePoints[index + 1];
+    const segmentX = end.x - start.x;
+    const segmentZ = end.z - start.z;
+    const segmentLengthSquared = segmentX * segmentX + segmentZ * segmentZ;
+    const fromStartX = position.x - start.x;
+    const fromStartZ = position.z - start.z;
+    const projection =
+      segmentLengthSquared === 0
+        ? 0
+        : MathUtils.clamp((fromStartX * segmentX + fromStartZ * segmentZ) / segmentLengthSquared, 0, 1);
+    const dx = fromStartX - segmentX * projection;
+    const dz = fromStartZ - segmentZ * projection;
+    const distanceSquared = dx * dx + dz * dz;
+
+    if (distanceSquared < nearestDistanceSquared) {
+      nearestDistanceSquared = distanceSquared;
+    }
+  }
+
+  return nearestDistanceSquared;
 }
 
 function createMountainGeometry(baseRadius: number, height: number, seed: number) {
