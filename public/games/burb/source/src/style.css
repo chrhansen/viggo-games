@@ -14,6 +14,10 @@
   box-sizing: border-box;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 html,
 body,
 #app,
@@ -154,6 +158,49 @@ body {
   line-height: 1;
 }
 
+.motion-panel {
+  position: absolute;
+  inset: auto 1rem 6.6rem 1rem;
+  display: grid;
+  gap: 0.45rem;
+  justify-items: start;
+  pointer-events: auto;
+}
+
+.motion-toggle {
+  appearance: none;
+  min-height: 3rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(255, 212, 90, 0.24), rgba(255, 212, 90, 0.08)),
+    var(--panel-strong);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.motion-toggle:disabled {
+  opacity: 0.7;
+}
+
+.motion-status {
+  max-width: min(28rem, calc(100vw - 2rem));
+  margin: 0;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: var(--panel);
+  backdrop-filter: blur(18px);
+  color: rgba(244, 241, 234, 0.86);
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
 .touch-controls {
   position: absolute;
   inset: auto 1rem 1rem 1rem;
@@ -186,6 +233,11 @@ body {
 }
 
 @media (min-width: 880px) and (pointer: fine) {
+  .motion-panel {
+    left: auto;
+    width: min(24rem, calc(100vw - 2rem));
+  }
+
   .touch-controls {
     left: auto;
     width: min(28rem, calc(100vw - 2rem));
@@ -204,5 +256,9 @@ body {
 
   .title {
     width: auto;
+  }
+
+  .motion-panel {
+    inset: auto 1rem 6.3rem 1rem;
   }
 }

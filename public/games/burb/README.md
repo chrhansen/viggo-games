@@ -43,6 +43,12 @@ npm install
 npm run dev
 ```
 
+If you need motion access over a remote HTTPS host such as Tailscale Serve, add a local `.env` in `source/`:
+
+```bash
+BURB_ALLOWED_HOSTS=macbook-pro-1.tailcc07d5.ts.net
+```
+
 ## Rebuild Deploy Files
 
 Build from `source/` with a relative base so the game works from `/games/burb/`:
@@ -61,6 +67,7 @@ Then copy `/tmp/burb-dist/index.html` plus `/tmp/burb-dist/assets/` into `/Users
 - `A` / `ArrowLeft`: steer left
 - `D` / `ArrowRight`: steer right
 - Touch: `Left`, `Right`, `Fast`, `Slow`
+- Touch tilt: `Enable tilt`, hold upright to center, lean left/right to steer
 
 ## Source Notes
 
