@@ -108,8 +108,9 @@ If a specific game has its own preferred local workflow, use that game's README.
 
 ## Analytics
 
-- Plausible is installed at the shell level in `index.html`
-- SPA pageviews are handled by the Plausible script
+- Umami is installed at the shell level in `index.html`
+- Initial pageviews come from the standard Umami script
+- Client-side route changes are tracked from the React shell
 - Custom events currently tracked from the React shell:
   - `Game Start`
   - `Game Exit`

@@ -1,11 +1,21 @@
 import type { Game } from "@/data/games";
 
-const trackEvent = (eventName: string, props?: Record<string, string>) => {
+type AnalyticsProps = Record<string, string | number | boolean>;
+
+const trackEvent = (eventName: string, props?: AnalyticsProps) => {
   if (typeof window === "undefined") {
     return;
   }
 
-  window.plausible?.(eventName, props ? { props } : undefined);
+  window.umami?.track(eventName, props);
+};
+
+export const trackPageview = () => {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.umami?.track();
 };
 
 const getGameProps = (game: Game) => ({

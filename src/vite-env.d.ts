@@ -1,17 +1,15 @@
 /// <reference types="vite/client" />
 
-interface PlausibleEventOptions {
-  callback?: () => void;
-  props?: Record<string, string | number | boolean>;
+interface UmamiTracker {
+  (): void;
+  (eventName: string, data?: Record<string, string | number | boolean>): void;
+  (data: Record<string, string | number | boolean>): void;
 }
 
-interface PlausibleFn {
-  (eventName: string, options?: PlausibleEventOptions): void;
-  init?: (options?: Record<string, unknown>) => void;
-  o?: Record<string, unknown>;
-  q?: IArguments[];
+interface Umami {
+  track: UmamiTracker;
 }
 
 interface Window {
-  plausible?: PlausibleFn;
+  umami?: Umami;
 }
