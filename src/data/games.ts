@@ -11,6 +11,7 @@ export interface Game {
   color: string;
   level: string;
   url: string;
+  tagline: string;
 }
 
 export const games: Game[] = [
@@ -21,6 +22,7 @@ export const games: Game[] = [
     color: "#FF4B4B",
     level: "Level 01",
     url: withBasePath("/games/chicken-hop/"),
+    tagline: "Why did the chicken hop the road? To get to the other slide!",
   },
   {
     id: "hunter-guy",
@@ -29,6 +31,7 @@ export const games: Game[] = [
     color: "#22C55E",
     level: "Level 02",
     url: withBasePath("/games/hunter-guy/"),
+    tagline: "What did the hunter say to his snack? Nice to meat you!",
   },
   {
     id: "burb",
@@ -37,6 +40,7 @@ export const games: Game[] = [
     color: "#FF7A99",
     level: "Level 03",
     url: withBasePath("/games/burb/"),
+    tagline: "A small bird, a big road, and very serious steering.",
   },
   {
     id: "gunny",
@@ -45,6 +49,7 @@ export const games: Game[] = [
     color: "#7AF6FF",
     level: "Level 04",
     url: withBasePath("/games/gunny/"),
+    tagline: "Space is loud. Your blaster is louder.",
   },
 ];
 

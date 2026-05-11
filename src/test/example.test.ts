@@ -15,4 +15,8 @@ describe("games registry", () => {
     const ids = games.map((game) => game.id);
     expect(new Set(ids).size).toBe(ids.length);
   });
+
+  it("keeps homepage taglines available for every game", () => {
+    expect(games.every((game) => game.tagline.trim().length > 0)).toBe(true);
+  });
 });

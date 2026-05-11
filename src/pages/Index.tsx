@@ -40,6 +40,7 @@ const Index = () => {
               image={game.image}
               color={game.color}
               level={game.level}
+              tagline={game.tagline}
               index={i}
               onClick={() => navigate(`/${game.id}`)}
             />
@@ -55,7 +56,7 @@ const Index = () => {
         >
           Insert Coin · High Score: 0000
         </motion.p>
-        <motion.p
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.68 }}
@@ -64,11 +65,11 @@ const Index = () => {
           <button
             type="button"
             onClick={() => navigate("/about")}
-            className="hover:text-primary transition-colors underline underline-offset-4"
+            className="inline-block mt-2 px-6 py-2.5 text-xs font-mono uppercase tracking-widest border-2 border-primary text-primary rounded-md bg-primary/10 hover:bg-primary hover:text-primary-foreground transition-colors shadow-[0_0_12px_hsl(var(--primary)/0.4)]"
           >
             About
           </button>
-        </motion.p>
+        </motion.div>
       </motion.div>
     </div>
   );

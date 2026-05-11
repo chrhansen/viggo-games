@@ -16,10 +16,9 @@ const About = () => {
         transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
       >
         <Button
-          variant="ghost"
-          size="sm"
+          variant="outline"
           onClick={() => navigate("/")}
-          className="mb-8 text-muted-foreground hover:text-foreground"
+          className="mb-8 font-mono uppercase tracking-widest text-xs border-2 border-primary text-primary bg-primary/10 hover:bg-primary hover:text-primary-foreground shadow-[0_0_12px_hsl(var(--primary)/0.4)]"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to Games
