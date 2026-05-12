@@ -21,11 +21,11 @@ const ArcadeCard = ({ title, image, color, level, tagline, index, onClick }: Arc
       whileHover={{ y: -10, scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      className="relative group bg-card rounded-[32px] p-4 overflow-hidden border border-foreground/10 text-left"
+      className="relative group bg-card rounded-[20px] md:rounded-[32px] p-2 md:p-4 overflow-hidden border border-foreground/10 text-left w-full"
       style={{ boxShadow: `0 20px 40px -10px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)` }}
     >
       {/* Game Image */}
-      <div className="aspect-video rounded-[20px] bg-secondary mb-4 overflow-hidden">
+      <div className="aspect-video rounded-[12px] md:rounded-[20px] bg-secondary mb-2 md:mb-4 overflow-hidden">
         <img
           src={image}
           alt={title}
@@ -34,16 +34,16 @@ const ArcadeCard = ({ title, image, color, level, tagline, index, onClick }: Arc
       </div>
 
       {/* Title & Action */}
-      <div className="flex justify-between items-center px-2 pb-2">
+      <div className="flex justify-between items-center px-1 md:px-2 pb-1 md:pb-2 gap-2">
         <div>
-          <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
+          <span className="text-[8px] md:text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
             {level}
           </span>
-          <h2 className="text-2xl font-bold font-display text-title">{title}</h2>
-          <p className="text-xs text-tagline mt-1 max-w-[200px]">{tagline}</p>
+          <h2 className="text-base md:text-2xl font-bold font-display text-foreground leading-tight">{title}</h2>
+          <p className="text-[10px] md:text-xs text-tagline mt-1 max-w-[200px]">{tagline}</p>
         </div>
-        <div className="h-12 w-12 rounded-full bg-foreground/5 flex items-center justify-center group-hover:bg-primary transition-colors duration-300">
-          <Play className="w-5 h-5 text-foreground group-hover:text-primary-foreground transition-colors duration-300" />
+        <div className="h-8 w-8 md:h-12 md:w-12 shrink-0 rounded-full bg-foreground/5 flex items-center justify-center group-hover:bg-primary transition-colors duration-300">
+          <Play className="w-3 h-3 md:w-5 md:h-5 text-foreground group-hover:text-primary-foreground transition-colors duration-300" />
         </div>
       </div>
 
