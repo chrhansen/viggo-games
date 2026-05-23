@@ -54,7 +54,7 @@ Then port the changes intentionally. Do not blindly overwrite repo-specific wiri
   - editable Gunny source snapshot synced from `/Users/chrh/dev/gunny`
 - `scripts/`
   - build/deploy helper scripts
-  - `prepare-pages.mjs` copies `dist/index.html` to `dist/404.html`
+  - `prepare-pages.mjs` prepares static route pages, `404.html`, `sitemap.xml`, and LLM crawler files after Vite builds
 - `src/`
   - React/Vite homepage app
   - routing, cards, iframe wrapper
@@ -64,7 +64,8 @@ Then port the changes intentionally. Do not blindly overwrite repo-specific wiri
   - homepage UI components
 - `src/data/`
   - game registry data
-  - `src/data/games.ts` defines slug, label, image, color, hosted URL
+  - `src/data/games.json` defines slug, label, SEO copy, image filename, controls, genre, and hosted URL paths
+  - `src/data/games.ts` maps registry rows to imported homepage artwork and runtime URLs
 - `src/hooks/`
   - shared React hooks
 - `src/lib/`
@@ -191,6 +192,7 @@ npm run build
 ```
 
 `npm run build` also writes `dist/404.html` so SPA routes work on GitHub Pages.
+It also writes static HTML entrypoints for each public route, `dist/sitemap.xml`, `dist/llms.txt`, `dist/llms-full.txt`, and SEO image copies under `dist/seo/`.
 
 ## Deploy
 

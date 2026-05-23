@@ -1,0 +1,62 @@
+[
+  {
+    "id": "chicken-hop",
+    "title": "Chicken Hop",
+    "level": "Level 01",
+    "color": "#FF4B4B",
+    "urlPath": "/games/chicken-hop/",
+    "routePath": "/chicken-hop",
+    "imageFile": "chicken-hop.png",
+    "tagline": "Why did the chicken hop the road? To get to the other slide!",
+    "description": "Chicken Hop is a tiny browser arcade game where a brave chicken runs through a cozy house, jumps clutter, grabs corn, and tries to keep both hearts full.",
+    "metaDescription": "Play Chicken Hop, a free browser arcade game on viggo.games. Jump household obstacles, collect corn, and keep a brave chicken running.",
+    "keywords": ["browser game", "arcade game", "chicken game", "jumping game", "kids game"],
+    "controls": ["Keyboard", "Touch"],
+    "genre": "Arcade runner"
+  },
+  {
+    "id": "hunter-guy",
+    "title": "Hunter Guy",
+    "level": "Level 02",
+    "color": "#22C55E",
+    "urlPath": "/games/hunter-guy/",
+    "routePath": "/hunter-guy",
+    "imageFile": "hunter-guy.png",
+    "tagline": "What did the hunter say to his snack? Nice to meat you!",
+    "description": "Hunter Guy is a first-person forest prototype where you walk through the woods, switch tools on a belt, and tag foxes, deer, and bears.",
+    "metaDescription": "Play Hunter Guy, a free first-person browser forest game on viggo.games with simple keyboard, mouse, and touch controls.",
+    "keywords": ["browser game", "3D game", "forest game", "first person game", "prototype game"],
+    "controls": ["Keyboard", "Mouse", "Touch"],
+    "genre": "First-person forest game"
+  },
+  {
+    "id": "burb",
+    "title": "Burb",
+    "level": "Level 03",
+    "color": "#FF7A99",
+    "urlPath": "/games/burb/",
+    "routePath": "/burb",
+    "imageFile": "burb.png",
+    "tagline": "A small bird, a big road, and very serious steering.",
+    "description": "Burb is a playful browser cycling game about steering a small bird along a winding 3D road.",
+    "metaDescription": "Play Burb, a free browser cycling game on viggo.games. Steer a small bird through a winding 3D road.",
+    "keywords": ["browser game", "cycling game", "3D road game", "bird game", "steering game"],
+    "controls": ["Keyboard", "Touch", "Device tilt"],
+    "genre": "3D cycling game"
+  },
+  {
+    "id": "gunny",
+    "title": "Gunny",
+    "level": "Level 04",
+    "color": "#7AF6FF",
+    "urlPath": "/games/gunny/",
+    "routePath": "/gunny",
+    "imageFile": "gunny.png",
+    "tagline": "Space is loud. Your blaster is louder.",
+    "description": "Gunny is a browser space shooter where you fly past Earth and the moon, blast red ships, dodge satellites, and clear the sector.",
+    "metaDescription": "Play Gunny, a free browser space shooter on viggo.games. Fly past Earth, blast raiders, and avoid satellites.",
+    "keywords": ["browser game", "space shooter", "arcade game", "flight game", "kids game"],
+    "controls": ["Keyboard", "Mouse", "Touch"],
+    "genre": "Space shooter"
+  }
+]

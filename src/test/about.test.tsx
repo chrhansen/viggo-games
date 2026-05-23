@@ -15,7 +15,7 @@ describe("about page", () => {
       </MemoryRouter>,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "About" }));
+    fireEvent.click(screen.getByRole("link", { name: "About" }));
 
     expect(await screen.findByRole("heading", { name: "About" })).toBeInTheDocument();
   });

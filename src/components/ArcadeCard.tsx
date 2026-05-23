@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Play } from "lucide-react";
+import type { MouseEvent } from "react";
 
 interface ArcadeCardProps {
   title: string;
@@ -7,14 +8,15 @@ interface ArcadeCardProps {
   color: string;
   level: string;
   tagline: string;
+  href: string;
   index: number;
-  onClick: () => void;
+  onClick: (event: MouseEvent<HTMLAnchorElement>) => void;
 }
 
-const ArcadeCard = ({ title, image, color, level, tagline, index, onClick }: ArcadeCardProps) => {
+const ArcadeCard = ({ title, image, color, level, tagline, href, index, onClick }: ArcadeCardProps) => {
   return (
-    <motion.button
-      type="button"
+    <motion.a
+      href={href}
       initial={{ y: 40, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ delay: index * 0.15, duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
@@ -52,7 +54,7 @@ const ArcadeCard = ({ title, image, color, level, tagline, index, onClick }: Arc
         className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-500 blur-3xl -z-10"
         style={{ backgroundColor: color }}
       />
-    </motion.button>
+    </motion.a>
   );
 };
 

@@ -3,12 +3,15 @@ import { ArrowLeft, Github } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import viggoImg from "@/assets/viggo.png";
 import { Button } from "@/components/ui/button";
+import { withBasePath } from "@/lib/app-base";
+import { aboutSeo, usePageSeo } from "@/lib/seo";
 
 const About = () => {
   const navigate = useNavigate();
+  usePageSeo(aboutSeo());
 
   return (
-    <div className="min-h-svh flex flex-col justify-center p-6 md:p-8">
+    <main className="min-h-svh flex flex-col justify-center p-6 md:p-8">
       <motion.div
         className="max-w-2xl mx-auto w-full"
         initial={{ opacity: 0, y: 20 }}
@@ -16,12 +19,20 @@ const About = () => {
         transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
       >
         <Button
+          asChild
           variant="outline"
-          onClick={() => navigate("/")}
           className="mb-8 font-mono uppercase tracking-widest text-xs border-2 border-primary text-primary bg-primary/10 hover:bg-primary hover:text-primary-foreground shadow-[0_0_12px_hsl(var(--primary)/0.4)]"
         >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Games
+          <a
+            href={withBasePath("/")}
+            onClick={(event) => {
+              event.preventDefault();
+              navigate("/");
+            }}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Games
+          </a>
         </Button>
 
         <h1 className="text-4xl md:text-5xl font-extrabold font-display tracking-tighter text-primary mb-6">
@@ -65,7 +76,7 @@ const About = () => {
           Made with heart and pixels
         </p>
       </motion.div>
-    </div>
+    </main>
   );
 };
 

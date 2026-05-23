@@ -14,12 +14,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { gamesById } from "@/data/games";
 import { trackGameExit, trackGameStart } from "@/lib/analytics";
+import { gameSeo, notFoundSeo, usePageSeo } from "@/lib/seo";
 
 const GamePage = () => {
   const { gameId } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
   const game = gameId ? gamesById[gameId] : null;
   const [showExitDialog, setShowExitDialog] = useState(false);
+  usePageSeo(game ? gameSeo(game) : notFoundSeo());
 
   useEffect(() => {
     if (!game) {
@@ -57,6 +59,14 @@ const GamePage = () => {
         className="h-full w-full border-0"
         allow="autoplay; fullscreen; pointer-lock; accelerometer; gyroscope"
       />
+
+      <main className="sr-only" aria-labelledby="game-title">
+        <h1 id="game-title">{game.title}</h1>
+        <p>{game.description}</p>
+        <p>{game.metaDescription}</p>
+        <a href={game.url}>Play {game.title} directly</a>
+        <a href="/">Browse all viggo.games browser games</a>
+      </main>
 
       <AlertDialog open={showExitDialog} onOpenChange={setShowExitDialog}>
         <AlertDialogContent>

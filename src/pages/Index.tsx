@@ -2,17 +2,20 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import ArcadeCard from "@/components/ArcadeCard";
 import { games } from "@/data/games";
+import { withBasePath } from "@/lib/app-base";
+import { homeSeo, usePageSeo } from "@/lib/seo";
 
 const Index = () => {
   const navigate = useNavigate();
+  usePageSeo(homeSeo(games));
 
   return (
-    <div className="min-h-svh flex flex-col justify-center p-6 md:p-8">
+    <main className="min-h-svh flex flex-col justify-center p-6 md:p-8">
       <motion.div
         className="max-w-6xl mx-auto w-full"
       >
         {/* Header */}
-        <div className="text-center mb-12">
+        <header className="text-center mb-12">
           <motion.h1
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -29,10 +32,22 @@ const Index = () => {
           >
             Select Your Mission
           </motion.p>
-        </div>
+          <motion.p
+            initial={{ y: -6, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.18, duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
+            className="mx-auto mt-5 max-w-2xl text-sm md:text-base font-mono leading-relaxed text-foreground/75"
+          >
+            Free browser arcade games made by Viggo. Play Chicken Hop, Hunter Guy, Burb, and Gunny
+            with keyboard, mouse, touch, or tilt controls.
+          </motion.p>
+        </header>
 
         {/* Game Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 justify-items-center">
+        <nav
+          aria-label="Browser games"
+          className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 justify-items-center"
+        >
           {games.map((game, i) => (
             <ArcadeCard
               key={game.id}
@@ -42,10 +57,14 @@ const Index = () => {
               level={game.level}
               tagline={game.tagline}
               index={i}
-              onClick={() => navigate(`/${game.id}`)}
+              href={withBasePath(game.routePath)}
+              onClick={(event) => {
+                event.preventDefault();
+                navigate(game.routePath);
+              }}
             />
           ))}
-        </div>
+        </nav>
 
         {/* Footer */}
         <motion.p
@@ -62,16 +81,19 @@ const Index = () => {
           transition={{ delay: 0.68 }}
           className="text-center text-[10px] font-mono text-muted-foreground uppercase tracking-widest mt-2"
         >
-          <button
-            type="button"
-            onClick={() => navigate("/about")}
+          <a
+            href={withBasePath("/about")}
+            onClick={(event) => {
+              event.preventDefault();
+              navigate("/about");
+            }}
             className="inline-block mt-2 px-6 py-2.5 text-xs font-mono uppercase tracking-widest border-2 border-primary text-primary rounded-md bg-primary/10 hover:bg-primary hover:text-primary-foreground transition-colors shadow-[0_0_12px_hsl(var(--primary)/0.4)]"
           >
             About
-          </button>
+          </a>
         </motion.div>
       </motion.div>
-    </div>
+    </main>
   );
 };
 

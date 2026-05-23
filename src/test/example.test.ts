@@ -19,4 +19,17 @@ describe("games registry", () => {
   it("keeps homepage taglines available for every game", () => {
     expect(games.every((game) => game.tagline.trim().length > 0)).toBe(true);
   });
+
+  it("keeps SEO metadata available for every game", () => {
+    expect(
+      games.every(
+        (game) =>
+          game.routePath === `/${game.id}` &&
+          game.urlPath === `/games/${game.id}/` &&
+          game.description.length > game.tagline.length &&
+          game.metaDescription.includes("viggo.games") &&
+          game.keywords.length >= 4,
+      ),
+    ).toBe(true);
+  });
 });

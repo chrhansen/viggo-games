@@ -3,55 +3,38 @@ import chickenHopImg from "@/assets/chicken-hop.png";
 import gunnyImg from "@/assets/gunny.png";
 import hunterGuyImg from "@/assets/hunter-guy.png";
 import { withBasePath } from "@/lib/app-base";
+import gameRecords from "./games.json";
 
 export interface Game {
   id: string;
   title: string;
   image: string;
+  imageFile: string;
   color: string;
   level: string;
   url: string;
+  urlPath: string;
+  routePath: string;
   tagline: string;
+  description: string;
+  metaDescription: string;
+  keywords: string[];
+  controls: string[];
+  genre: string;
 }
 
-export const games: Game[] = [
-  {
-    id: "chicken-hop",
-    title: "Chicken Hop",
-    image: chickenHopImg,
-    color: "#FF4B4B",
-    level: "Level 01",
-    url: withBasePath("/games/chicken-hop/"),
-    tagline: "Why did the chicken hop the road? To get to the other slide!",
-  },
-  {
-    id: "hunter-guy",
-    title: "Hunter Guy",
-    image: hunterGuyImg,
-    color: "#22C55E",
-    level: "Level 02",
-    url: withBasePath("/games/hunter-guy/"),
-    tagline: "What did the hunter say to his snack? Nice to meat you!",
-  },
-  {
-    id: "burb",
-    title: "Burb",
-    image: burbImg,
-    color: "#FF7A99",
-    level: "Level 03",
-    url: withBasePath("/games/burb/"),
-    tagline: "A small bird, a big road, and very serious steering.",
-  },
-  {
-    id: "gunny",
-    title: "Gunny",
-    image: gunnyImg,
-    color: "#7AF6FF",
-    level: "Level 04",
-    url: withBasePath("/games/gunny/"),
-    tagline: "Space is loud. Your blaster is louder.",
-  },
-];
+const gameImages: Record<string, string> = {
+  "burb.png": burbImg,
+  "chicken-hop.png": chickenHopImg,
+  "gunny.png": gunnyImg,
+  "hunter-guy.png": hunterGuyImg,
+};
+
+export const games: Game[] = gameRecords.map((game) => ({
+  ...game,
+  image: gameImages[game.imageFile],
+  url: withBasePath(game.urlPath),
+}));
 
 export const gamesById: Record<string, Game> = Object.fromEntries(
   games.map((game) => [game.id, game]),
