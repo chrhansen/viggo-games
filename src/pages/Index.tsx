@@ -38,8 +38,8 @@ const Index = () => {
             transition={{ delay: 0.18, duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
             className="mx-auto mt-5 max-w-2xl text-sm md:text-base font-mono leading-relaxed text-foreground/75"
           >
-            Free browser arcade games made by Viggo. Play Chicken Hop, Hunter Guy, Burb, and Gunny
-            with keyboard, mouse, touch, or tilt controls.
+            Free browser arcade games made by Viggo. Play Chicken Hop, Hunter Guy, Burb, Gunny,
+            and Torpedo with keyboard, mouse, touch, or tilt controls.
           </motion.p>
         </header>
 

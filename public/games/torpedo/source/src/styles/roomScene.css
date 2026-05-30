@@ -1,0 +1,210 @@
+.room-scene {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 92px 28px 34px;
+  background:
+    linear-gradient(90deg, rgba(2, 9, 13, 0.72), transparent 20% 80%, rgba(2, 9, 13, 0.72)),
+    radial-gradient(circle at 50% 28%, rgba(103, 230, 255, 0.14), transparent 36%),
+    #071820;
+}
+
+.room-depth-lines {
+  position: absolute;
+  inset: 86px 0 0;
+  background:
+    linear-gradient(115deg, transparent 0 47%, rgba(238, 250, 255, 0.12) 47.2% 47.6%, transparent 48%),
+    linear-gradient(65deg, transparent 0 47%, rgba(238, 250, 255, 0.1) 47.2% 47.6%, transparent 48%);
+}
+
+.room-back-wall {
+  position: relative;
+  width: min(920px, 92vw);
+  height: min(520px, 66vh);
+  border: 16px solid #586b70;
+  border-radius: 10px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 86px, rgba(238, 250, 255, 0.08) 86px 90px),
+    linear-gradient(#22343b, #111f25);
+  box-shadow:
+    inset 0 0 0 5px #132329,
+    inset 0 -40px 60px rgba(0, 0, 0, 0.28),
+    0 30px 80px rgba(0, 0, 0, 0.42);
+}
+
+.room-floor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 25vh;
+  background:
+    repeating-linear-gradient(90deg, rgba(214, 168, 88, 0.22) 0 18px, transparent 18px 84px),
+    linear-gradient(#17262b, #091115);
+  transform: perspective(520px) rotateX(58deg);
+  transform-origin: bottom;
+}
+
+.room-view-window {
+  position: absolute;
+  left: 7%;
+  right: 7%;
+  top: 12%;
+  height: 34%;
+  display: flex;
+  justify-content: center;
+  gap: 26px;
+}
+
+.room-view-window span {
+  width: 28%;
+  max-width: 180px;
+  aspect-ratio: 1;
+  border: 11px solid #172329;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 48% 38%, rgba(183, 250, 255, 0.26), transparent 18%),
+    linear-gradient(#0c5468, #072431);
+  box-shadow: inset 0 0 0 5px #93a3a7;
+}
+
+.room-prop {
+  position: absolute;
+  border: 7px solid #132329;
+  box-shadow: inset 0 0 0 4px rgba(238, 250, 255, 0.09);
+}
+
+.room-prop.primary {
+  left: 12%;
+  bottom: 13%;
+  width: 32%;
+  height: 23%;
+  border-radius: 8px;
+  background: linear-gradient(#4e666d, #17272e);
+}
+
+.room-prop.secondary {
+  right: 12%;
+  bottom: 14%;
+  width: 26%;
+  height: 30%;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle, #67e6ff 0 7px, transparent 8px),
+    radial-gradient(circle, transparent 0 42%, rgba(103, 230, 255, 0.22) 43% 45%, transparent 46%),
+    #0a2029;
+}
+
+.room-scene[data-room-kind="steering"] .room-view-window span:not(:nth-child(2)) {
+  display: none;
+}
+
+.room-scene[data-room-kind="bunks"] .room-prop.primary {
+  height: 42%;
+  background:
+    linear-gradient(#d6a858 0 9px, transparent 9px 45%, #d6a858 45% calc(45% + 9px), transparent calc(45% + 9px)),
+    linear-gradient(90deg, #263b42, #71858a);
+}
+
+.room-scene[data-room-kind="galley"] .room-prop.primary {
+  left: 28%;
+  width: 44%;
+  background: linear-gradient(#d6a858, #8b6531);
+}
+
+.room-scene[data-room-kind="engine"] .room-prop.primary {
+  left: 30%;
+  width: 40%;
+  height: 38%;
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 50% 50%, #f3d366 0 18px, transparent 19px),
+    repeating-linear-gradient(90deg, #33474d 0 18px, #526a70 18px 36px);
+  animation: engine-pulse 900ms ease-in-out infinite alternate;
+}
+
+.room-scene[data-room-kind="engine"] .room-view-window,
+.room-scene[data-room-kind="engine"] .room-prop.secondary {
+  display: none;
+}
+
+.room-scene[data-room-kind="sonar"] .room-prop.secondary {
+  animation: sonar-sweep 1.2s linear infinite;
+}
+
+.room-status {
+  position: absolute;
+  left: 50%;
+  bottom: 9%;
+  min-width: 168px;
+  transform: translateX(-50%);
+  border: 1px solid rgba(245, 211, 96, 0.5);
+  border-radius: 8px;
+  background: rgba(5, 22, 29, 0.82);
+  color: var(--ready);
+  padding: 10px 14px;
+  text-align: center;
+  font-weight: 900;
+}
+
+.room-scene.acted .room-status {
+  animation: status-pop 320ms ease-out;
+}
+
+.room-action,
+.room-plan {
+  position: absolute;
+  z-index: 4;
+  bottom: 28px;
+  border: 0;
+  border-radius: 8px;
+  padding: 12px 18px;
+  font-weight: 900;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.room-action {
+  right: 28px;
+  background: var(--ready);
+  color: #172126;
+}
+
+.room-plan {
+  left: 28px;
+  background: rgba(238, 250, 255, 0.12);
+  color: var(--ink);
+  border: 1px solid rgba(238, 250, 255, 0.24);
+}
+
+@keyframes sonar-sweep {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes status-pop {
+  50% {
+    transform: translateX(-50%) scale(1.08);
+  }
+}
+
+@media (max-width: 760px) {
+  .room-scene {
+    padding: 88px 14px 28px;
+  }
+
+  .room-back-wall {
+    height: 62vh;
+  }
+
+  .room-view-window {
+    gap: 10px;
+  }
+
+  .room-action,
+  .room-plan {
+    bottom: 18px;
+  }
+}

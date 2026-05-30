@@ -28,7 +28,7 @@ export const absoluteUrl = (path: string) => {
 export const homeSeo = (games: Game[]): SeoConfig => ({
   title: "viggo.games - Free Browser Arcade Games by Viggo",
   description:
-    "Play free browser games made by Viggo, including Chicken Hop, Hunter Guy, Burb, and Gunny. Small arcade games for keyboard, mouse, and touch.",
+    "Play free browser games made by Viggo, including Chicken Hop, Hunter Guy, Burb, Gunny, and Torpedo. Small arcade games for keyboard, mouse, and touch.",
   path: "/",
   image: DEFAULT_SOCIAL_IMAGE,
   jsonLd: [

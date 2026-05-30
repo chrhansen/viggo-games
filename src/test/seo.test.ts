@@ -15,7 +15,7 @@ describe("seo metadata", () => {
     const metadata = gameSeo(gamesById.gunny);
 
     expect(metadata.path).toBe("/gunny");
-    expect(metadata.image).toBe("/seo/gunny.png");
+    expect(metadata.image).toBe("/seo/gunny.webp");
     expect(JSON.stringify(metadata.jsonLd)).toContain(`${SITE_URL}/games/gunny/`);
   });
 });

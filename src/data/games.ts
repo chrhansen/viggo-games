@@ -1,7 +1,8 @@
-import burbImg from "@/assets/burb.png";
-import chickenHopImg from "@/assets/chicken-hop.png";
-import gunnyImg from "@/assets/gunny.png";
-import hunterGuyImg from "@/assets/hunter-guy.png";
+import burbImg from "@/assets/burb.webp";
+import chickenHopImg from "@/assets/chicken-hop.webp";
+import gunnyImg from "@/assets/gunny.webp";
+import hunterGuyImg from "@/assets/hunter-guy.webp";
+import torpedoImg from "@/assets/torpedo.webp";
 import { withBasePath } from "@/lib/app-base";
 import gameRecords from "./games.json";
 
@@ -24,10 +25,11 @@ export interface Game {
 }
 
 const gameImages: Record<string, string> = {
-  "burb.png": burbImg,
-  "chicken-hop.png": chickenHopImg,
-  "gunny.png": gunnyImg,
-  "hunter-guy.png": hunterGuyImg,
+  "burb.webp": burbImg,
+  "chicken-hop.webp": chickenHopImg,
+  "gunny.webp": gunnyImg,
+  "hunter-guy.webp": hunterGuyImg,
+  "torpedo.webp": torpedoImg,
 };
 
 export const games: Game[] = gameRecords.map((game) => ({

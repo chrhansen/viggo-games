@@ -45,7 +45,7 @@ function homePage() {
     depth: 0,
     title: "viggo.games - Free Browser Arcade Games by Viggo",
     description:
-      "Play free browser games made by Viggo, including Chicken Hop, Hunter Guy, Burb, and Gunny. Small arcade games for keyboard, mouse, and touch.",
+      "Play free browser games made by Viggo, including Chicken Hop, Hunter Guy, Burb, Gunny, and Torpedo. Small arcade games for keyboard, mouse, and touch.",
     image: "/seo/viggo.png",
     body: renderHomeBody(),
     jsonLd: [
@@ -367,7 +367,7 @@ function renderHomeBody() {
   return `
     <main data-seo-fallback>
       <h1>viggo.games</h1>
-      <p>Free browser arcade games made by Viggo. Play Chicken Hop, Hunter Guy, Burb, and Gunny with keyboard, mouse, touch, or tilt controls.</p>
+      <p>Free browser arcade games made by Viggo. Play Chicken Hop, Hunter Guy, Burb, Gunny, and Torpedo with keyboard, mouse, touch, or tilt controls.</p>
       <nav aria-label="Browser games">
         <ul>${gameItems}
         </ul>

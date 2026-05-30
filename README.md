@@ -7,7 +7,7 @@ This repo owns:
 - the homepage shell at `https://viggo.games/`
 - the hosted game code under `https://viggo.games/games/<slug>/`
 - the GitHub Pages deploy for the custom domain
-- current live games/slots: `chicken-hop`, `hunter-guy`, `burb`, `gunny`
+- current live games/slots: `chicken-hop`, `hunter-guy`, `burb`, `gunny`, `torpedo`
 
 Do not treat the old single-game repos as deploy targets anymore. The game code that matters now lives here.
 
@@ -18,6 +18,7 @@ Do not treat the old single-game repos as deploy targets anymore. The game code 
 - Hunter Guy source was copied in from `chrhansen/hunter-guy`; local sibling repo: `/Users/chrh/dev/hunter-guy`
 - Burb source is synced in from local authoring folder `/Users/chrh/dev/burb`
 - Gunny source is synced in from local authoring folder `/Users/chrh/dev/gunny`
+- Torpedo source is synced in from local authoring folder `/Users/chrh/dev/torpedo`
 
 This repo is now the place to edit and deploy all of it.
 
@@ -52,6 +53,10 @@ Then port the changes intentionally. Do not blindly overwrite repo-specific wiri
   - deploy-ready Gunny build at folder root
 - `public/games/gunny/source/`
   - editable Gunny source snapshot synced from `/Users/chrh/dev/gunny`
+- `public/games/torpedo/`
+  - deploy-ready Torpedo build at folder root
+- `public/games/torpedo/source/`
+  - editable Torpedo source snapshot synced from `/Users/chrh/dev/torpedo`
 - `scripts/`
   - build/deploy helper scripts
   - `prepare-pages.mjs` prepares static route pages, `404.html`, `sitemap.xml`, and LLM crawler files after Vite builds
@@ -59,7 +64,7 @@ Then port the changes intentionally. Do not blindly overwrite repo-specific wiri
   - React/Vite homepage app
   - routing, cards, iframe wrapper
 - `src/assets/`
-  - homepage card art, including `gunny.png`
+  - homepage card art, using optimized WebP title images
 - `src/components/`
   - homepage UI components
 - `src/data/`
@@ -84,7 +89,7 @@ Then port the changes intentionally. Do not blindly overwrite repo-specific wiri
   - edit files in `src/`
 - Game-specific logic, controls, art, tuning:
   - edit files inside that game's folder under `public/games/<slug>/`
-  - for bundled games like `burb` and `gunny`, edit `public/games/<slug>/source/` and rebuild the deploy files at folder root
+  - for bundled games like `burb`, `gunny`, and `torpedo`, edit `public/games/<slug>/source/` and rebuild the deploy files at folder root
 - Game-specific docs:
   - keep them in `public/games/<slug>/README.md`
   - do not put game-specific operating notes in this top-level README
@@ -164,12 +169,39 @@ npm run build -- --base ./ --outDir /tmp/gunny-dist
 
 Copy `/tmp/gunny-dist/index.html` and `/tmp/gunny-dist/assets/` into `/Users/chrh/dev/viggo-games/public/games/gunny/`.
 
+## Torpedo Sync
+
+Local Torpedo work currently starts in `/Users/chrh/dev/torpedo`.
+
+To refresh the vendored source snapshot in this repo:
+
+```sh
+rsync -a --delete \
+  --exclude .git \
+  --exclude node_modules \
+  --exclude dist \
+  /Users/chrh/dev/torpedo/ \
+  /Users/chrh/dev/viggo-games/public/games/torpedo/source/
+```
+
+Then rebuild the deploy files with relative asset paths:
+
+```sh
+cd /Users/chrh/dev/viggo-games/public/games/torpedo/source
+npm run build -- --base=./ --outDir /tmp/torpedo-dist
+```
+
+Copy `/tmp/torpedo-dist/index.html` and `/tmp/torpedo-dist/assets/` into `/Users/chrh/dev/viggo-games/public/games/torpedo/`.
+
 ## Adding a new game
 
 1. Copy the full game source into `public/games/<slug>/` or `public/games/<slug>/source/` if the game needs a build step
 2. Add or update `public/games/<slug>/README.md` with game-specific instructions
-3. Add homepage artwork to `src/assets/`
-4. Register the game in `src/data/games.ts`
+3. Add homepage title artwork to `src/assets/`
+   - Title images are always WebP
+   - Keep the source image sharp and high quality, but encode it for web delivery
+   - Do not over-downsample; optimize format/quality before reducing dimensions
+4. Register the game in `src/data/games.json` and map its artwork in `src/data/games.ts`
 5. Point the game URL at `withBasePath("/games/<slug>/")`
 6. If the game needs special iframe handling, update `src/pages/GamePage.tsx`
 7. Run the gate
@@ -222,10 +254,12 @@ Pages/domain notes:
 - Local sibling repo for Hunter Guy: `/Users/chrh/dev/hunter-guy`
 - Local sibling repo for Burb: `/Users/chrh/dev/burb`
 - Local sibling repo for Gunny: `/Users/chrh/dev/gunny`
+- Local sibling repo for Torpedo: `/Users/chrh/dev/torpedo`
 - `chicken-hop` and `hunter-guy` are hosted from subfolders here
 - Root homepage code and game source code are intentionally separate
 - Burb authoring source lives at `/Users/chrh/dev/burb`; sync it into `public/games/burb/source/` before rebuilding deploy files
 - Gunny authoring source lives at `/Users/chrh/dev/gunny`; sync it into `public/games/gunny/source/` before rebuilding deploy files
+- Torpedo authoring source lives at `/Users/chrh/dev/torpedo`; sync it into `public/games/torpedo/source/` before rebuilding deploy files
 - If syncing new Lovable work, diff it first and preserve repo-specific files like:
   - `src/data/games.ts`
   - `src/lib/app-base.ts`

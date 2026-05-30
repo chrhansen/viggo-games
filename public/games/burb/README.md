@@ -73,5 +73,5 @@ Then copy `/tmp/burb-dist/index.html` plus `/tmp/burb-dist/assets/` into `/Users
 
 - Original source README lives at `source/README.md`
 - The homepage card art/registry live outside this folder in:
-  - `/Users/chrh/dev/viggo-games/src/assets/burb.png`
+  - `/Users/chrh/dev/viggo-games/src/assets/burb.webp`
   - `/Users/chrh/dev/viggo-games/src/data/games.ts`

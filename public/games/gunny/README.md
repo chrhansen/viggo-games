@@ -70,5 +70,5 @@ Then copy `/tmp/gunny-dist/index.html` plus `/tmp/gunny-dist/assets/` into `/Use
 
 - Original source README lives at `source/README.md`
 - Homepage card art/registry live outside this folder in:
-  - `/Users/chrh/dev/viggo-games/src/assets/gunny.png`
+  - `/Users/chrh/dev/viggo-games/src/assets/gunny.webp`
   - `/Users/chrh/dev/viggo-games/src/data/games.ts`

@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Torpedo</title>
+  </head>
+  <body>
+    <main id="app">
+      <canvas id="combat-canvas" aria-label="Torpedo ocean combat scene"></canvas>
+
+      <section id="combat-ui" class="screen-layer">
+        <header class="hud">
+          <div>
+            <p class="eyebrow">Torpedo</p>
+            <h1 id="view-title">Front Window</h1>
+          </div>
+          <div class="meters" aria-live="polite">
+            <span id="score-meter">Score 0</span>
+            <span id="health-meter">Hull 100</span>
+            <span id="charge-meter">Ready</span>
+          </div>
+        </header>
+
+        <div id="window-frame" class="window-frame front" aria-hidden="true">
+          <div class="rivet-strip top"></div>
+          <div class="rivet-strip bottom"></div>
+          <div class="front-pane"></div>
+          <div class="side-window-bank port">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="side-window-bank starboard">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+
+        <div id="periscope-mask" class="periscope-mask" aria-hidden="true">
+          <div class="scope-glass"></div>
+          <div class="scope-line horizontal"></div>
+          <div class="scope-line vertical"></div>
+          <div class="scope-tick top"></div>
+          <div class="scope-tick bottom"></div>
+          <div class="scope-tick left"></div>
+          <div class="scope-tick right"></div>
+        </div>
+
+        <div id="damage-flash" class="damage-flash" aria-hidden="true"></div>
+        <div id="splash-screen" class="splash-card">
+          <p class="eyebrow">Captain Station</p>
+          <h2>Torpedo</h2>
+          <p>Sink the incoming subs before their torpedoes crack the hull.</p>
+          <button id="start-button" type="button">Start Patrol</button>
+        </div>
+      </section>
+
+      <section id="interior-screen" class="screen-layer interior-screen hidden" aria-label="Submarine interior">
+        <header class="hud interior-hud">
+          <div>
+            <p class="eyebrow">Inside Submarine</p>
+            <h1 id="room-title">Steering Room</h1>
+          </div>
+          <div class="meters">
+            <span id="room-meter">Front Window</span>
+          </div>
+        </header>
+
+        <div class="submarine-cutaway">
+          <div class="sub-shell">
+            <div class="room steering" data-room="0">
+              <span class="room-name">Steering</span>
+              <div class="front-window"></div>
+              <div class="wheel"></div>
+              <div class="console-lights"></div>
+            </div>
+            <div class="room sonar" data-room="1">
+              <span class="room-name">Sonar</span>
+              <div class="radar"></div>
+              <div class="side-windows">
+                <span></span><span></span><span></span>
+              </div>
+            </div>
+            <div class="room bunks" data-room="2">
+              <span class="room-name">Bunks</span>
+              <div class="bunk-stack"></div>
+              <div class="side-windows">
+                <span></span><span></span><span></span>
+              </div>
+            </div>
+            <div class="room galley" data-room="3">
+              <span class="room-name">Galley</span>
+              <div class="table"></div>
+              <div class="side-windows">
+                <span></span><span></span><span></span>
+              </div>
+            </div>
+            <div class="room engine" data-room="4">
+              <span class="room-name">Engine</span>
+              <div class="engine-core"></div>
+              <div class="pipe-row"></div>
+            </div>
+            <div id="crew-kid" class="crew-kid" aria-hidden="true">
+              <div class="helmet"></div>
+              <div class="body"></div>
+              <div class="feet"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="room-scene" class="room-scene hidden" data-room-kind="steering">
+          <div class="room-depth-lines" aria-hidden="true"></div>
+          <div class="room-back-wall">
+            <div class="room-view-window">
+              <span></span><span></span><span></span>
+            </div>
+            <div class="room-prop primary"></div>
+            <div class="room-prop secondary"></div>
+            <div id="room-status" class="room-status">Ready</div>
+          </div>
+          <div class="room-floor"></div>
+          <button id="room-action" class="room-action" type="button">Use</button>
+          <button id="room-plan" class="room-plan" type="button">Plan</button>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,305 @@
+.interior-screen {
+  background:
+    radial-gradient(circle at 30% 16%, rgba(103, 230, 255, 0.18), transparent 26%),
+    linear-gradient(180deg, #071d27, #020b10 64%, #030608);
+  pointer-events: auto;
+}
+
+.interior-hud {
+  z-index: 10;
+}
+
+.submarine-cutaway {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 86px 24px 44px;
+}
+
+.sub-shell {
+  --crew-room: 0;
+  position: relative;
+  width: min(1180px, 96vw);
+  height: min(420px, 62vh);
+  min-height: 280px;
+  border: 18px solid #76888d;
+  border-radius: 45% 18% 18% 45% / 50%;
+  background:
+    linear-gradient(90deg, #263a41, #42535a 9%, #1b2b32 9% 91%, #4b5b60 91%),
+    repeating-linear-gradient(90deg, transparent 0 calc(20% - 2px), rgba(238, 250, 255, 0.17) calc(20% - 2px) 20%);
+  box-shadow:
+    inset 0 0 0 5px #172329,
+    inset 0 -34px 44px rgba(0, 0, 0, 0.3),
+    0 30px 90px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+.sub-shell::before {
+  content: "";
+  position: absolute;
+  left: 16%;
+  right: 12%;
+  top: 16px;
+  height: 38px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #203037, #7c9095, #203037);
+}
+
+.room {
+  position: absolute;
+  top: 58px;
+  bottom: 28px;
+  width: 20%;
+  border-right: 2px solid rgba(238, 250, 255, 0.16);
+  transition: background 160ms ease, box-shadow 160ms ease;
+}
+
+.room[data-room="0"] {
+  left: 0;
+}
+
+.room[data-room="1"] {
+  left: 20%;
+}
+
+.room[data-room="2"] {
+  left: 40%;
+}
+
+.room[data-room="3"] {
+  left: 60%;
+}
+
+.room[data-room="4"] {
+  left: 80%;
+  border-right: 0;
+}
+
+.room.active {
+  background: rgba(245, 211, 96, 0.13);
+  box-shadow: inset 0 0 50px rgba(245, 211, 96, 0.1);
+}
+
+.room-name {
+  position: absolute;
+  left: 14px;
+  top: 10px;
+  color: rgba(238, 250, 255, 0.72);
+  font-size: clamp(0.72rem, 1.5vw, 0.9rem);
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.front-window {
+  position: absolute;
+  left: 22%;
+  top: 28%;
+  width: 44%;
+  aspect-ratio: 1;
+  border: 10px solid #18242b;
+  border-radius: 999px;
+  background: radial-gradient(circle, #72e9ff, #0d6175 62%, #072934);
+  box-shadow: inset 0 0 0 4px #95a4a8;
+}
+
+.wheel {
+  position: absolute;
+  left: 52%;
+  bottom: 23%;
+  width: 56px;
+  aspect-ratio: 1;
+  border: 7px solid #d6a858;
+  border-radius: 999px;
+}
+
+.wheel::before,
+.wheel::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 58px;
+  background: #d6a858;
+  transform: translate(-50%, -50%);
+}
+
+.wheel::after {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.console-lights {
+  position: absolute;
+  left: 16%;
+  bottom: 16%;
+  width: 70px;
+  height: 30px;
+  background:
+    radial-gradient(circle at 20% 50%, #5dff87 0 4px, transparent 5px),
+    radial-gradient(circle at 50% 50%, #f3d366 0 4px, transparent 5px),
+    radial-gradient(circle at 80% 50%, #ff6257 0 4px, transparent 5px),
+    #101b20;
+  border-radius: 5px;
+}
+
+.side-windows {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  top: 32%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.side-windows span {
+  width: 24%;
+  aspect-ratio: 1;
+  border: 7px solid #18242b;
+  border-radius: 999px;
+  background: radial-gradient(circle, #91f3ff, #126e7d);
+  box-shadow: inset 0 0 0 3px #95a4a8;
+}
+
+.radar {
+  position: absolute;
+  left: 35%;
+  bottom: 16%;
+  width: 64px;
+  aspect-ratio: 1;
+  border: 5px solid #67e6ff;
+  border-radius: 999px;
+  background:
+    linear-gradient(45deg, transparent 49%, rgba(103, 230, 255, 0.7) 50% 51%, transparent 52%),
+    radial-gradient(circle, transparent 0 42%, rgba(103, 230, 255, 0.24) 43% 45%, transparent 46%),
+    #09232d;
+}
+
+.bunk-stack {
+  position: absolute;
+  left: 20%;
+  bottom: 17%;
+  width: 62%;
+  height: 42%;
+  background:
+    linear-gradient(#d6a858 0 8px, transparent 8px 44%, #d6a858 44% calc(44% + 8px), transparent calc(44% + 8px)),
+    linear-gradient(90deg, #21333a, #5a7177);
+  border-radius: 6px;
+}
+
+.table {
+  position: absolute;
+  left: 26%;
+  bottom: 22%;
+  width: 52%;
+  height: 25%;
+  border-radius: 8px 8px 4px 4px;
+  background: linear-gradient(#d6a858, #8b6531);
+}
+
+.table::before,
+.table::after {
+  content: "";
+  position: absolute;
+  bottom: -34px;
+  width: 8px;
+  height: 36px;
+  background: #8b6531;
+}
+
+.table::before {
+  left: 18%;
+}
+
+.table::after {
+  right: 18%;
+}
+
+.engine-core {
+  position: absolute;
+  left: 24%;
+  top: 31%;
+  width: 52%;
+  height: 42%;
+  border: 8px solid #16252a;
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 50% 50%, #f3d366 0 12px, transparent 13px),
+    repeating-linear-gradient(90deg, #33474d 0 14px, #526a70 14px 28px);
+  animation: engine-pulse 900ms ease-in-out infinite alternate;
+}
+
+.pipe-row {
+  position: absolute;
+  left: 15%;
+  right: 12%;
+  top: 17%;
+  height: 16px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #89999d, #2d4248, #89999d);
+}
+
+@keyframes engine-pulse {
+  from {
+    box-shadow: 0 0 12px rgba(243, 211, 102, 0.2);
+  }
+
+  to {
+    box-shadow: 0 0 34px rgba(243, 211, 102, 0.58);
+  }
+}
+
+.crew-kid {
+  position: absolute;
+  left: calc(10% + var(--crew-room) * 20%);
+  bottom: 35px;
+  width: 46px;
+  height: 92px;
+  transform: translateX(-50%);
+  transition: left 210ms ease;
+}
+
+.helmet {
+  position: absolute;
+  left: 8px;
+  top: 0;
+  width: 30px;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: radial-gradient(circle at 35% 35%, #eefaff, #9fc0c7);
+  border: 4px solid #172329;
+}
+
+.body {
+  position: absolute;
+  left: 11px;
+  top: 28px;
+  width: 24px;
+  height: 46px;
+  border-radius: 13px 13px 7px 7px;
+  background: linear-gradient(#f3d366, #d6a858);
+  border: 3px solid #172329;
+}
+
+.feet {
+  position: absolute;
+  left: 5px;
+  bottom: 0;
+  width: 36px;
+  height: 12px;
+  border-radius: 999px;
+  background: #172329;
+}
+
+@media (max-width: 760px) {
+  .submarine-cutaway {
+    padding: 78px 12px 32px;
+  }
+
+  .sub-shell {
+    width: 1180px;
+    max-width: none;
+    transform: scale(0.72);
+    transform-origin: center;
+  }
+}
