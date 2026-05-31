@@ -12,17 +12,28 @@
 .submarine-cutaway {
   position: absolute;
   inset: 0;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-x: auto;
+  overflow-y: hidden;
   padding: 86px 24px 44px;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+  scrollbar-width: none;
+  user-select: none;
+}
+
+.submarine-cutaway::-webkit-scrollbar {
+  display: none;
 }
 
 .sub-shell {
   --crew-room: 0;
   position: relative;
-  width: min(1180px, 96vw);
-  height: min(420px, 62vh);
-  min-height: 280px;
+  flex: 0 0 2133px;
+  width: 2133px;
+  height: 420px;
   border: 18px solid #76888d;
   border-radius: 45% 18% 18% 45% / 50%;
   background:
@@ -52,43 +63,103 @@
   bottom: 28px;
   width: 20%;
   border-right: 2px solid rgba(238, 250, 255, 0.16);
+  background:
+    repeating-linear-gradient(0deg, rgba(238, 250, 255, 0.05) 0 1px, transparent 1px 18px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 44%);
+  cursor: pointer;
   transition: background 160ms ease, box-shadow 160ms ease;
+}
+
+.room::before {
+  content: "";
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 8px;
+  height: 18px;
+  border-radius: 4px;
+  background:
+    repeating-linear-gradient(90deg, rgba(238, 250, 255, 0.22) 0 3px, transparent 3px 13px),
+    #101a1f;
+}
+
+.room::after {
+  content: "";
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 18px;
+  height: 7px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #18262c, #7f9296 45% 55%, #18262c);
+  opacity: 0.76;
 }
 
 .room[data-room="0"] {
   left: 0;
+  background-image:
+    linear-gradient(180deg, rgba(2, 9, 13, 0.06), rgba(2, 9, 13, 0.22)),
+    url("../assets/rooms/control.webp");
+  background-position: center;
+  background-size: cover;
 }
 
 .room[data-room="1"] {
   left: 20%;
+  background-image:
+    linear-gradient(180deg, rgba(2, 9, 13, 0.06), rgba(2, 9, 13, 0.22)),
+    url("../assets/rooms/sonar.webp");
+  background-position: center;
+  background-size: cover;
 }
 
 .room[data-room="2"] {
   left: 40%;
+  background-image:
+    linear-gradient(180deg, rgba(2, 9, 13, 0.06), rgba(2, 9, 13, 0.22)),
+    url("../assets/rooms/bunks.webp");
+  background-position: center;
+  background-size: cover;
 }
 
 .room[data-room="3"] {
   left: 60%;
+  background-image:
+    linear-gradient(180deg, rgba(2, 9, 13, 0.06), rgba(2, 9, 13, 0.22)),
+    url("../assets/rooms/galley.webp");
+  background-position: center;
+  background-size: cover;
 }
 
 .room[data-room="4"] {
   left: 80%;
   border-right: 0;
+  background-image:
+    linear-gradient(180deg, rgba(2, 9, 13, 0.06), rgba(2, 9, 13, 0.22)),
+    url("../assets/rooms/engine.webp");
+  background-position: center;
+  background-size: cover;
 }
 
 .room.active {
-  background: rgba(245, 211, 96, 0.13);
-  box-shadow: inset 0 0 50px rgba(245, 211, 96, 0.1);
+  box-shadow:
+    inset 0 0 0 4px rgba(245, 211, 96, 0.72),
+    inset 0 0 50px rgba(245, 211, 96, 0.1);
 }
 
 .room-name {
   position: absolute;
   left: 14px;
   top: 10px;
-  color: rgba(238, 250, 255, 0.72);
+  color: rgba(238, 250, 255, 0.9);
   font-size: clamp(0.72rem, 1.5vw, 0.9rem);
   font-weight: 900;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
   text-transform: uppercase;
+}
+
+.room > :not(.room-name) {
+  opacity: 0;
 }
 
 .front-window {
@@ -143,6 +214,44 @@
   border-radius: 5px;
 }
 
+.helm-console {
+  position: absolute;
+  left: 12%;
+  bottom: 22%;
+  width: 34%;
+  height: 34px;
+  border: 4px solid #111b20;
+  border-radius: 7px;
+  background: linear-gradient(160deg, #526970, #17262c 65%);
+  transform: skewX(-9deg);
+}
+
+.helm-console span {
+  position: absolute;
+  top: 8px;
+  width: 10px;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: #d7f8ff;
+  box-shadow: 0 0 9px rgba(103, 230, 255, 0.72);
+}
+
+.helm-console span:nth-child(1) {
+  left: 18%;
+}
+
+.helm-console span:nth-child(2) {
+  left: 45%;
+  background: #f3d366;
+  box-shadow: 0 0 9px rgba(243, 211, 102, 0.72);
+}
+
+.helm-console span:nth-child(3) {
+  right: 16%;
+  background: #ff6257;
+  box-shadow: 0 0 9px rgba(255, 98, 87, 0.72);
+}
+
 .side-windows {
   position: absolute;
   left: 12%;
@@ -175,6 +284,20 @@
     #09232d;
 }
 
+.sonar-console {
+  position: absolute;
+  left: 10%;
+  bottom: 14%;
+  width: 42%;
+  height: 34%;
+  border: 5px solid #101a1f;
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 70% 34%, #67e6ff 0 5px, transparent 6px),
+    repeating-linear-gradient(90deg, #33474d 0 12px, #1a2c32 12px 20px);
+  box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.36);
+}
+
 .bunk-stack {
   position: absolute;
   left: 20%;
@@ -185,6 +308,19 @@
     linear-gradient(#d6a858 0 8px, transparent 8px 44%, #d6a858 44% calc(44% + 8px), transparent calc(44% + 8px)),
     linear-gradient(90deg, #21333a, #5a7177);
   border-radius: 6px;
+}
+
+.locker-row {
+  position: absolute;
+  right: 11%;
+  bottom: 18%;
+  width: 24%;
+  height: 50%;
+  border: 4px solid #172329;
+  border-radius: 5px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 28%, rgba(238, 250, 255, 0.12) 28% 31%, transparent 31%),
+    linear-gradient(#4b6066, #24383f);
 }
 
 .table {
@@ -215,6 +351,31 @@
   right: 18%;
 }
 
+.galley-range {
+  position: absolute;
+  left: 12%;
+  bottom: 19%;
+  width: 27%;
+  height: 42%;
+  border: 5px solid #172329;
+  border-radius: 6px;
+  background:
+    radial-gradient(circle at 28% 22%, #111b20 0 8px, transparent 9px),
+    radial-gradient(circle at 68% 22%, #111b20 0 8px, transparent 9px),
+    linear-gradient(#6f8084, #26383f);
+}
+
+.sink-basin {
+  position: absolute;
+  right: 12%;
+  bottom: 28%;
+  width: 25%;
+  height: 18%;
+  border: 5px solid #172329;
+  border-radius: 0 0 18px 18px;
+  background: radial-gradient(circle at 50% 0, #99eaff, #2c5862 70%);
+}
+
 .engine-core {
   position: absolute;
   left: 24%;
@@ -227,6 +388,20 @@
     radial-gradient(circle at 50% 50%, #f3d366 0 12px, transparent 13px),
     repeating-linear-gradient(90deg, #33474d 0 14px, #526a70 14px 28px);
   animation: engine-pulse 900ms ease-in-out infinite alternate;
+}
+
+.motor-bank {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: 13%;
+  height: 24%;
+  border: 5px solid #16252a;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 15% 50%, #111b20 0 12px, transparent 13px),
+    radial-gradient(circle at 85% 50%, #111b20 0 12px, transparent 13px),
+    repeating-linear-gradient(90deg, #5b7075 0 18px, #263b42 18px 30px);
 }
 
 .pipe-row {
@@ -293,13 +468,13 @@
 
 @media (max-width: 760px) {
   .submarine-cutaway {
-    padding: 78px 12px 32px;
+    justify-content: flex-start;
+    padding: 78px 12px 116px;
   }
 
   .sub-shell {
-    width: 1180px;
-    max-width: none;
-    transform: scale(0.72);
-    transform-origin: center;
+    flex-basis: 1922px;
+    width: 1922px;
+    height: 390px;
   }
 }

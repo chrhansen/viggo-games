@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Torpedo</title>
-    <script type="module" crossorigin src="./assets/index-CsGbhWlV.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-BpGVe4xW.css">
+    <script type="module" crossorigin src="./assets/index-Bn35arxY.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-DKrcaxhv.css">
   </head>
   <body>
     <main id="app">
@@ -19,7 +19,8 @@
           </div>
           <div class="meters" aria-live="polite">
             <span id="score-meter">Score 0</span>
-            <span id="health-meter">Hull 100</span>
+            <span id="level-meter">Boss 0/5</span>
+            <span id="health-meter">Hull 160</span>
             <span id="charge-meter">Ready</span>
           </div>
         </header>
@@ -47,6 +48,20 @@
         </div>
 
         <div id="damage-flash" class="damage-flash" aria-hidden="true"></div>
+        <div id="mobile-combat-controls" class="mobile-controls combat-controls" aria-label="Phone submarine controls">
+          <div class="dpad" aria-label="Steer submarine">
+            <button class="control-button dpad-up" type="button" data-move-x="0" data-move-y="1" aria-label="Move up">▲</button>
+            <button class="control-button dpad-left" type="button" data-move-x="-1" data-move-y="0" aria-label="Move left">◀</button>
+            <button class="control-button dpad-right" type="button" data-move-x="1" data-move-y="0" aria-label="Move right">▶</button>
+            <button class="control-button dpad-down" type="button" data-move-x="0" data-move-y="-1" aria-label="Move down">▼</button>
+          </div>
+          <div class="command-buttons">
+            <button id="motion-toggle" class="control-button motion-toggle" type="button" aria-pressed="false">Motion</button>
+            <button id="periscope-button" class="control-button" type="button" aria-pressed="false">Scope</button>
+            <button id="rooms-button" class="control-button" type="button">Rooms</button>
+            <button id="fire-button" class="control-button fire-button" type="button">Fire</button>
+          </div>
+        </div>
         <div id="splash-screen" class="splash-card">
           <p class="eyebrow">Captain Station</p>
           <h2>Torpedo</h2>
@@ -69,14 +84,18 @@
         <div class="submarine-cutaway">
           <div class="sub-shell">
             <div class="room steering" data-room="0">
-              <span class="room-name">Steering</span>
+              <span class="room-name">Control</span>
               <div class="front-window"></div>
               <div class="wheel"></div>
               <div class="console-lights"></div>
+              <div class="helm-console">
+                <span></span><span></span><span></span>
+              </div>
             </div>
             <div class="room sonar" data-room="1">
               <span class="room-name">Sonar</span>
               <div class="radar"></div>
+              <div class="sonar-console"></div>
               <div class="side-windows">
                 <span></span><span></span><span></span>
               </div>
@@ -84,6 +103,7 @@
             <div class="room bunks" data-room="2">
               <span class="room-name">Bunks</span>
               <div class="bunk-stack"></div>
+              <div class="locker-row"></div>
               <div class="side-windows">
                 <span></span><span></span><span></span>
               </div>
@@ -91,6 +111,8 @@
             <div class="room galley" data-room="3">
               <span class="room-name">Galley</span>
               <div class="table"></div>
+              <div class="galley-range"></div>
+              <div class="sink-basin"></div>
               <div class="side-windows">
                 <span></span><span></span><span></span>
               </div>
@@ -98,6 +120,7 @@
             <div class="room engine" data-room="4">
               <span class="room-name">Engine</span>
               <div class="engine-core"></div>
+              <div class="motor-bank"></div>
               <div class="pipe-row"></div>
             </div>
             <div id="crew-kid" class="crew-kid" aria-hidden="true">
@@ -111,16 +134,29 @@
         <div id="room-scene" class="room-scene hidden" data-room-kind="steering">
           <div class="room-depth-lines" aria-hidden="true"></div>
           <div class="room-back-wall">
+            <div class="room-ceiling-pipes" aria-hidden="true">
+              <span></span><span></span><span></span>
+            </div>
             <div class="room-view-window">
               <span></span><span></span><span></span>
             </div>
             <div class="room-prop primary"></div>
             <div class="room-prop secondary"></div>
+            <div class="room-gauge-bank" aria-hidden="true">
+              <span></span><span></span><span></span>
+            </div>
             <div id="room-status" class="room-status">Ready</div>
           </div>
           <div class="room-floor"></div>
           <button id="room-action" class="room-action" type="button">Use</button>
           <button id="room-plan" class="room-plan" type="button">Plan</button>
+        </div>
+
+        <div id="mobile-room-controls" class="mobile-controls room-controls" aria-label="Phone room controls">
+          <button id="room-prev" class="control-button" type="button">Prev</button>
+          <button id="room-back" class="control-button" type="button">Back</button>
+          <button id="room-enter" class="control-button fire-button" type="button">Enter / Use</button>
+          <button id="room-next" class="control-button" type="button">Next</button>
         </div>
       </section>
     </main>

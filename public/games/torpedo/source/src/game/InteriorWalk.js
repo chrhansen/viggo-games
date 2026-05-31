@@ -1,10 +1,12 @@
 const ROOMS = [
-  { title: 'Steering Room', meter: 'Front Window', view: 'front', kind: 'steering', action: 'steer', actionLabel: 'Steer' },
-  { title: 'Sonar Room', meter: 'Port Windows', view: 'port', kind: 'sonar', action: 'sonar', actionLabel: 'Ping' },
-  { title: 'Bunk Room', meter: 'Starboard Windows', view: 'starboard', kind: 'bunks', action: 'rest', actionLabel: 'Nap' },
-  { title: 'Galley', meter: 'Side Windows', view: 'port', kind: 'galley', action: 'eat', actionLabel: 'Eat' },
-  { title: 'Engine Room', meter: 'Engine Warm', view: 'front', kind: 'engine', action: 'repair', actionLabel: 'Repair' }
+  { title: 'Control Room', meter: 'Helm Station', view: 'front', kind: 'steering', action: 'steer', actionLabel: 'Hold Course' },
+  { title: 'Sonar Room', meter: 'Hydrophones', view: 'port', kind: 'sonar', action: 'sonar', actionLabel: 'Ping Sonar' },
+  { title: 'Crew Quarters', meter: 'Bunks Secure', view: 'starboard', kind: 'bunks', action: 'rest', actionLabel: 'Rest' },
+  { title: 'Galley', meter: 'Mess Deck', view: 'port', kind: 'galley', action: 'eat', actionLabel: 'Eat Meal' },
+  { title: 'Engine Room', meter: 'Motor Room', view: 'front', kind: 'engine', action: 'repair', actionLabel: 'Repair' }
 ];
+
+const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
 export class InteriorWalk {
   constructor(root, hud, callbacks = {}) {
@@ -20,8 +22,23 @@ export class InteriorWalk {
     this.actionButton = root.querySelector('#room-action');
     this.planButton = root.querySelector('#room-plan');
     this.status = root.querySelector('#room-status');
+    this.dragState = {
+      active: false,
+      moved: false,
+      startX: 0,
+      startScrollLeft: 0
+    };
+    this.suppressRoomTap = false;
     this.actionButton.addEventListener('click', () => this.performAction());
     this.planButton.addEventListener('click', () => this.showPlan());
+    this.cutaway.addEventListener('pointerdown', (event) => this.startMapDrag(event));
+    this.cutaway.addEventListener('pointermove', (event) => this.dragMap(event));
+    this.cutaway.addEventListener('pointerup', () => this.endMapDrag());
+    this.cutaway.addEventListener('pointercancel', () => this.endMapDrag());
+    this.cutaway.addEventListener('lostpointercapture', () => this.endMapDrag());
+    for (const roomEl of this.rooms) {
+      roomEl.addEventListener('click', () => this.enterRoom(Number(roomEl.dataset.room)));
+    }
     this.update();
   }
 
@@ -37,34 +54,69 @@ export class InteriorWalk {
     }
 
     if (event.code === 'KeyV' || event.code === 'Escape') {
-      this.callbacks.onExit?.(ROOMS[this.roomIndex].view);
+      this.back();
       return;
     }
 
     if (event.code === 'ArrowLeft' || event.code === 'KeyA') {
-      this.roomIndex = Math.max(0, this.roomIndex - 1);
-      this.update();
+      this.moveRoom(-1);
     }
 
     if (event.code === 'ArrowRight' || event.code === 'KeyD') {
-      this.roomIndex = Math.min(ROOMS.length - 1, this.roomIndex + 1);
-      this.update();
+      this.moveRoom(1);
     }
 
     if (event.code === 'Enter' || event.code === 'Space' || event.code === 'KeyE') {
-      this.showRoom();
+      this.confirm();
     }
   }
 
   handleRoomKey(event) {
     if (event.code === 'KeyV' || event.code === 'Escape' || event.code === 'Backspace') {
-      this.showPlan();
+      this.back();
       return;
     }
 
     if (event.code === 'Enter' || event.code === 'Space' || event.code === 'KeyE') {
-      this.performAction();
+      this.confirm();
     }
+  }
+
+  moveRoom(step) {
+    const nextIndex = clamp(this.roomIndex + step, 0, ROOMS.length - 1);
+    if (nextIndex === this.roomIndex) return;
+    this.roomIndex = nextIndex;
+    if (this.mode === 'room') {
+      this.status.textContent = 'Ready';
+    }
+    this.update();
+  }
+
+  enterRoom(index) {
+    if (this.mode !== 'plan') return;
+    if (this.suppressRoomTap) {
+      this.suppressRoomTap = false;
+      return;
+    }
+
+    this.roomIndex = clamp(index, 0, ROOMS.length - 1);
+    this.showRoom();
+  }
+
+  confirm() {
+    if (this.mode === 'plan') {
+      this.showRoom();
+      return;
+    }
+    this.performAction();
+  }
+
+  back() {
+    if (this.mode === 'room') {
+      this.showPlan();
+      return;
+    }
+    this.callbacks.onExit?.(ROOMS[this.roomIndex].view);
   }
 
   showPlan() {
@@ -92,6 +144,48 @@ export class InteriorWalk {
     this.update();
   }
 
+  startMapDrag(event) {
+    if (this.mode !== 'plan') return;
+    this.dragState.active = true;
+    this.dragState.moved = false;
+    this.dragState.startX = event.clientX;
+    this.dragState.startScrollLeft = this.cutaway.scrollLeft;
+    this.cutaway.setPointerCapture?.(event.pointerId);
+  }
+
+  dragMap(event) {
+    if (!this.dragState.active) return;
+
+    const deltaX = event.clientX - this.dragState.startX;
+    if (Math.abs(deltaX) > 6) {
+      this.dragState.moved = true;
+      event.preventDefault();
+    }
+    this.cutaway.scrollLeft = this.dragState.startScrollLeft - deltaX;
+  }
+
+  endMapDrag() {
+    if (!this.dragState.active) return;
+
+    if (this.dragState.moved) {
+      this.suppressRoomTap = true;
+      setTimeout(() => {
+        this.suppressRoomTap = false;
+      }, 0);
+    }
+
+    this.dragState.active = false;
+    this.dragState.moved = false;
+  }
+
+  scrollActiveRoomIntoView() {
+    if (this.mode !== 'plan') return;
+    const activeRoom = this.rooms[this.roomIndex];
+    requestAnimationFrame(() => {
+      activeRoom.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+    });
+  }
+
   update() {
     const room = ROOMS[this.roomIndex];
     this.hud.title.textContent = room.title;
@@ -103,5 +197,6 @@ export class InteriorWalk {
     for (const roomEl of this.rooms) {
       roomEl.classList.toggle('active', Number(roomEl.dataset.room) === this.roomIndex);
     }
+    this.scrollActiveRoomIntoView();
   }
 }

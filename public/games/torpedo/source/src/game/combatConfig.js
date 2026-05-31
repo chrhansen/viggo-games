@@ -34,3 +34,4 @@ export const PLAYER_BOUNDS = {
   y: 14
 };
 export const PLAYER_DODGE_SPEED = 20;
+export const PLAYER_MAX_HULL = 160;

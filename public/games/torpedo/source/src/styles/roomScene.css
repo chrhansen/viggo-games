@@ -21,7 +21,7 @@
 .room-back-wall {
   position: relative;
   width: min(920px, 92vw);
-  height: min(520px, 66vh);
+  aspect-ratio: var(--room-image-ratio);
   border: 16px solid #586b70;
   border-radius: 10px;
   background:
@@ -31,6 +31,81 @@
     inset 0 0 0 5px #132329,
     inset 0 -40px 60px rgba(0, 0, 0, 0.28),
     0 30px 80px rgba(0, 0, 0, 0.42);
+}
+
+.room-back-wall::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-position: center;
+  background-size: cover;
+}
+
+.room-back-wall::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(180deg, rgba(2, 9, 13, 0.16), transparent 42%, rgba(2, 9, 13, 0.42)),
+    radial-gradient(circle at 50% 18%, rgba(255, 244, 202, 0.08), transparent 34%);
+  pointer-events: none;
+}
+
+.room-scene[data-room-kind="steering"] .room-back-wall::before {
+  background-image: url("../assets/rooms/control.webp");
+}
+
+.room-scene[data-room-kind="sonar"] .room-back-wall::before {
+  background-image: url("../assets/rooms/sonar.webp");
+}
+
+.room-scene[data-room-kind="bunks"] .room-back-wall::before {
+  background-image: url("../assets/rooms/bunks.webp");
+}
+
+.room-scene[data-room-kind="galley"] .room-back-wall::before {
+  background-image: url("../assets/rooms/galley.webp");
+}
+
+.room-scene[data-room-kind="engine"] .room-back-wall::before {
+  background-image: url("../assets/rooms/engine.webp");
+}
+
+.room-ceiling-pipes {
+  position: absolute;
+  z-index: 2;
+  left: 5%;
+  right: 5%;
+  top: 5%;
+  height: 30px;
+}
+
+.room-ceiling-pipes span {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 7px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #101a1f, #91a4a8 42% 58%, #101a1f);
+}
+
+.room-ceiling-pipes span:nth-child(1) {
+  top: 0;
+}
+
+.room-ceiling-pipes span:nth-child(2) {
+  top: 11px;
+  left: 11%;
+  right: 16%;
+  background: linear-gradient(90deg, #31444a, #d6a858 48% 52%, #31444a);
+}
+
+.room-ceiling-pipes span:nth-child(3) {
+  top: 22px;
+  left: 7%;
+  right: 6%;
 }
 
 .room-floor {
@@ -48,6 +123,7 @@
 
 .room-view-window {
   position: absolute;
+  z-index: 2;
   left: 7%;
   right: 7%;
   top: 12%;
@@ -71,6 +147,7 @@
 
 .room-prop {
   position: absolute;
+  z-index: 2;
   border: 7px solid #132329;
   box-shadow: inset 0 0 0 4px rgba(238, 250, 255, 0.09);
 }
@@ -96,8 +173,97 @@
     #0a2029;
 }
 
+.room-gauge-bank {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  bottom: 18%;
+  width: min(220px, 30%);
+  height: 74px;
+  transform: translateX(-50%);
+  border: 5px solid #111b20;
+  border-radius: 8px;
+  background:
+    repeating-linear-gradient(90deg, rgba(238, 250, 255, 0.08) 0 2px, transparent 2px 22px),
+    linear-gradient(#4d6268, #17262d);
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.34);
+}
+
+.room-gauge-bank span {
+  position: absolute;
+  top: 16px;
+  width: 30px;
+  aspect-ratio: 1;
+  border: 4px solid #111b20;
+  border-radius: 999px;
+  background:
+    conic-gradient(from 210deg, #67e6ff 0 22%, #f3d366 22% 44%, #ff6257 44% 48%, transparent 48%),
+    #d6edf0;
+}
+
+.room-gauge-bank span:nth-child(1) {
+  left: 16%;
+}
+
+.room-gauge-bank span:nth-child(2) {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.room-gauge-bank span:nth-child(3) {
+  right: 16%;
+}
+
 .room-scene[data-room-kind="steering"] .room-view-window span:not(:nth-child(2)) {
   display: none;
+}
+
+.room-scene[data-room-kind="steering"] .room-prop.primary {
+  left: 13%;
+  bottom: 13%;
+  width: 31%;
+  height: 25%;
+  background:
+    radial-gradient(circle at 19% 34%, #5dff87 0 6px, transparent 7px),
+    radial-gradient(circle at 42% 34%, #f3d366 0 6px, transparent 7px),
+    radial-gradient(circle at 65% 34%, #ff6257 0 6px, transparent 7px),
+    linear-gradient(160deg, #647a80, #17262c 70%);
+  transform: skewX(-7deg);
+}
+
+.room-scene[data-room-kind="steering"] .room-prop.secondary {
+  right: 16%;
+  bottom: 18%;
+  width: min(150px, 22%);
+  height: auto;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background:
+    linear-gradient(0deg, transparent 46%, #d6a858 46% 54%, transparent 54%),
+    linear-gradient(90deg, transparent 46%, #d6a858 46% 54%, transparent 54%),
+    radial-gradient(circle, transparent 0 46%, #d6a858 47% 60%, transparent 61%),
+    #0b171c;
+}
+
+.room-scene[data-room-kind="sonar"] .room-view-window {
+  display: none;
+}
+
+.room-scene[data-room-kind="sonar"] .room-prop.primary {
+  left: 12%;
+  width: 36%;
+  height: 30%;
+  background:
+    radial-gradient(circle at 22% 30%, #67e6ff 0 9px, transparent 10px),
+    repeating-linear-gradient(90deg, #40565c 0 17px, #17272e 17px 28px);
+}
+
+.room-scene[data-room-kind="sonar"] .room-prop.secondary {
+  right: 14%;
+  bottom: 13%;
+  width: min(250px, 34%);
+  height: auto;
+  aspect-ratio: 1;
 }
 
 .room-scene[data-room-kind="bunks"] .room-prop.primary {
@@ -107,10 +273,34 @@
     linear-gradient(90deg, #263b42, #71858a);
 }
 
+.room-scene[data-room-kind="bunks"] .room-prop.secondary {
+  right: 14%;
+  width: 20%;
+  height: 44%;
+  border-radius: 6px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 31%, rgba(238, 250, 255, 0.12) 31% 34%, transparent 34%),
+    linear-gradient(#5b6f74, #22363d);
+}
+
 .room-scene[data-room-kind="galley"] .room-prop.primary {
-  left: 28%;
-  width: 44%;
-  background: linear-gradient(#d6a858, #8b6531);
+  left: 14%;
+  width: 34%;
+  height: 34%;
+  background:
+    radial-gradient(circle at 24% 22%, #101b20 0 13px, transparent 14px),
+    radial-gradient(circle at 62% 22%, #101b20 0 13px, transparent 14px),
+    linear-gradient(#8fa0a4, #32484f);
+}
+
+.room-scene[data-room-kind="galley"] .room-prop.secondary {
+  right: 16%;
+  width: 28%;
+  height: 22%;
+  border-radius: 0 0 24px 24px;
+  background:
+    radial-gradient(circle at 50% 0, #b6f5ff, #2d626d 68%),
+    linear-gradient(#d6a858, #8b6531);
 }
 
 .room-scene[data-room-kind="engine"] .room-prop.primary {
@@ -124,9 +314,20 @@
   animation: engine-pulse 900ms ease-in-out infinite alternate;
 }
 
-.room-scene[data-room-kind="engine"] .room-view-window,
-.room-scene[data-room-kind="engine"] .room-prop.secondary {
+.room-scene[data-room-kind="engine"] .room-view-window {
   display: none;
+}
+
+.room-scene[data-room-kind="engine"] .room-prop.secondary {
+  right: 10%;
+  bottom: 20%;
+  width: 24%;
+  height: 18%;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 18% 50%, #111b20 0 13px, transparent 14px),
+    radial-gradient(circle at 82% 50%, #111b20 0 13px, transparent 14px),
+    repeating-linear-gradient(90deg, #62777c 0 16px, #273c43 16px 28px);
 }
 
 .room-scene[data-room-kind="sonar"] .room-prop.secondary {
@@ -135,6 +336,7 @@
 
 .room-status {
   position: absolute;
+  z-index: 3;
   left: 50%;
   bottom: 9%;
   min-width: 168px;
@@ -146,6 +348,13 @@
   padding: 10px 14px;
   text-align: center;
   font-weight: 900;
+}
+
+.room-ceiling-pipes,
+.room-view-window,
+.room-prop,
+.room-gauge-bank {
+  display: none;
 }
 
 .room-scene.acted .room-status {
@@ -192,11 +401,11 @@
 
 @media (max-width: 760px) {
   .room-scene {
-    padding: 88px 14px 28px;
+    padding: 88px 14px 112px;
   }
 
   .room-back-wall {
-    height: 62vh;
+    width: min(92vw, calc(58vh * 1216 / 864));
   }
 
   .room-view-window {
@@ -205,6 +414,6 @@
 
   .room-action,
   .room-plan {
-    bottom: 18px;
+    display: none;
   }
 }

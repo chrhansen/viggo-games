@@ -1,8 +1,12 @@
 import * as THREE from 'three';
-import { createSubmarineMesh, createTorpedoMesh, quaternionFacing } from './meshes.js';
+import { BossLoop } from './bossLoop.js';
+import { CombatInput } from './combatInput.js';
+import { updatePlayerControls } from './combatControls.js';
+import { createEnemySubmarineMesh, createTorpedoMesh, quaternionFacing } from './meshes.js';
+import { performInteriorAction as runInteriorAction } from './interiorActions.js';
 import { createOceanEnvironment, updateOceanEnvironment } from './oceanEnvironment.js';
 import { createHelperFormation, resetHelperFormation, updateHelperFormation } from './helperFormation.js';
-import { FRONT_SPAWN_DISTANCE, FRONT_SPAWN_LANES, PLAYER_BOUNDS, PLAYER_DODGE_SPEED, VIEW_CONFIG } from './combatConfig.js';
+import { FRONT_SPAWN_DISTANCE, FRONT_SPAWN_LANES, PLAYER_BOUNDS, PLAYER_MAX_HULL, VIEW_CONFIG } from './combatConfig.js';
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const randomBetween = (min, max) => min + Math.random() * (max - min);
@@ -21,12 +25,13 @@ export class OceanCombat {
     this.spawnTimer = 0;
     this.hitTimer = 0;
     this.periscopeYaw = 0;
+    this.input = new CombatInput();
 
     this.player = {
       position: new THREE.Vector3(0, 0, 0),
       forwardSpeed: 9,
       engineBroken: false,
-      hull: 100,
+      hull: PLAYER_MAX_HULL,
       score: 0,
       cooldown: 0
     };
@@ -39,6 +44,7 @@ export class OceanCombat {
 
     this.setupRenderer();
     this.setupScene();
+    this.bossLoop = new BossLoop(this);
     this.updateHud();
     this.animate = this.animate.bind(this);
   }
@@ -87,6 +93,7 @@ export class OceanCombat {
   pause() {
     this.paused = true;
     this.keys.clear();
+    this.clearTouchInput();
   }
 
   resume() {
@@ -100,6 +107,7 @@ export class OceanCombat {
     for (const torpedo of this.playerTorpedoes) this.world.remove(torpedo.mesh);
     for (const torpedo of this.enemyTorpedoes) this.world.remove(torpedo.mesh);
     for (const bubble of this.trailBubbles) this.world.remove(bubble);
+    this.bossLoop.removeAll();
 
     this.enemies = [];
     this.playerTorpedoes = [];
@@ -108,7 +116,7 @@ export class OceanCombat {
     this.player.position.set(0, 0, 0);
     this.player.forwardSpeed = 9;
     this.player.engineBroken = false;
-    this.player.hull = 100;
+    this.player.hull = PLAYER_MAX_HULL;
     this.player.score = 0;
     this.player.cooldown = 0;
     this.spawnTimer = 0;
@@ -125,19 +133,32 @@ export class OceanCombat {
     if (event.code === 'Digit1') this.setView('front');
     if (event.code === 'Digit2') this.setView('port');
     if (event.code === 'Digit3') this.setView('starboard');
-    if (event.code === 'KeyP') this.setView(this.view === 'periscope' ? 'front' : 'periscope');
+    if (event.code === 'KeyP') this.togglePeriscope();
     if (event.code === 'KeyV') this.callbacks.onEnterInterior?.();
     if (event.code === 'Space') this.firePlayerTorpedo();
     if (event.code === 'KeyR' && this.isGameOver) this.restart();
   }
 
-  handleKeyUp(event) {
-    this.keys.delete(event.code);
+  togglePeriscope() {
+    const nextView = this.view === 'periscope' ? 'front' : 'periscope';
+    this.setView(nextView);
+    return nextView;
   }
+
+  handleKeyUp(event) { this.keys.delete(event.code); }
 
   clearKeys() {
     this.keys.clear();
+    this.clearTouchInput();
   }
+
+  setTouchInput(x, y) { this.input.setTouch(x, y); }
+
+  clearTouchInput() { this.input.clearTouch(); }
+
+  setMotionControl(enabled) { this.input.setMotionControl(enabled); }
+
+  handleDeviceOrientation(event) { return this.input.handleDeviceOrientation(event); }
 
   setView(view) {
     if (!VIEW_CONFIG[view]) return;
@@ -179,10 +200,11 @@ export class OceanCombat {
     this.hitTimer = Math.max(0, this.hitTimer - delta);
 
     this.player.position.z -= this.player.forwardSpeed * delta;
-    this.updateControls(delta);
+    updatePlayerControls(this, delta);
     updateOceanEnvironment(this.environment, this.player, delta);
     this.updateEnemies(delta);
-    updateHelperFormation(this.helpers, this.player, this.enemies, delta, (position, direction) => {
+    this.bossLoop.update(delta);
+    updateHelperFormation(this.helpers, this.player, this.bossLoop.helperTargets(this.enemies), delta, (position, direction) => {
       this.fireHelperTorpedo(position, direction);
     });
     this.updateTorpedoes(delta);
@@ -191,39 +213,13 @@ export class OceanCombat {
     this.updateHud();
   }
 
-  updateControls(delta) {
-    const speed = PLAYER_DODGE_SPEED;
-    let moveX = 0;
-    let moveY = 0;
-
-    if (this.keys.has('ArrowLeft') || this.keys.has('KeyA')) moveX -= 1;
-    if (this.keys.has('ArrowRight') || this.keys.has('KeyD')) moveX += 1;
-    if (this.keys.has('ArrowUp') || this.keys.has('KeyW')) moveY += 1;
-    if (this.keys.has('ArrowDown') || this.keys.has('KeyS')) moveY -= 1;
-
-    if (this.view === 'periscope') {
-      if (this.keys.has('KeyQ')) this.periscopeYaw += delta * 1.4;
-      if (this.keys.has('KeyE')) this.periscopeYaw -= delta * 1.4;
-    }
-
-    const length = Math.hypot(moveX, moveY) || 1;
-    this.player.position.x = clamp(
-      this.player.position.x + (moveX / length) * speed * delta,
-      -PLAYER_BOUNDS.x,
-      PLAYER_BOUNDS.x
-    );
-    this.player.position.y = clamp(
-      this.player.position.y + (moveY / length) * speed * delta,
-      -PLAYER_BOUNDS.y,
-      PLAYER_BOUNDS.y
-    );
-  }
-
   updateEnemies(delta) {
     this.spawnTimer -= delta;
-    if (this.spawnTimer <= 0) {
+    if (this.spawnTimer <= 0 && this.bossLoop.canSpawnRegular()) {
       this.spawnEnemy();
       this.spawnTimer = randomBetween(1.7, 3.0);
+    } else if (!this.bossLoop.canSpawnRegular()) {
+      this.spawnTimer = Math.max(this.spawnTimer, 0.8);
     }
 
     for (let i = this.enemies.length - 1; i >= 0; i -= 1) {
@@ -233,7 +229,9 @@ export class OceanCombat {
       const direction = toPlayer.normalize();
       enemy.mesh.position.addScaledVector(direction, enemy.speed * delta);
       enemy.mesh.quaternion.copy(quaternionFacing(direction));
-      enemy.mesh.children[0].rotation.x += delta * 2.6;
+      if (enemy.mesh.userData.propeller) {
+        enemy.mesh.userData.propeller.rotation.x += delta * 4.8;
+      }
       enemy.shootTimer -= delta;
 
       if (enemy.shootTimer <= 0 && distance < 88 && this.isEnemyInFront(enemy)) {
@@ -256,7 +254,7 @@ export class OceanCombat {
   }
 
   spawnEnemy() {
-    const mesh = createSubmarineMesh();
+    const mesh = createEnemySubmarineMesh();
     const lane = FRONT_SPAWN_LANES[Math.floor(Math.random() * FRONT_SPAWN_LANES.length)];
     const distance = randomBetween(FRONT_SPAWN_DISTANCE[0], FRONT_SPAWN_DISTANCE[1]);
     mesh.position.set(
@@ -269,7 +267,7 @@ export class OceanCombat {
 
     this.enemies.push({
       mesh,
-      speed: randomBetween(5.0, 8.0),
+      speed: randomBetween(5.0, 8.0) * (this.bossLoop.level > 1 ? 1.18 : 1),
       shootTimer: randomBetween(1.0, 2.3)
     });
   }
@@ -374,6 +372,12 @@ export class OceanCombat {
   checkCollisions() {
     for (let t = this.playerTorpedoes.length - 1; t >= 0; t -= 1) {
       const torpedo = this.playerTorpedoes[t];
+      if (this.bossLoop.hitBoss(torpedo)) {
+        this.world.remove(torpedo.mesh);
+        this.playerTorpedoes.splice(t, 1);
+        continue;
+      }
+
       for (let e = this.enemies.length - 1; e >= 0; e -= 1) {
         const enemy = this.enemies[e];
         if (torpedo.mesh.position.distanceTo(enemy.mesh.position) < 2.25) {
@@ -383,6 +387,7 @@ export class OceanCombat {
           this.playerTorpedoes.splice(t, 1);
           this.enemies.splice(e, 1);
           this.player.score += 100;
+          this.bossLoop.recordRegularKill();
           break;
         }
       }
@@ -445,6 +450,7 @@ export class OceanCombat {
 
   updateHud() {
     this.hud.score.textContent = `Score ${this.player.score}`;
+    this.hud.level.textContent = this.bossLoop.statusText();
     this.hud.health.textContent = `Hull ${this.player.hull}`;
     this.hud.charge.textContent = this.player.engineBroken
       ? 'Engine Hit'
@@ -452,26 +458,7 @@ export class OceanCombat {
   }
 
   performInteriorAction(action) {
-    if (action === 'steer') return 'Holding course';
-    if (action === 'repair') {
-      if (!this.player.engineBroken) return 'Engine running';
-      this.player.engineBroken = false;
-      this.player.forwardSpeed = 9;
-      this.player.hull = Math.min(100, this.player.hull + 8);
-      this.updateHud();
-      return 'Engine repaired';
-    }
-    if (action === 'rest') {
-      this.player.hull = Math.min(100, this.player.hull + 4);
-      this.updateHud();
-      return 'Nap complete';
-    }
-    if (action === 'eat') return 'Lunch finished';
-    if (action === 'sonar') {
-      this.spawnTimer = Math.max(this.spawnTimer, 2.2);
-      return `${this.enemies.length} contacts`;
-    }
-    return 'Ready';
+    return runInteriorAction(this, action);
   }
 
   updateCamera() {
@@ -490,5 +477,4 @@ export class OceanCombat {
 
     return base.applyAxisAngle(new THREE.Vector3(0, 1, 0), this.periscopeYaw).normalize();
   }
-
 }

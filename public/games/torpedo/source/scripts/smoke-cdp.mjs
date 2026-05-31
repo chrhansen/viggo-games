@@ -9,6 +9,7 @@ const appPort = Number(process.env.SMOKE_PORT || 4173);
 const debugPort = Number(process.env.CDP_PORT || 9224);
 const appUrl = `http://127.0.0.1:${appPort}/`;
 const chromePath = process.env.CHROME_PATH || defaultChromePath();
+const roomImageRatio = 1216 / 864;
 
 if (!chromePath) {
   throw new Error('Chrome not found. Set CHROME_PATH to run the smoke test.');
@@ -37,19 +38,17 @@ try {
   await waitForHttp(appUrl);
   await waitForHttp(`http://127.0.0.1:${debugPort}/json/version`);
 
-  const target = await createTarget(appUrl);
-  const client = await connectCdp(target.webSocketDebuggerUrl);
-  await client.send('Page.enable');
-  await client.send('Runtime.enable');
+  const desktopClient = await createPageClient();
+  const desktop = await runScenario(desktopClient, 'desktop');
 
-  const desktop = await runScenario(client, 'desktop');
-  await client.send('Emulation.setDeviceMetricsOverride', {
+  const mobileClient = await createPageClient();
+  await mobileClient.send('Emulation.setDeviceMetricsOverride', {
     width: 390,
     height: 844,
     deviceScaleFactor: 2,
     mobile: true
   });
-  const mobile = await runScenario(client, 'mobile');
+  const mobile = await runScenario(mobileClient, 'mobile');
   const report = { desktop, mobile };
 
   const failures = [...scenarioFailures('desktop', desktop), ...scenarioFailures('mobile', mobile)];
@@ -66,7 +65,11 @@ try {
 
 async function runScenario(client, label) {
   await client.send('Page.navigate', { url: appUrl });
-  await waitForExpression(client, 'document.readyState === "complete"');
+  await waitForExpression(client, `
+    document.readyState === "complete"
+      && typeof window.__torpedoDebugMotion === "function"
+      && getComputedStyle(document.querySelector("#combat-ui")).position === "fixed"
+  `);
   const report = await evaluate(client, smokeExpression(), true);
   const screenshot = await client.send('Page.captureScreenshot', { format: 'png' });
   const screenshotPath = join(tmpdir(), `torpedo-${label}-${Date.now()}.png`);
@@ -74,21 +77,54 @@ async function runScenario(client, label) {
   return { ...report, screenshotPath };
 }
 
+async function createPageClient() {
+  const target = await createTarget('about:blank');
+  const client = await connectCdp(target.webSocketDebuggerUrl);
+  await client.send('Page.enable');
+  await client.send('Runtime.enable');
+  return client;
+}
+
 function scenarioFailures(label, report) {
-  return [
+  const failures = [
     [`${label} splash visible`, report.initialSplash],
     [`${label} canvas has size`, report.canvasWidth > 0 && report.canvasHeight > 0],
     [`${label} canvas has varied pixels`, report.distinctColors >= 3],
+    [`${label} tougher hull`, report.initialHull === 'Hull 160'],
+    [`${label} boss ladder hud`, report.initialBossStatus === 'Boss 0/5'],
+    [`${label} fire button`, report.fireButtonFired],
+    [`${label} motion permission requested`, report.motionPermissionAsked],
+    [`${label} motion awaits sensor`, report.motionAfterRequest],
+    [`${label} motion sensor connected`, report.motionSensorConnected],
+    [`${label} motion axes swapped`, report.motionAxesSwapped],
+    [`${label} motion turns off`, report.motionTurnedOff],
     [`${label} port view switch`, report.portTitle === 'Port Windows'],
     [`${label} starboard view switch`, report.starboardTitle === 'Starboard Windows'],
-    [`${label} periscope switch`, report.periscopeActive],
+    [`${label} periscope enters`, report.periscopeActive],
+    [`${label} periscope exits`, report.periscopeInactive],
     [`${label} interior opens`, report.interiorVisible],
+    [`${label} plan rooms match images`, Math.abs(report.planRoomRatio - roomImageRatio) < 0.01],
     [`${label} interior movement`, report.roomAfterMove === 'Sonar Room'],
+    [`${label} direct room tap`, report.directRoomTapTitle === 'Galley'],
     [`${label} room view opens`, report.roomSceneVisible],
-    [`${label} room action runs`, report.roomStatus.includes('contacts')],
+    [`${label} room view matches images`, Math.abs(report.roomViewRatio - roomImageRatio) < 0.01],
+    [`${label} room action runs`, report.roomStatus !== 'Ready'],
     [`${label} plan returns`, report.planVisibleAgain],
     [`${label} combat returns`, report.combatBack]
-  ].filter(([, passed]) => !passed);
+  ];
+
+  if (label === 'mobile') {
+    failures.push(
+      ['mobile combat controls visible', report.combatControlsVisible],
+      ['mobile room controls visible', report.roomControlsVisible],
+      ['mobile motion toggle visible', report.motionToggleVisible],
+      ['mobile periscope button visible', report.periscopeButtonVisible],
+      ['mobile submarine map scrollable', report.cutawayScrollable],
+      ['mobile submarine map drags', report.cutawayDragChanged]
+    );
+  }
+
+  return failures.filter(([, passed]) => !passed);
 }
 
 function defaultChromePath() {
@@ -190,43 +226,122 @@ function smokeExpression() {
       const element = document.querySelector(selector);
       if (!element) return false;
       const style = getComputedStyle(element);
-      return style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+      return style.display !== 'none'
+        && style.visibility !== 'hidden'
+        && style.opacity !== '0'
+        && element.getClientRects().length > 0;
     };
     const key = (code) => {
       window.dispatchEvent(new KeyboardEvent('keydown', { code, key: code, bubbles: true }));
       window.dispatchEvent(new KeyboardEvent('keyup', { code, key: code, bubbles: true }));
     };
+    const pointerDown = (selector) => {
+      document.querySelector(selector).dispatchEvent(new PointerEvent('pointerdown', {
+        bubbles: true,
+        cancelable: true,
+        pointerId: 7,
+        pointerType: 'touch'
+      }));
+    };
+    const pointer = (element, type, clientX) => {
+      element.dispatchEvent(new PointerEvent(type, {
+        bubbles: true,
+        cancelable: true,
+        pointerId: 8,
+        pointerType: 'touch',
+        clientX
+      }));
+    };
 
     const initialSplash = visible('#splash-screen');
     document.querySelector('#start-button').click();
     await wait(900);
-    key('Space');
-    await wait(160);
+    const initialHull = document.querySelector('#health-meter').textContent;
+    const initialBossStatus = document.querySelector('#level-meter').textContent;
+    const combatControlsVisible = visible('#mobile-combat-controls');
+    const motionToggleVisible = visible('#motion-toggle');
+    const periscopeButtonVisible = visible('#periscope-button');
+    let motionPermissionAsked = false;
+    try {
+      Object.defineProperty(window, 'DeviceOrientationEvent', {
+        configurable: true,
+        value: class TestDeviceOrientationEvent extends Event {
+          static async requestPermission() {
+            motionPermissionAsked = true;
+            return 'granted';
+          }
+        }
+      });
+    } catch {}
+    document.querySelector('#motion-toggle').click();
+    await wait(80);
+    const motionAfterRequest = document.querySelector('#motion-toggle').textContent === 'Move Phone'
+      && document.querySelector('#motion-toggle').getAttribute('aria-pressed') === 'true';
+    const orientationEvent = new Event('deviceorientation');
+    Object.defineProperties(orientationEvent, {
+      beta: { value: 14 },
+      gamma: { value: 8 }
+    });
+    window.dispatchEvent(orientationEvent);
+    const tiltedEvent = new Event('deviceorientation');
+    Object.defineProperties(tiltedEvent, {
+      beta: { value: 24 },
+      gamma: { value: 18 }
+    });
+    window.dispatchEvent(tiltedEvent);
+    await wait(80);
+    const motionSensorConnected = document.querySelector('#motion-toggle').textContent === 'Tilt On';
+    const motionVector = window.__torpedoDebugMotion?.();
+    const motionAxesSwapped = motionVector?.x < 0 && motionVector?.y > 0;
+    document.querySelector('#motion-toggle').click();
+    await wait(80);
+    const motionTurnedOff = document.querySelector('#motion-toggle').textContent === 'Motion'
+      && document.querySelector('#motion-toggle').getAttribute('aria-pressed') === 'false';
+    pointerDown('#fire-button');
+    await wait(80);
+    const fireButtonFired = document.querySelector('#charge-meter').textContent.includes('Reloading');
     key('Digit2');
     await wait(100);
     const portTitle = document.querySelector('#view-title').textContent;
     key('Digit3');
     await wait(100);
     const starboardTitle = document.querySelector('#view-title').textContent;
-    key('KeyP');
+    document.querySelector('#periscope-button').click();
     await wait(100);
     const periscopeActive = document.querySelector('#periscope-mask').classList.contains('active');
-    key('KeyV');
+    document.querySelector('#periscope-button').click();
+    await wait(100);
+    const periscopeInactive = !document.querySelector('#periscope-mask').classList.contains('active');
+    document.querySelector('#rooms-button').click();
     await wait(140);
     const interiorVisible = visible('#interior-screen');
-    key('ArrowRight');
+    const roomControlsVisible = visible('#mobile-room-controls');
+    const planRoomRect = document.querySelector('.room[data-room="0"]').getBoundingClientRect();
+    const planRoomRatio = planRoomRect.width / planRoomRect.height;
+    const cutaway = document.querySelector('.submarine-cutaway');
+    const cutawayScrollable = cutaway.scrollWidth > cutaway.clientWidth;
+    const cutawayStartScroll = cutaway.scrollLeft;
+    pointer(cutaway, 'pointerdown', 320);
+    pointer(cutaway, 'pointermove', 120);
+    pointer(cutaway, 'pointerup', 120);
+    await wait(80);
+    const cutawayDragChanged = cutaway.scrollLeft > cutawayStartScroll + 30;
+    document.querySelector('#room-next').click();
     await wait(140);
     const roomAfterMove = document.querySelector('#room-title').textContent;
-    key('Enter');
+    document.querySelector('.room[data-room="3"]').click();
     await wait(140);
+    const directRoomTapTitle = document.querySelector('#room-title').textContent;
     const roomSceneVisible = visible('#room-scene');
-    key('Enter');
+    const roomViewRect = document.querySelector('.room-back-wall').getBoundingClientRect();
+    const roomViewRatio = roomViewRect.width / roomViewRect.height;
+    document.querySelector('#room-enter').click();
     await wait(140);
     const roomStatus = document.querySelector('#room-status').textContent;
-    key('KeyV');
+    document.querySelector('#room-back').click();
     await wait(140);
     const planVisibleAgain = visible('.submarine-cutaway');
-    key('KeyV');
+    document.querySelector('#room-back').click();
     await wait(140);
     const combatBack = visible('#combat-ui') && !visible('#interior-screen');
 
@@ -248,12 +363,30 @@ function smokeExpression() {
 
     return {
       initialSplash,
+      initialHull,
+      initialBossStatus,
+      combatControlsVisible,
+      roomControlsVisible,
+      motionToggleVisible,
+      periscopeButtonVisible,
+      fireButtonFired,
+      motionPermissionAsked,
+      motionAfterRequest,
+      motionSensorConnected,
+      motionAxesSwapped,
+      motionTurnedOff,
+      cutawayScrollable,
+      cutawayDragChanged,
       portTitle,
       starboardTitle,
       periscopeActive,
+      periscopeInactive,
       interiorVisible,
+      planRoomRatio,
       roomAfterMove,
+      directRoomTapTitle,
       roomSceneVisible,
+      roomViewRatio,
       roomStatus,
       planVisibleAgain,
       combatBack,

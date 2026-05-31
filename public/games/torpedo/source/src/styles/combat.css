@@ -192,6 +192,116 @@
   animation: flash-hit 420ms ease-out;
 }
 
+.mobile-controls {
+  position: absolute;
+  z-index: 26;
+  left: 0;
+  right: 0;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  display: none;
+  align-items: end;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 0 14px;
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+}
+
+.control-button {
+  min-width: 58px;
+  min-height: 50px;
+  border: 1px solid rgba(238, 250, 255, 0.3);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(42, 64, 70, 0.92), rgba(9, 21, 26, 0.92)),
+    repeating-linear-gradient(90deg, transparent 0 12px, rgba(255, 255, 255, 0.04) 12px 13px);
+  color: var(--ink);
+  box-shadow:
+    inset 0 0 0 2px rgba(0, 0, 0, 0.24),
+    0 10px 28px rgba(0, 0, 0, 0.38);
+  font-size: 0.8rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.control-button.pressed,
+.control-button:active {
+  transform: translateY(1px);
+  border-color: rgba(245, 211, 96, 0.78);
+  background: linear-gradient(180deg, rgba(84, 73, 38, 0.96), rgba(20, 24, 22, 0.96));
+}
+
+.dpad {
+  width: 156px;
+  display: grid;
+  grid-template-columns: repeat(3, 50px);
+  grid-template-rows: repeat(3, 46px);
+  gap: 4px;
+}
+
+.dpad .control-button {
+  min-width: 50px;
+  min-height: 46px;
+  padding: 0;
+  font-size: 1.05rem;
+}
+
+.dpad-up {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.dpad-left {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.dpad-right {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.dpad-down {
+  grid-column: 2;
+  grid-row: 3;
+}
+
+.command-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(58px, 1fr));
+  gap: 8px;
+  width: min(220px, calc(100vw - 190px));
+}
+
+.room-controls {
+  justify-content: center;
+}
+
+.room-controls .control-button {
+  width: min(24vw, 150px);
+}
+
+.fire-button {
+  background: linear-gradient(180deg, #f6d96f, #b88328);
+  color: #172126;
+}
+
+.motion-toggle[aria-pressed="true"] {
+  border-color: rgba(98, 255, 172, 0.72);
+  color: #c8ffe0;
+}
+
+.motion-toggle.warning {
+  border-color: rgba(255, 98, 87, 0.78);
+  color: #ffd6d2;
+}
+
+#periscope-button[aria-pressed="true"] {
+  border-color: rgba(103, 230, 255, 0.8);
+  color: #c4f8ff;
+}
+
 @keyframes flash-hit {
   0%,
   100% {
@@ -262,5 +372,20 @@
     width: 86vw;
     display: grid;
     gap: 10px;
+  }
+
+  .mobile-controls {
+    display: flex;
+  }
+
+  .splash-card {
+    top: 43%;
+  }
+}
+
+@media (pointer: coarse) and (min-width: 761px) {
+  .mobile-controls {
+    display: flex;
+    padding: 0 22px;
   }
 }

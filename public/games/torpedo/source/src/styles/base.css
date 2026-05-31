@@ -9,6 +9,7 @@
   --warning: #ff6257;
   --ready: #f3d366;
   --glow: #67e6ff;
+  --room-image-ratio: 1216 / 864;
   font-family: "Avenir Next", "Trebuchet MS", Verdana, sans-serif;
 }
 
@@ -24,10 +25,14 @@ body,
   margin: 0;
   overflow: hidden;
   background: var(--deep);
+  touch-action: none;
 }
 
 button {
   font: inherit;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 #combat-canvas {
