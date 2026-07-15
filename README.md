@@ -6,6 +6,7 @@ This repo owns:
 
 - the homepage shell at `https://viggo.games/`
 - the hosted game code under `https://viggo.games/games/<slug>/`
+- the native Expo app under `mobile/`
 - the GitHub Pages deploy for the custom domain
 - current live games/slots: `chicken-hop`, `hunter-guy`, `burb`, `gunny`, `torpedo`
 
@@ -60,6 +61,9 @@ Then port the changes intentionally. Do not blindly overwrite repo-specific wiri
 - `scripts/`
   - build/deploy helper scripts
   - `prepare-pages.mjs` prepares static route pages, `404.html`, `sitemap.xml`, and LLM crawler files after Vite builds
+- `mobile/`
+  - native React Native and Expo app for iOS and Android phones
+  - owns its dependencies, build profiles, native assets, landing screen, and mobile CI gate
 - `src/`
   - React/Vite homepage app
   - routing, cards, iframe wrapper
@@ -111,6 +115,19 @@ npm run dev
 This serves the React shell. The static games are loaded from `public/games/...`.
 
 If a specific game has its own preferred local workflow, use that game's README.
+
+## Mobile app
+
+The native app is intentionally separate from the Vite website runtime. It does not use a WebView. Install and run it from its own folder:
+
+```sh
+cd mobile
+npm ci
+npm run ios
+# or: npm run android
+```
+
+See `mobile/README.md` for the mobile gate, environment requirements, and child-directed product constraints.
 
 ## Analytics
 
