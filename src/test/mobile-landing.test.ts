@@ -74,14 +74,14 @@ describe("mobile child-safety constraints", () => {
 });
 
 describe("mobile game selector", () => {
-  it("presents Chicken Hop first as the only next mission", () => {
+  it("presents Chicken Hop first as the only ready mission", () => {
     expect(gamePreviews[0]).toMatchObject({
       id: "chicken-hop",
       level: "01",
       title: "Chicken Hop",
-      status: "next",
+      status: "ready",
     });
-    expect(gamePreviews.filter((game) => game.status === "next")).toHaveLength(1);
+    expect(gamePreviews.filter((game) => game.status === "ready")).toHaveLength(1);
     expect(gamePreviews.slice(1).every((game) => game.status === "locked")).toBe(true);
   });
 

@@ -1,5 +1,5 @@
 import { Image } from "expo-image";
-import { Animated, StyleSheet, Text, View } from "react-native";
+import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { colors, fonts } from "@/constants/theme";
 import type { GamePreview } from "@/data/games";
@@ -8,14 +8,16 @@ interface MissionCardProps {
   animation: Animated.Value;
   featured?: boolean;
   mission: GamePreview;
+  onPress?: () => void;
 }
 
-export function MissionCard({ animation, featured = false, mission }: MissionCardProps) {
+export function MissionCard({ animation, featured = false, mission, onPress }: MissionCardProps) {
   const translateY = animation.interpolate({
     inputRange: [0, 1],
     outputRange: [24, 0],
   });
-  const statusLabel = mission.status === "next" ? "Next mission" : "Locked";
+  const statusLabel = mission.status === "ready" ? "Play now" : "Locked";
+  const disabled = !onPress;
 
   return (
     <Animated.View
@@ -24,15 +26,17 @@ export function MissionCard({ animation, featured = false, mission }: MissionCar
         transform: [{ translateY }],
       }}
     >
-      <View
-        accessible
-        accessibilityLabel={`${mission.title}. ${mission.genre}. ${statusLabel}. Coming soon.`}
+      <Pressable
+        accessibilityLabel={`${mission.title}. ${mission.genre}. ${disabled ? "Coming soon" : "Play now"}.`}
         accessibilityRole="button"
-        accessibilityState={{ disabled: true }}
-        style={[
+        accessibilityState={{ disabled }}
+        disabled={disabled}
+        onPress={onPress}
+        style={({ pressed }) => [
           styles.card,
           featured ? styles.featuredCard : styles.standardCard,
           { borderColor: mission.color },
+          pressed && styles.pressedCard,
         ]}
       >
         <Image
@@ -60,7 +64,7 @@ export function MissionCard({ animation, featured = false, mission }: MissionCar
           </Text>
           <Text style={styles.genre}>{mission.genre}</Text>
         </View>
-      </View>
+      </Pressable>
     </Animated.View>
   );
 }
@@ -83,6 +87,10 @@ const styles = StyleSheet.create({
   },
   standardCard: {
     minHeight: 122,
+  },
+  pressedCard: {
+    opacity: 0.82,
+    transform: [{ scale: 0.985 }],
   },
   featuredShade: {
     backgroundColor: "rgba(9, 11, 24, 0.48)",

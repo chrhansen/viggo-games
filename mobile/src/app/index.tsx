@@ -1,4 +1,5 @@
 import { StatusBar } from "expo-status-bar";
+import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   Animated,
@@ -16,6 +17,7 @@ import { colors, fonts } from "@/constants/theme";
 import { gamePreviews } from "@/data/games";
 
 export default function GameSelectorScreen() {
+  const router = useRouter();
   const [viewport, setViewport] = useState({ height: 0, width: 0 });
   const isLandscape = viewport.width > viewport.height;
   const [revealValues] = useState(() =>
@@ -77,7 +79,7 @@ export default function GameSelectorScreen() {
                 <View style={styles.onlineDot} />
                 <Text style={styles.systemText}>MOBILE ARCADE ONLINE</Text>
               </View>
-              <Text style={styles.buildText}>BUILD 001</Text>
+              <Text style={styles.buildText}>BUILD 002</Text>
             </View>
 
             <Text
@@ -89,7 +91,7 @@ export default function GameSelectorScreen() {
             </Text>
             <Text style={styles.kicker}>SELECT YOUR MISSION</Text>
             <Text style={styles.intro}>
-              The doors are open. Games are warming up. Chicken Hop is first in line.
+              The doors are open. Chicken Hop is ready for its first native run.
             </Text>
 
             <View style={styles.coinSlot}>
@@ -106,10 +108,13 @@ export default function GameSelectorScreen() {
                 featured={index === 0}
                 key={mission.id}
                 mission={mission}
+                onPress={
+                  mission.status === "ready" ? () => router.push("./chicken-hop") : undefined
+                }
               />
             ))}
 
-            <Text style={styles.footer}>NO GAMES INSTALLED · ARCADE OPENS SOON</Text>
+            <Text style={styles.footer}>1 GAME READY · MORE MISSIONS IN DEVELOPMENT</Text>
           </View>
         </View>
       </ScrollView>

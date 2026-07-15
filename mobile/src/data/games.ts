@@ -12,7 +12,7 @@ export interface GamePreview {
   genre: string;
   color: string;
   image: number;
-  status: "next" | "locked";
+  status: "ready" | "locked";
 }
 
 export const gamePreviews: readonly GamePreview[] = [
@@ -24,7 +24,7 @@ export const gamePreviews: readonly GamePreview[] = [
     genre: "Arcade runner",
     color: "#FF4B4B",
     image: chickenHopImage,
-    status: "next",
+    status: "ready",
   },
   {
     id: "hunter-guy",
