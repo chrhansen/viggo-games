@@ -13,7 +13,50 @@ interface ChickenHopSceneProps {
   profile: ChickenProfile;
 }
 
+const isPlatform = (obstacle: ChickenHopObstacle) =>
+  obstacle.kind === "shelf" || obstacle.kind === "step";
+
 function Obstacle({ obstacle }: { obstacle: ChickenHopObstacle }) {
+  if (isPlatform(obstacle)) {
+    return (
+      <View
+        accessibilityLabel={`${obstacle.kind} platform`}
+        style={[
+          styles.platform,
+          {
+            height: obstacle.height,
+            left: obstacle.x,
+            top: obstacle.y,
+            width: obstacle.width,
+          },
+        ]}
+      >
+        <View
+          style={[
+            styles.platformShadow,
+            { top: obstacle.height + 5 },
+          ]}
+        />
+        <View
+          style={[
+            styles.platformSurface,
+            obstacle.kind === "step"
+              ? styles.stepSurface
+              : styles.shelfSurface,
+          ]}
+        >
+          <View style={styles.platformTop} />
+          {obstacle.kind === "step" ? (
+            <>
+              <View style={[styles.stepRiser, { left: "34%" }]} />
+              <View style={[styles.stepRiser, { left: "68%" }]} />
+            </>
+          ) : null}
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View
       accessibilityLabel={`${obstacle.kind} obstacle`}
@@ -313,6 +356,52 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 6,
     elevation: 5,
+  },
+  platform: {
+    position: "absolute",
+  },
+  platformShadow: {
+    position: "absolute",
+    left: 6,
+    right: 6,
+    height: 9,
+    borderRadius: 8,
+    backgroundColor: "rgba(0,0,0,0.38)",
+  },
+  platformSurface: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    overflow: "hidden",
+    borderWidth: 2,
+    borderColor: "rgba(255,255,255,0.2)",
+    borderRadius: 10,
+    shadowColor: "#000000",
+    shadowOffset: { width: 4, height: 7 },
+    shadowOpacity: 0.28,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  shelfSurface: {
+    backgroundColor: "rgba(46,229,157,0.3)",
+  },
+  stepSurface: {
+    backgroundColor: "rgba(46,229,157,0.22)",
+  },
+  platformTop: {
+    height: 10,
+    backgroundColor: "rgba(126,240,138,0.42)",
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(0,0,0,0.12)",
+  },
+  stepRiser: {
+    position: "absolute",
+    top: 10,
+    bottom: 0,
+    width: 1,
+    backgroundColor: "rgba(255,255,255,0.08)",
   },
   obstacleFace: {
     position: "absolute",

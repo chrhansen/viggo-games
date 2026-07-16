@@ -45,10 +45,11 @@ Tap Chicken Hop on the selector, name the chicken, and choose one of four design
 
 - Hold left or right to move.
 - Tap Hop to jump; keep holding it while airborne to fly.
-- Land on obstacle tops safely. Front collisions drain two 100-point hearts.
+- Land on obstacle tops, climb the green stairs, and run across one-way shelves. Walking off a shelf returns the chicken to the floor.
+- Front collisions with clutter drain two 100-point hearts; stairs and shelves are safe.
 - Regular corn gives `+1 Corn` and `+60 Score`; gold corn gives `+3 Corn` and `+180 Score`.
 - Eggs remove one corn, never health, and never reduce corn below zero.
 - Flight has five seconds of fuel and refills after resting on the floor.
 - Leaving the app pauses an active run automatically.
 
-This review slice intentionally defers shelves and stairs, sound effects, particles, persistent personalization, and persistent best-score storage. Those should follow after the native movement and game feel are approved.
+This review slice intentionally defers sound effects, particles, persistent personalization, and persistent best-score storage. Those should follow after the native movement and game feel are approved.

@@ -22,6 +22,7 @@ const idleInput = { jump: false, left: false, right: false };
 
 function disableSpawners(game: ReturnType<typeof createChickenHopGame>) {
   game.obstacleTimer = 999;
+  game.platformTimer = 999;
   game.pickupTimer = 999;
   game.eggTimer = 999;
 }
@@ -43,11 +44,11 @@ describe("Chicken Hop native engine", () => {
     expect(game.flyFuel).toBe(5);
   });
 
-  it("uses the smaller native chicken collision size", () => {
+  it("uses a chicken collision size that is 35 percent smaller", () => {
     const game = createChickenHopGame(390, 700, 42);
 
-    expect(game.player.width).toBe(46);
-    expect(game.player.height).toBe(38);
+    expect(game.player.width).toBe(30);
+    expect(game.player.height).toBe(25);
   });
 
   it("jumps on a new press and uses fuel while the button stays held", () => {
@@ -222,6 +223,196 @@ describe("Chicken Hop native engine", () => {
     expect(game.hearts).toEqual([100, 100]);
   });
 
+  it("spawns web-style stairs and an elevated shelf", () => {
+    const game = createChickenHopGame(390, 700, 42);
+    startChickenHopRun(game);
+    disableSpawners(game);
+    game.obstacles = [
+      {
+        id: 100,
+        kind: "book",
+        color: "#2EE59D",
+        x: game.width + 280,
+        y: game.floorY - 22,
+        width: 58,
+        height: 22,
+      },
+    ];
+    game.platformTimer = 0;
+
+    advanceChickenHopGame(game, idleInput, 0);
+
+    const steps = game.obstacles.filter(({ kind }) => kind === "step");
+    const shelves = game.obstacles.filter(({ kind }) => kind === "shelf");
+    expect(steps).toHaveLength(4);
+    expect(shelves).toHaveLength(1);
+    expect(new Set(steps.map(({ floorOffset }) => floorOffset)).size).toBe(4);
+    expect(steps[0].x).toBeGreaterThan(
+      game.obstacles[0].x + game.obstacles[0].width,
+    );
+    expect(shelves[0].y).toBeLessThan(game.floorY - shelves[0].height);
+    expect(game.platformTimer).toBeGreaterThanOrEqual(4.8);
+    expect(game.platformTimer).toBeLessThanOrEqual(7.2);
+    expect(game.pickups).toHaveLength(1);
+    expect(game.pickups[0]).toMatchObject({ kind: "corn", value: 1 });
+    expect(game.pickups[0].y).toBeLessThan(shelves[0].y);
+  });
+
+  it("sometimes leaves an elevated shelf clear of corn", () => {
+    const game = createChickenHopGame(390, 700, 1);
+    startChickenHopRun(game);
+    disableSpawners(game);
+    game.platformTimer = 0;
+
+    advanceChickenHopGame(game, idleInput, 0);
+
+    expect(game.obstacles.some(({ kind }) => kind === "shelf")).toBe(true);
+    expect(game.pickups).toHaveLength(0);
+  });
+
+  it("lands safely on every stair height", () => {
+    const game = createChickenHopGame(390, 700, 42);
+    startChickenHopRun(game);
+    disableSpawners(game);
+    game.platformTimer = 0;
+    advanceChickenHopGame(game, idleInput, 0);
+    disableSpawners(game);
+
+    const steps = game.obstacles.filter(({ kind }) => kind === "step");
+    for (const step of steps) {
+      const activeStep = { ...step, x: game.player.x - 5 };
+      game.obstacles = [activeStep];
+      game.player.y = step.y - game.player.height - 8;
+      game.player.vx = 0;
+      game.player.vy = 300;
+      game.player.onGround = false;
+      game.player.groundObstacleId = null;
+
+      advanceChickenHopGame(game, idleInput, 0.04);
+
+      expect(game.player.onGround).toBe(true);
+      expect(game.player.groundObstacleId).toBe(activeStep.id);
+      expect(game.player.y).toBe(activeStep.y - game.player.height);
+      expect(game.hearts).toEqual([100, 100]);
+    }
+  });
+
+  it("lands on a shelf and falls after walking off its edge", () => {
+    const game = createChickenHopGame(390, 700, 42);
+    startChickenHopRun(game);
+    disableSpawners(game);
+    game.obstacles = [
+      {
+        id: 1,
+        kind: "shelf",
+        color: "#2EE59D",
+        x: game.player.x - 20,
+        y: game.floorY - 100,
+        width: 120,
+        height: 18,
+        floorOffset: 100,
+      },
+    ];
+    game.player.y =
+      game.obstacles[0].y - game.player.height - 12;
+    game.player.vy = 360;
+    game.player.onGround = false;
+
+    advanceChickenHopGame(game, idleInput, 0.05);
+
+    expect(game.player.onGround).toBe(true);
+    expect(game.player.groundObstacleId).toBe(1);
+    expect(game.player.y).toBe(
+      game.obstacles[0].y - game.player.height,
+    );
+
+    game.obstacles[0].x =
+      game.player.x + game.player.width + 24;
+    advanceChickenHopGame(game, idleInput, 1 / 60);
+
+    expect(game.player.onGround).toBe(false);
+    expect(game.player.groundObstacleId).toBeNull();
+    expect(game.player.vy).toBeGreaterThan(0);
+  });
+
+  it("treats shelves as one-way surfaces when jumping from below", () => {
+    const game = createChickenHopGame(390, 700, 42);
+    startChickenHopRun(game);
+    disableSpawners(game);
+    game.obstacles = [
+      {
+        id: 1,
+        kind: "shelf",
+        color: "#2EE59D",
+        x: game.player.x - 20,
+        y: game.floorY - 100,
+        width: 120,
+        height: 18,
+        floorOffset: 100,
+      },
+    ];
+    game.player.y = game.obstacles[0].y + 6;
+    game.player.vy = -420;
+    game.player.onGround = false;
+
+    advanceChickenHopGame(game, idleInput, 1 / 60);
+
+    expect(game.player.onGround).toBe(false);
+    expect(game.player.groundObstacleId).toBeNull();
+    expect(game.player.y).toBeLessThan(game.obstacles[0].y + 6);
+    expect(game.hearts).toEqual([100, 100]);
+  });
+
+  it("keeps a supported chicken on the same shelf after rotation", () => {
+    const game = createChickenHopGame(390, 700, 42);
+    startChickenHopRun(game);
+    game.obstacles = [
+      {
+        id: 1,
+        kind: "shelf",
+        color: "#2EE59D",
+        x: game.player.x - 20,
+        y: game.floorY - 100,
+        width: 120,
+        height: 18,
+        floorOffset: 100,
+      },
+    ];
+    game.player.onGround = true;
+    game.player.groundObstacleId = 1;
+    game.player.y = game.obstacles[0].y - game.player.height;
+
+    resizeChickenHopGame(game, 800, 360);
+
+    expect(game.obstacles[0].y).toBe(game.floorY - 100);
+    expect(game.player.y).toBe(
+      game.obstacles[0].y - game.player.height,
+    );
+  });
+
+  it("uses obstacle height as the resize fallback and returns missing support to the floor", () => {
+    const game = createChickenHopGame(390, 700, 42);
+    startChickenHopRun(game);
+    game.obstacles = [
+      {
+        id: 1,
+        kind: "block",
+        color: "#FF6A3D",
+        x: game.player.x - 20,
+        y: game.floorY - 34,
+        width: 110,
+        height: 34,
+      },
+    ];
+    game.player.onGround = true;
+    game.player.groundObstacleId = 2;
+
+    resizeChickenHopGame(game, 800, 360);
+
+    expect(game.obstacles[0].y).toBe(game.floorY - 34);
+    expect(game.player.y).toBe(game.floorY - game.player.height);
+  });
+
   it("uses both hearts before ending the run on repeated front hits", () => {
     const game = createChickenHopGame(390, 700, 42);
     startChickenHopRun(game);
@@ -240,7 +431,7 @@ describe("Chicken Hop native engine", () => {
           id: hit + 1,
           kind: "robot",
           color: "#FFD166",
-          x: game.player.x + 36,
+          x: game.player.x + game.player.width - 8,
           y: game.floorY - 42,
           width: 52,
           height: 42,
@@ -263,7 +454,7 @@ describe("Chicken Hop native engine", () => {
         id: 1,
         kind: "robot",
         color: "#FFD166",
-        x: game.player.x + 36,
+        x: game.player.x + game.player.width - 8,
         y: game.floorY - 42,
         width: 52,
         height: 42,

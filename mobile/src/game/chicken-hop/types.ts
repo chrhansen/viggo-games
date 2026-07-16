@@ -23,12 +23,13 @@ export interface ChickenHopPlayer {
 
 export interface ChickenHopObstacle {
   id: number;
-  kind: "block" | "book" | "plant" | "robot";
+  kind: "block" | "book" | "plant" | "robot" | "shelf" | "step";
   color: string;
   x: number;
   y: number;
   width: number;
   height: number;
+  floorOffset?: number;
 }
 
 export interface ChickenHopPickup {
@@ -73,6 +74,7 @@ export interface ChickenHopGame {
   pickups: ChickenHopPickup[];
   eggs: ChickenHopEgg[];
   obstacleTimer: number;
+  platformTimer: number;
   pickupTimer: number;
   eggTimer: number;
   randomSeed: number;

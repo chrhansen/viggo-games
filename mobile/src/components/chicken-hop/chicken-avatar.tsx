@@ -12,22 +12,38 @@ interface ChickenAvatarProps {
   profile: ChickenProfile;
 }
 
+const spriteWidth = 46;
+const spriteHeight = 38;
+
 interface ChickenSpriteProps {
   profile: ChickenProfile;
+  scale?: number;
   tilt?: number;
   wingTilt?: number;
 }
 
 export function ChickenSprite({
   profile,
+  scale = 1,
   tilt = 0,
   wingTilt = 0,
 }: ChickenSpriteProps) {
   const palette = getChickenPalette(profile.color);
   const isFlame = profile.design === "flame";
+  const left = -((spriteWidth - spriteWidth * scale) / 2);
+  const top = -((spriteHeight - spriteHeight * scale) / 2);
 
   return (
-    <View style={[styles.sprite, { transform: [{ rotate: `${tilt}deg` }] }]}>
+    <View
+      style={[
+        styles.sprite,
+        {
+          left,
+          top,
+          transform: [{ scale }, { rotate: `${tilt}deg` }],
+        },
+      ]}
+    >
       <View
         style={[
           styles.tailTop,
@@ -110,6 +126,10 @@ export function ChickenAvatar({ game, profile }: ChickenAvatarProps) {
     ? Math.sin(game.elapsed * 20) * 10
     : Math.sin(game.elapsed * 26) * 24;
   const blink = player.invulnerableFor > 0 && Math.floor(game.elapsed * 16) % 2 === 0;
+  const spriteScale = Math.min(
+    player.width / spriteWidth,
+    player.height / spriteHeight,
+  );
 
   return (
     <View
@@ -130,7 +150,12 @@ export function ChickenAvatar({ game, profile }: ChickenAvatarProps) {
           {profile.name}
         </Text>
       </View>
-      <ChickenSprite profile={profile} tilt={tilt} wingTilt={wingTilt} />
+      <ChickenSprite
+        profile={profile}
+        scale={spriteScale}
+        tilt={tilt}
+        wingTilt={wingTilt}
+      />
     </View>
   );
 }
@@ -143,8 +168,8 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 0,
     left: 0,
-    width: 46,
-    height: 38,
+    width: spriteWidth,
+    height: spriteHeight,
   },
   preview: {
     width: 52,
