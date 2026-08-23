@@ -59,10 +59,12 @@ Then port the changes intentionally. Do not blindly overwrite repo-specific wiri
   - editable Torpedo source snapshot synced from `/Users/chrh/dev/torpedo`
 - `scripts/`
   - build/deploy helper scripts
-  - `prepare-pages.mjs` prepares static route pages, `404.html`, `sitemap.xml`, and LLM crawler files after Vite builds
+  - `prepare-pages.mjs` prepares and validates static route pages, `404.html`, `sitemap.xml`, and LLM crawler files after Vite builds
+- `docs/seo.md`
+  - search metadata, canonical URL, content, and post-deploy indexing rules
 - `src/`
   - React/Vite homepage app
-  - routing, cards, iframe wrapper
+  - routing, cards, descriptive game landing pages, and on-demand iframe player
 - `src/assets/`
   - homepage card art, using optimized WebP title images
 - `src/components/`
@@ -203,9 +205,10 @@ Copy `/tmp/torpedo-dist/index.html` and `/tmp/torpedo-dist/assets/` into `/Users
    - Do not over-downsample; optimize format/quality before reducing dimensions
 4. Register the game in `src/data/games.json` and map its artwork in `src/data/games.ts`
 5. Point the game URL at `withBasePath("/games/<slug>/")`
-6. If the game needs special iframe handling, update `src/pages/GamePage.tsx`
-7. Run the gate
-8. Push to `main` to deploy
+6. Add accurate how-to steps, tips, image alt text, and a unique search title to the registry
+7. If the game needs special iframe handling, update `src/pages/GamePage.tsx`
+8. Run the gate
+9. Push to `main` to deploy
 
 Rules:
 
@@ -225,6 +228,7 @@ npm run build
 
 `npm run build` also writes `dist/404.html` so SPA routes work on GitHub Pages.
 It also writes static HTML entrypoints for each public route, `dist/sitemap.xml`, `dist/llms.txt`, `dist/llms-full.txt`, and SEO image copies under `dist/seo/`.
+The build validates canonical URL shape, static fallback content, sitemap entries, and direct-game canonical tags. See `docs/seo.md` before changing public routes or metadata.
 
 ## Deploy
 
