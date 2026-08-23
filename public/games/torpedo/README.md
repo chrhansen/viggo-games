@@ -7,7 +7,7 @@ The player submarine has fictional windows, even though real military submarines
 ## Deployment
 
 - Production URL: `https://viggo.games/games/torpedo/`
-- Embedded on homepage route: `https://viggo.games/torpedo`
+- Embedded on homepage route: `https://viggo.games/torpedo/`
 - Repo owner: `chrhansen/viggo-games`
 - Hosting: GitHub Pages from the umbrella repo
 - Deploy workflow: `/Users/chrh/dev/viggo-games/.github/workflows/pages.yml`

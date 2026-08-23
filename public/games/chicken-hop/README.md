@@ -21,7 +21,7 @@ Then open `http://localhost:5173`.
 ## Deployment
 
 - Production URL: `https://viggo.games/games/chicken-hop/`
-- Embedded on homepage route: `https://viggo.games/chicken-hop`
+- Embedded on homepage route: `https://viggo.games/chicken-hop/`
 - Repo owner: `chrhansen/viggo-games`
 - Hosting: GitHub Pages from the umbrella repo
 - Deploy workflow: `/Users/chrh/dev/viggo-games/.github/workflows/pages.yml`

@@ -5,7 +5,7 @@ Browser space shooter. Deploy files at this folder root. Editable source snapsho
 ## Deployment
 
 - Production URL: `https://viggo.games/games/gunny/`
-- Embedded on homepage route: `https://viggo.games/gunny`
+- Embedded on homepage route: `https://viggo.games/gunny/`
 - Repo owner: `chrhansen/viggo-games`
 - Hosting: GitHub Pages from the umbrella repo
 - Deploy workflow: `/Users/chrh/dev/viggo-games/.github/workflows/pages.yml`

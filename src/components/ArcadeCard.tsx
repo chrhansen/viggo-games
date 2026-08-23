@@ -5,6 +5,10 @@ import type { MouseEvent } from "react";
 interface ArcadeCardProps {
   title: string;
   image: string;
+  thumbnail: string;
+  imageAlt: string;
+  imageWidth: number;
+  imageHeight: number;
   color: string;
   level: string;
   tagline: string;
@@ -13,7 +17,20 @@ interface ArcadeCardProps {
   onClick: (event: MouseEvent<HTMLAnchorElement>) => void;
 }
 
-const ArcadeCard = ({ title, image, color, level, tagline, href, index, onClick }: ArcadeCardProps) => {
+const ArcadeCard = ({
+  title,
+  image,
+  thumbnail,
+  imageAlt,
+  imageWidth,
+  imageHeight,
+  color,
+  level,
+  tagline,
+  href,
+  index,
+  onClick,
+}: ArcadeCardProps) => {
   return (
     <motion.a
       href={href}
@@ -30,7 +47,13 @@ const ArcadeCard = ({ title, image, color, level, tagline, href, index, onClick 
       <div className="aspect-video rounded-[12px] md:rounded-[20px] bg-secondary mb-2 md:mb-4 overflow-hidden">
         <img
           src={image}
-          alt={title}
+          srcSet={`${thumbnail} 768w, ${image} ${imageWidth}w`}
+          sizes="(min-width: 1024px) 352px, (min-width: 768px) 44vw, 44vw"
+          alt={imageAlt}
+          width={imageWidth}
+          height={imageHeight}
+          loading={index < 2 ? "eager" : "lazy"}
+          decoding="async"
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
         />
       </div>
@@ -42,7 +65,7 @@ const ArcadeCard = ({ title, image, color, level, tagline, href, index, onClick 
             {level}
           </span>
           <h2 className="text-base md:text-2xl font-bold font-display text-foreground leading-tight">{title}</h2>
-          <p className="text-[10px] md:text-xs text-tagline mt-1 max-w-[200px]">{tagline}</p>
+          <p className="mt-1 max-w-[220px] text-base leading-relaxed text-tagline">{tagline}</p>
         </div>
         <div className="h-8 w-8 md:h-12 md:w-12 shrink-0 rounded-full bg-foreground/5 flex items-center justify-center group-hover:bg-primary transition-colors duration-300">
           <Play className="w-3 h-3 md:w-5 md:h-5 text-foreground group-hover:text-primary-foreground transition-colors duration-300" />

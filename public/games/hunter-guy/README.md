@@ -29,7 +29,7 @@ If behavior looks stale, hard refresh (`Cmd+Shift+R`).
 ## Deployment
 
 - Production URL: `https://viggo.games/games/hunter-guy/`
-- Embedded on homepage route: `https://viggo.games/hunter-guy`
+- Embedded on homepage route: `https://viggo.games/hunter-guy/`
 - Repo owner: `chrhansen/viggo-games`
 - Hosting: GitHub Pages from the umbrella repo
 - Deploy workflow: `/Users/chrh/dev/viggo-games/.github/workflows/pages.yml`

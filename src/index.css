@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;700;800&family=Space+Mono:wght@400;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -38,13 +36,68 @@
 
     --chicken: 0 100% 64%;
     --hunter: 142 71% 45%;
-    --tagline: 215 90% 45%;
+    --tagline: 205 100% 68%;
     --title: 270 80% 65%;
 
     --font-display: 'Bricolage Grotesque', sans-serif;
     --font-mono: 'Space Mono', monospace;
 
     --shadow-card: 0 20px 40px -10px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  }
+}
+
+@layer components {
+  .game-landing {
+    --game-accent: #ffd600;
+    isolation: isolate;
+    position: relative;
+    background:
+      radial-gradient(
+        circle at 82% 6%,
+        color-mix(in srgb, var(--game-accent) 18%, transparent),
+        transparent 30rem
+      ),
+      radial-gradient(circle at 4% 38%, hsl(222 35% 16% / 0.9), transparent 34rem),
+      linear-gradient(155deg, hsl(222 26% 8%), hsl(222 30% 5%) 68%);
+  }
+
+  .game-landing::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    opacity: 0.16;
+    pointer-events: none;
+    background-image:
+      linear-gradient(hsl(0 0% 100% / 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(0 0% 100% / 0.05) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: linear-gradient(to bottom, black, transparent 70%);
+  }
+
+  .game-accent-text,
+  .game-step-number {
+    color: var(--game-accent);
+  }
+
+  .game-play-button {
+    background: var(--game-accent);
+    box-shadow:
+      0 14px 36px -14px color-mix(in srgb, var(--game-accent) 80%, transparent),
+      inset 0 -2px 0 hsl(0 0% 0% / 0.22);
+  }
+
+  .game-hero-frame {
+    box-shadow:
+      0 34px 80px -42px color-mix(in srgb, var(--game-accent) 68%, transparent),
+      0 24px 60px -36px hsl(0 0% 0% / 0.95);
+  }
+
+  .game-notes {
+    background:
+      linear-gradient(145deg, hsl(0 0% 100% / 0.055), transparent 70%),
+      hsl(222 26% 10% / 0.84);
+    box-shadow: inset 0 1px 0 hsl(0 0% 100% / 0.04);
   }
 }
 

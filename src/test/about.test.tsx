@@ -17,12 +17,12 @@ describe("about page", () => {
 
     fireEvent.click(screen.getByRole("link", { name: "About" }));
 
-    expect(await screen.findByRole("heading", { name: "About" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "About viggo.games" })).toBeInTheDocument();
   });
 
   it("renders the source link", () => {
     render(
-      <MemoryRouter initialEntries={["/about"]}>
+      <MemoryRouter initialEntries={["/about/"]}>
         <Routes>
           <Route path="/about" element={<About />} />
         </Routes>
