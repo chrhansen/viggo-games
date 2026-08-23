@@ -31,6 +31,8 @@
     "useDefineForClassFields": true
   },
   "include": [
+    "games",
+    "packages",
     "src"
   ]
 }

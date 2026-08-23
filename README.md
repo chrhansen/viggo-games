@@ -6,6 +6,7 @@ This repo owns:
 
 - the homepage shell at `https://viggo.games/`
 - the hosted game code under `https://viggo.games/games/<slug>/`
+- the native Expo app under `mobile/`
 - the GitHub Pages deploy for the custom domain
 - current live games/slots: `chicken-hop`, `hunter-guy`, `burb`, `gunny`, `torpedo`
 
@@ -36,13 +37,18 @@ Then port the changes intentionally. Do not blindly overwrite repo-specific wiri
 - `.github/`
   - GitHub Actions config
   - Pages deploy workflow lives in `.github/workflows/pages.yml`
+  - mobile web, shared-core, and native bundle checks live in `.github/workflows/mobile.yml`
 - `public/`
   - static files shipped as-is
   - custom domain file lives in `public/CNAME`
 - `public/games/`
   - hosted game payloads grouped by slug
+- `games/chicken-hop/`
+  - Chicken Hop browser entrypoint, Canvas renderer, web input, audio, and UI
+- `packages/chicken-hop-core/`
+  - platform-neutral Chicken Hop state, physics, spawning, collisions, and events
 - `public/games/chicken-hop/`
-  - full Chicken Hop source
+  - Chicken Hop static stylesheet and operating notes copied into the build
 - `public/games/hunter-guy/`
   - full Hunter Guy source
 - `public/games/burb/`
@@ -60,6 +66,9 @@ Then port the changes intentionally. Do not blindly overwrite repo-specific wiri
 - `scripts/`
   - build/deploy helper scripts
   - `prepare-pages.mjs` prepares and validates static route pages, `404.html`, `sitemap.xml`, and LLM crawler files after Vite builds
+- `mobile/`
+  - native React Native and Expo app for iOS and Android phones
+  - owns its dependencies, build profiles, native assets, landing screen, and mobile CI gate
 - `docs/seo.md`
   - search metadata, canonical URL, content, and post-deploy indexing rules
 - `src/`
@@ -89,7 +98,13 @@ Then port the changes intentionally. Do not blindly overwrite repo-specific wiri
 
 - Homepage layout, card UI, iframe wrapper, routing:
   - edit files in `src/`
-- Game-specific logic, controls, art, tuning:
+- Chicken Hop rules and tuning shared by browser and native:
+  - edit `packages/chicken-hop-core/`
+- Chicken Hop browser rendering, controls, audio, and browser persistence:
+  - edit `games/chicken-hop/`
+- Chicken Hop native rendering and phone controls:
+  - edit `mobile/src/components/chicken-hop/` and the thin adapter in `mobile/src/game/chicken-hop/engine.ts`
+- Other game-specific logic, controls, art, tuning:
   - edit files inside that game's folder under `public/games/<slug>/`
   - for bundled games like `burb`, `gunny`, and `torpedo`, edit `public/games/<slug>/source/` and rebuild the deploy files at folder root
 - Game-specific docs:
@@ -110,9 +125,22 @@ Run the homepage app locally:
 npm run dev
 ```
 
-This serves the React shell. The static games are loaded from `public/games/...`.
+This serves the React shell and the bundled Chicken Hop browser entrypoint. Other static games are loaded from `public/games/...`.
 
 If a specific game has its own preferred local workflow, use that game's README.
+
+## Mobile app
+
+The native app is separate from the Vite website renderer and does not use a WebView. Chicken Hop imports the same platform-neutral game engine as the browser build. Install and run it from its own folder:
+
+```sh
+cd mobile
+npm ci
+npm run ios
+# or: npm run android
+```
+
+See `mobile/README.md` for the mobile gate, environment requirements, and child-directed product constraints.
 
 ## Analytics
 
@@ -259,7 +287,7 @@ Pages/domain notes:
 - Local sibling repo for Burb: `/Users/chrh/dev/burb`
 - Local sibling repo for Gunny: `/Users/chrh/dev/gunny`
 - Local sibling repo for Torpedo: `/Users/chrh/dev/torpedo`
-- `chicken-hop` and `hunter-guy` are hosted from subfolders here
+- `chicken-hop` is a Vite multi-page entry under `games/chicken-hop/`; `hunter-guy` remains hosted from `public/games/`
 - Root homepage code and game source code are intentionally separate
 - Burb authoring source lives at `/Users/chrh/dev/burb`; sync it into `public/games/burb/source/` before rebuilding deploy files
 - Gunny authoring source lives at `/Users/chrh/dev/gunny`; sync it into `public/games/gunny/source/` before rebuilding deploy files

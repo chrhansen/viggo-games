@@ -1,0 +1,58 @@
+{
+  "expo": {
+    "name": "Viggo Games",
+    "slug": "viggo-games",
+    "version": "0.1.0",
+    "platforms": [
+      "ios",
+      "android"
+    ],
+    "orientation": "default",
+    "icon": "./assets/app-icon.png",
+    "scheme": "viggo",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#090B18",
+    "primaryColor": "#FFD60A",
+    "ios": {
+      "bundleIdentifier": "games.viggo",
+      "buildNumber": "1",
+      "icon": "./assets/app-icon.png",
+      "infoPlist": {
+        "CFBundleName": "Viggo Games"
+      },
+      "supportsTablet": false
+    },
+    "android": {
+      "package": "games.viggo",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "backgroundColor": "#000000",
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "monochromeImage": "./assets/monochrome-icon.png"
+      },
+      "blockedPermissions": [
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.VIBRATE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ],
+      "predictiveBackGestureEnabled": false
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#000000",
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 180,
+          "resizeMode": "contain"
+        }
+      ],
+      "expo-image"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

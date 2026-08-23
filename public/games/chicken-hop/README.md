@@ -1,198 +1,107 @@
 # Chicken Hop: House Run
 
-Tiny browser game. Keyboard + touch. No build step.
+Browser and native game with one shared rules engine and separate platform renderers.
 
-Source of truth: this folder inside `chrhansen/viggo-games`.
+Source of truth: `chrhansen/viggo-games`.
 
-## Play
+## Play in a browser
 
-1. Open `index.html` in a browser.
-2. Press `Enter` (or tap `Tap to start` on touch devices).
+From the repo root:
 
-If your browser blocks audio when opened from a file, run a local server:
-
-```bash
-cd /Users/chrh/dev/viggo-games/public/games/chicken-hop
-python3 -m http.server 5173
+```sh
+npm ci
+npm run dev
 ```
 
-Then open `http://localhost:5173`.
-
-## Deployment
-
-- Production URL: `https://viggo.games/games/chicken-hop/`
-- Embedded on homepage route: `https://viggo.games/chicken-hop/`
-- Repo owner: `chrhansen/viggo-games`
-- Hosting: GitHub Pages from the umbrella repo
-- Deploy workflow: `/Users/chrh/dev/viggo-games/.github/workflows/pages.yml`
-- Trigger: push to `main` in `chrhansen/viggo-games`
+Open `http://localhost:8080/games/chicken-hop/`.
 
 ## Controls
 
 - Move: `Left/Right` or `A/D`
-- Jump: `Space` (or tap `Up` / `W`)
-- Fly (5s): hold `Up` / `W`
-- Speed: `1` slow-mo, `2` normal, `3` fast
+- Jump: `Space`, `Up`, or `W`
+- Fly: hold the jump control while airborne
 - Drop from shelves: `Down` or `S`
+- Speed: `1` slow, `2` normal, `3` fast
 - Pause: `P`
 - Restart: `R`
 
-Touch controls (auto-shown on phone/tablet):
-- `◀` / `▶`: move
-- `▲`: jump, hold to fly
-- `▼`: drop from shelf/step
-- `Pause`: pause/resume
-- `Restart`: restart run
-- Overlay CTA button: tap to start/continue/retry
+Touch devices show move, jump/fly, drop, pause, and restart controls.
 
-## Game Rules
+## Shared rules
 
-- The chicken runs inside a house lane. World scrolls right-to-left.
-- Obstacles are solid blocks you can jump onto.
-- Shelves/steps are one-way platforms you can stand on, then drop from.
+- Two 100-point hearts; front collisions deal 12 damage.
+- Obstacle tops, steps, and shelves are safe landing surfaces.
+- Regular corn gives `+1 Corn` and `+60 Score`.
+- Gold corn gives `+3 Corn` and `+180 Score`.
+- Eggs remove one corn, never health, and never reduce corn below zero.
+- Flight has five seconds of fuel and refills after resting on a landing surface.
+- Obstacles spawn in clearable chunks with landing gaps.
+- Plateau shelves use stairs and one-way platform collision.
 
-## Lives / Health
+## Architecture
 
-- You start with 2 lives (2 hearts).
-- Each heart has 100 health.
-- Running into an obstacle from the front drains health.
-- When a heart hits 0, you lose a life and continue on the next heart.
-- When both hearts are empty: game over.
+The browser and React Native app both call `packages/chicken-hop-core/src/`.
+The core is pure TypeScript: no DOM, Canvas, React, or React Native imports.
 
-Obstacle safety rules:
-- Landing on top of an obstacle is safe (no damage).
-- Damage triggers only when colliding from the front/side in the running path.
+Shared core owns:
 
-## Corn / Eggs / Score
+- game state and deterministic random stream
+- input-to-movement rules
+- jump, flight, gravity, and platform physics
+- obstacles, stairs, shelves, corn, and egg spawning
+- collisions, health, score, pause, and time modes
+- semantic events such as `jump`, `flight-feather`, `land`, `hurt`, and `corn`
+- chicken profile option IDs, name normalization, and random-name selection
 
-HUD values:
-- `Corn`: your corn counter (what eggs reduce, what corn increases).
-- `Score`: distance score + corn bonus.
-- `Best`: best `Score` saved in your browser.
+Browser-only files under `games/chicken-hop/` own:
 
-Corn:
-- Regular corn pickup: `+1 Corn`, `+60 Score`.
-- Giant gold corn pickup (rare, higher up): `+3 Corn`, `+180 Score`.
+- `game.ts`: browser loop and adapter wiring
+- `canvas-*.ts`: Canvas rendering, renderer palettes, and browser particles
+- `web-input.ts`: keyboard and pointer controls
+- `web-audio.ts`: WebAudio effects
+- `web-ui.ts`: DOM UI and local storage
+- `index.html`: browser entrypoint
 
-Eggs:
-- Eggs sit on the floor.
-- If you run into an egg: `-1 Corn` (min 0).
-- Eggs do not affect health.
+Native-only files under `mobile/` own:
 
-## Flight
+- React Native rendering and controls
+- the 50% world camera projection
+- native feather rendering
+- phone lifecycle behavior, including auto-pause
 
-- Tap `Up/W`: normal jump (like before).
-- Hold `Up/W` while airborne: flight starts after a short hold.
-- While flying you drift upward while the key is held.
-- Flight fuel: 5 seconds max per charge.
-- Refuel: land on the ground and wait ~0.75s after the last flight moment, then fuel refills to 5 seconds.
+`public/games/chicken-hop/styles.css` remains a static browser asset. Vite bundles the browser TypeScript entry and writes `dist/games/chicken-hop/index.html`.
 
-## Shelves / Stairs
+## Changing behavior
 
-- Plateau shelves spawn at a constant height.
-- Stair runs connect floor <-> plateau.
-- Steps are connected visually and function as small one-way platforms.
-- Drop through shelves/steps with `Down/S`.
+A gameplay rule belongs in `packages/chicken-hop-core/src/`. Add or update its parity coverage in `src/test/chicken-hop-engine.test.ts`, then run both gates:
 
-## Code Map
+```sh
+npm run lint
+npm run typecheck
+npm run test
+npm run build
 
-- `index.html`
-  - Canvas + HUD + overlay UI
-  - stage fills the full iframe viewport; no extra in-game top bar/footer chrome
-  - Start screen inputs: chicken name, design, color.
-- `styles.css`
-  - UI styling only
-  - safe-area handling for phone HUD / touch controls
-- `game.js`
-  - Everything else: input, state, physics, spawning, collisions, render, audio
+cd mobile
+npm ci
+npm run lint
+npm run typecheck
+npm run doctor
+npm run export:native
+```
 
-## How The Code Fits Together (`game.js`)
+Renderer, input-device, audio, storage, and lifecycle changes stay in their platform folder.
 
-Main loop:
-- `frame()` uses `requestAnimationFrame`.
-- Each frame: `update(dt)` then `render()`.
+## Persistence
 
-Input:
-- `keydown/keyup` maintain `keys` set.
-- Touch buttons maintain a parallel `touchState` (`left/right/jump/down`) with multi-touch pointer tracking.
-- `P` or touch `Pause` toggles pause, clears keyboard + touch input to avoid stuck movement.
-- `R` resets run.
-- `Enter` or overlay CTA starts from title/gameover.
+The browser stores:
 
-State (high level):
-- `state.mode`: `title` | `playing` | `paused` | `gameover`
-- `state.score`: distance + bonus points
-- `state.best`: saved best score (`localStorage` key `chicken_hop_best_v1`)
-- `state.corn`: corn counter
-- `state.hearts`: `[hp1, hp2]` with smoothing for heart fill
-- `state.flyFuel`: flight fuel (0..5 seconds) + `flyRefuelCd`
-- `state.name`, `state.design`, `state.color`: customization (saved)
-
-World:
-- `world.floorY`, `world.leftBound`, `world.rightBound`: computed from canvas each update
-- `world.scroll`: used for parallax/pattern motion in `drawRoom()`
-
-Entities:
-- `player`: position/velocity, jump buffer/coyote time, invuln timer, platform grounding, flight hold timer
-- `obstacles[]`: blocks that scroll left; can be stood on; damage only from front
-- `platforms[]`: shelves and steps (one-way platforms)
-- `pickups[]`: corn objects
-  - `kind: 'corn' | 'big'`
-  - `value: 1 | 3`
-- `eggs[]`: floor hazards; smash on contact; reduce `Corn`
-- `particles[]`: feathers/dust/yolk
-
-Spawning:
-- Obstacles spawn in "chunks" (1-2) with a forced landing gap between chunks.
-- Shelves/stairs spawn in readable segments between obstacle runs.
-- Eggs spawn mostly during breaks.
-- Giant corn spawns rarely (and higher than regular corn).
-
-Collisions (order matters):
-- One-way platform landing check (steps/shelves).
-- Safe landing on obstacles (top surface).
-- Floor landing.
-- Obstacle damage check (front-only; skip if standing on that obstacle).
-- Pickup collection (corn adds; eggs subtract corn and smash).
-
-Rendering:
-- `render()` order:
-  - `drawRoom()`
-  - `drawPlatforms()`
-  - `drawEggs()`
-  - `drawPickups()`
-  - `drawObstacles()`
-  - `drawPlayer()`
-  - `drawParticles()`
-  - `drawNameTag()`
-  - `drawForeground()`
-
-Audio:
-- WebAudio synth in `Sfx`.
-- Uses a resume queue so sounds fire reliably after the first user gesture.
-- Cluck SFX: holding right clucks faster, holding left clucks slower.
-
-Persistence (`localStorage`):
 - `chicken_hop_best_v1`: best score
 - `chicken_hop_name_v1`: chicken name
-- `chicken_hop_look_v1`: `{ design, color }`
+- `chicken_hop_look_v1`: design and color
 
-## Tuning Cheatsheet
+## Deployment
 
-Useful knobs in `game.js`:
-- Jump/feel: `world.gravity`, `world.jumpVel`
-- Flight: `state.flyFuelMax`, `state.flyRefuelDelay`, flight target vy in `isFlying` block
-- Damage: `hurt(obstacle, amount = 12)` amount + `player.invuln`
-- Lives: `state.heartsMax` and initialization in `resetRun()`
-- Obstacle fairness: spawner section in `update(dt)`
-- Plateau height: `world.plateauLift`
-- Egg frequency: `eggSpawner.cd` range and spawn chance
-- Giant corn rarity: `spawnBigCorn()` calls near obstacle/shelf spawns
-
-## Chicken Name
-
-Type a name on the start screen (or hit Random). It saves in your browser.
-
-## Chicken Look
-
-Pick a design + color on the start screen. It saves in your browser.
+- Production game: `https://viggo.games/games/chicken-hop/`
+- Homepage route: `https://viggo.games/chicken-hop/`
+- Workflow: `.github/workflows/pages.yml`
+- Trigger: push to `main`
