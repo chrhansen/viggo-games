@@ -24,6 +24,7 @@ const Home = () => {
 describe("pageview tracker", () => {
   beforeEach(() => {
     analyticsMocks.trackPageview.mockReset();
+    vi.mocked(window.scrollTo).mockReset();
   });
 
   it("tracks client-side route changes after the initial page load", () => {
@@ -38,9 +39,13 @@ describe("pageview tracker", () => {
     );
 
     expect(analyticsMocks.trackPageview).not.toHaveBeenCalled();
+    expect(window.scrollTo).toHaveBeenCalledWith(0, 0);
+
+    vi.mocked(window.scrollTo).mockClear();
 
     fireEvent.click(screen.getByRole("button", { name: "About" }));
 
     expect(analyticsMocks.trackPageview).toHaveBeenCalledTimes(1);
+    expect(window.scrollTo).toHaveBeenCalledWith(0, 0);
   });
 });

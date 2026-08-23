@@ -30,13 +30,13 @@ const Index = () => {
             transition={{ delay: 0.1, duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
             className="text-xs font-mono text-muted-foreground uppercase tracking-widest mt-3"
           >
-            Select Your Mission
+            Free Browser Arcade · Select Your Mission
           </motion.p>
           <motion.p
             initial={{ y: -6, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.18, duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
-            className="mx-auto mt-5 max-w-2xl text-sm md:text-base font-mono leading-relaxed text-foreground/75"
+            className="mx-auto mt-5 max-w-2xl text-base md:text-lg font-mono leading-relaxed text-foreground/75"
           >
             Free browser arcade games made by Viggo. Play Chicken Hop, Hunter Guy, Burb, Gunny,
             and Torpedo with keyboard, mouse, touch, or tilt controls.
@@ -46,13 +46,17 @@ const Index = () => {
         {/* Game Grid */}
         <nav
           aria-label="Browser games"
-          className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 justify-items-center"
+          className="grid grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8 justify-items-center"
         >
           {games.map((game, i) => (
             <ArcadeCard
               key={game.id}
               title={game.title}
               image={game.image}
+              thumbnail={game.thumbnail}
+              imageAlt={game.imageAlt}
+              imageWidth={game.imageWidth}
+              imageHeight={game.imageHeight}
               color={game.color}
               level={game.level}
               tagline={game.tagline}
@@ -82,10 +86,10 @@ const Index = () => {
           className="text-center text-[10px] font-mono text-muted-foreground uppercase tracking-widest mt-2"
         >
           <a
-            href={withBasePath("/about")}
+            href={withBasePath("/about/")}
             onClick={(event) => {
               event.preventDefault();
-              navigate("/about");
+              navigate("/about/");
             }}
             className="inline-block mt-2 px-6 py-2.5 text-xs font-mono uppercase tracking-widest border-2 border-primary text-primary rounded-md bg-primary/10 hover:bg-primary hover:text-primary-foreground transition-colors shadow-[0_0_12px_hsl(var(--primary)/0.4)]"
           >

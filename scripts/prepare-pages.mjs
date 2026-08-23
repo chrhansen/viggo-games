@@ -6,9 +6,17 @@ import {
   writeFileSync,
 } from "node:fs";
 import { dirname, resolve } from "node:path";
-
-const SITE_URL = "https://viggo.games";
-const SITE_NAME = "viggo.games";
+import {
+  absoluteUrl,
+  createAboutSeo,
+  createGameSeo,
+  createHomeSeo,
+  createNotFoundSeo,
+  DEFAULT_SOCIAL_IMAGE,
+  gameJsonLd,
+  SITE_NAME,
+  SITE_URL,
+} from "../src/lib/seo-config.js";
 
 const distDir = resolve("dist");
 const indexPath = resolve(distDir, "index.html");
@@ -24,113 +32,43 @@ const games = JSON.parse(readFileSync(gameRecordsPath, "utf8"));
 
 copySeoImages();
 
-const routePages = [
-  homePage(),
-  aboutPage(),
-  ...games.map((game) => gamePage(game)),
-];
+const routePages = [homePage(), aboutPage(), ...games.map((game) => gamePage(game))];
 
 routePages.forEach(writeRoutePage);
 writeNotFoundPage();
 writeSitemap(routePages);
 writeLlmsFiles();
 injectDirectGameMetadata();
+validateBuild(routePages);
 
-console.log(`Prepared ${routePages.length} crawlable route pages, sitemap.xml, llms.txt, and 404.html`);
+console.log(
+  `Prepared and validated ${routePages.length} crawlable route pages, sitemap.xml, llms.txt, and 404.html`,
+);
 
 function homePage() {
   return {
-    path: "/",
+    ...createHomeSeo(games),
     outputPath: indexPath,
     depth: 0,
-    title: "viggo.games - Free Browser Arcade Games by Viggo",
-    description:
-      "Play free browser games made by Viggo, including Chicken Hop, Hunter Guy, Burb, Gunny, and Torpedo. Small arcade games for keyboard, mouse, and touch.",
-    image: "/seo/viggo.png",
     body: renderHomeBody(),
-    jsonLd: [
-      {
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        name: SITE_NAME,
-        url: SITE_URL,
-        description:
-          "A collection of free browser games made by Viggo, built for fun, learning, and arcade nostalgia.",
-        publisher: organizationJsonLd(),
-      },
-      {
-        "@context": "https://schema.org",
-        "@type": "ItemList",
-        name: "viggo.games browser games",
-        itemListElement: games.map((game, index) => ({
-          "@type": "ListItem",
-          position: index + 1,
-          name: game.title,
-          url: absoluteUrl(game.routePath),
-        })),
-      },
-    ],
   };
 }
 
 function aboutPage() {
   return {
-    path: "/about",
+    ...createAboutSeo(),
     outputPath: resolve(distDir, "about/index.html"),
     depth: 1,
-    title: "About viggo.games - Browser Games by Viggo",
-    description:
-      "Learn about viggo.games, an open source collection of browser games designed and developed by Viggo with help from his dad and Codex.",
-    image: "/seo/viggo.png",
     body: renderAboutBody(),
-    jsonLd: [
-      {
-        "@context": "https://schema.org",
-        "@type": "AboutPage",
-        name: "About viggo.games",
-        url: absoluteUrl("/about"),
-        description:
-          "viggo.games is a collection of browser games made by Viggo for fun, learning, and arcade nostalgia.",
-        isPartOf: {
-          "@type": "WebSite",
-          name: SITE_NAME,
-          url: SITE_URL,
-        },
-      },
-    ],
   };
 }
 
 function gamePage(game) {
   return {
-    path: game.routePath,
+    ...createGameSeo(game),
     outputPath: resolve(distDir, `${game.id}/index.html`),
     depth: 1,
-    title: `${game.title} - Free Browser Game | viggo.games`,
-    description: game.metaDescription,
-    image: `/seo/${game.imageFile}`,
     body: renderGameBody(game),
-    jsonLd: [
-      gameJsonLd(game),
-      {
-        "@context": "https://schema.org",
-        "@type": "BreadcrumbList",
-        itemListElement: [
-          {
-            "@type": "ListItem",
-            position: 1,
-            name: SITE_NAME,
-            item: SITE_URL,
-          },
-          {
-            "@type": "ListItem",
-            position: 2,
-            name: game.title,
-            item: absoluteUrl(game.routePath),
-          },
-        ],
-      },
-    ],
   };
 }
 
@@ -149,21 +87,19 @@ function writeRoutePage(page) {
 }
 
 function writeNotFoundPage() {
-  const html = injectPage(baseHtml, {
-    path: "/404.html",
-    title: "Page Not Found | viggo.games",
-    description: "The requested viggo.games page could not be found.",
-    image: "/seo/viggo.png",
-    robots: "noindex, follow",
-    body: `
-      <main data-seo-fallback>
-        <h1>Page not found</h1>
-        <p>The requested viggo.games page could not be found.</p>
-        <p><a href="/">Return to all browser games</a></p>
-      </main>
-    `,
-    jsonLd: [],
-  });
+  const html = withRootAssets(
+    injectPage(baseHtml, {
+      ...createNotFoundSeo(),
+      body: `
+        <main data-seo-fallback>
+          <h1>Page not found</h1>
+          <p>The requested viggo.games page could not be found.</p>
+          <p><a href="/">Return to all browser games</a></p>
+        </main>
+      `,
+      jsonLd: [],
+    }),
+  );
 
   writeFileSync(notFoundPath, html);
 }
@@ -183,13 +119,27 @@ function stripManagedHead(html) {
     .replace(/\s*<meta\s+property="og:[^"]+"[\s\S]*?>/gi, "")
     .replace(/\s*<meta\s+name="twitter:[^"]+"[\s\S]*?>/gi, "")
     .replace(/\s*<link\s+rel="canonical"[\s\S]*?>/gi, "")
-    .replace(/\s*<script\s+type="application\/ld\+json"\s+data-seo-jsonld[\s\S]*?<\/script>/gi, "");
+    .replace(
+      /\s*<script\s+type="application\/ld\+json"\s+data-seo-jsonld[\s\S]*?<\/script>/gi,
+      "",
+    );
 }
 
 function renderHead(page) {
-  const imageUrl = absoluteUrl(page.image ?? "/seo/viggo.png");
+  const imageUrl = absoluteUrl(page.image ?? DEFAULT_SOCIAL_IMAGE);
+  const imageAlt = page.imageAlt ?? `${page.title} preview image`;
   const pageUrl = absoluteUrl(page.path);
-  const jsonLdTags = page.jsonLd
+  const dimensions = [
+    page.imageWidth
+      ? `<meta property="og:image:width" content="${page.imageWidth}" />`
+      : "",
+    page.imageHeight
+      ? `<meta property="og:image:height" content="${page.imageHeight}" />`
+      : "",
+  ]
+    .filter(Boolean)
+    .join("\n    ");
+  const jsonLdTags = (page.jsonLd ?? [])
     .map(
       (data) =>
         `<script type="application/ld+json" data-seo-jsonld>${safeJson(data)}</script>`,
@@ -202,16 +152,18 @@ function renderHead(page) {
     <meta name="robots" content="${escapeAttribute(page.robots)}" />
     <link rel="canonical" href="${pageUrl}" />
     <meta property="og:site_name" content="${SITE_NAME}" />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content="${page.type ?? "website"}" />
     <meta property="og:title" content="${escapeAttribute(page.title)}" />
     <meta property="og:description" content="${escapeAttribute(page.description)}" />
     <meta property="og:url" content="${pageUrl}" />
     <meta property="og:image" content="${imageUrl}" />
-    <meta property="og:image:alt" content="${escapeAttribute(`${page.title} preview image`)}" />
+    <meta property="og:image:alt" content="${escapeAttribute(imageAlt)}" />
+    ${dimensions}
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="${escapeAttribute(page.title)}" />
     <meta name="twitter:description" content="${escapeAttribute(page.description)}" />
     <meta name="twitter:image" content="${imageUrl}" />
+    <meta name="twitter:image:alt" content="${escapeAttribute(imageAlt)}" />
     ${jsonLdTags}`;
 }
 
@@ -223,27 +175,31 @@ function withRelativeAssets(html, depth) {
   const prefix = "../".repeat(depth);
   return html
     .replaceAll('src="./assets/', `src="${prefix}assets/`)
-    .replaceAll('href="./assets/', `href="${prefix}assets/`);
+    .replaceAll('href="./assets/', `href="${prefix}assets/`)
+    .replaceAll('href="./favicon.ico"', `href="${prefix}favicon.ico"`);
+}
+
+function withRootAssets(html) {
+  return html
+    .replaceAll('src="./assets/', 'src="/assets/')
+    .replaceAll('href="./assets/', 'href="/assets/')
+    .replaceAll('href="./favicon.ico"', 'href="/favicon.ico"');
 }
 
 function writeSitemap(pages) {
-  const lastmod = new Date().toISOString().slice(0, 10);
   const urls = pages
     .map(
-      (page) => `
-  <url>
-    <loc>${absoluteUrl(page.path)}</loc>
-    <lastmod>${lastmod}</lastmod>
-    <changefreq>${page.path === "/" ? "weekly" : "monthly"}</changefreq>
-    <priority>${page.path === "/" ? "1.0" : "0.8"}</priority>
+      (page) => `  <url>
+    <loc>${escapeHtml(absoluteUrl(page.path))}</loc>
   </url>`,
     )
-    .join("");
+    .join("\n");
 
   writeFileSync(
     resolve(distDir, "sitemap.xml"),
     `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls}
 </urlset>
 `,
   );
@@ -269,8 +225,8 @@ function renderLlmsIndex() {
 ## Main Pages
 
 - [Home](${absoluteUrl("/")}): Browse every current viggo.games browser game.
-- [About](${absoluteUrl("/about")}): Learn who made viggo.games and find the open source repository.
-- [Full LLM context](${absoluteUrl("/llms-full.txt")}): Plain text summary of all current games.
+- [About](${absoluteUrl("/about/")}): Learn who made viggo.games and find the open-source repository.
+- [Full LLM context](${absoluteUrl("/llms-full.txt")}): Plain-text summary of all current games.
 
 ## Games
 
@@ -295,7 +251,8 @@ function renderLlmsFull() {
 - Genre: ${game.genre}
 - Controls: ${game.controls.join(", ")}
 - Summary: ${game.description}
-- Search keywords: ${game.keywords.join(", ")}
+- How to play: ${game.howToPlay.join(" ")}
+- Tips: ${game.tips.join(" ")}
 `,
     )
     .join("\n");
@@ -304,8 +261,7 @@ function renderLlmsFull() {
 
 viggo.games is a free browser-game collection made by Viggo. The site is open source and hosted from the chrhansen/viggo-games repository on GitHub Pages.
 
-${gameSections}
-`;
+${gameSections}`;
 }
 
 function injectDirectGameMetadata() {
@@ -317,18 +273,14 @@ function injectDirectGameMetadata() {
     }
 
     const directHtml = readFileSync(gameIndexPath, "utf8");
-    const page = {
-      path: game.routePath,
-      title: `${game.title} - Play Free on viggo.games`,
-      description: game.metaDescription,
-      image: `/seo/${game.imageFile}`,
-      robots: "index, follow, max-image-preview:large",
-      jsonLd: [gameJsonLd(game)],
-    };
-
+    const metadata = createGameSeo(game);
     const updatedHtml = stripManagedHead(directHtml).replace(
       "</head>",
-      `${renderHead(page)}\n  </head>`,
+      `${renderHead({
+        ...metadata,
+        robots: "index, follow, max-image-preview:large",
+        jsonLd: [gameJsonLd(game)],
+      })}\n  </head>`,
     );
 
     writeFileSync(gameIndexPath, updatedHtml);
@@ -339,7 +291,8 @@ function copySeoImages() {
   const imageDir = resolve(distDir, "seo");
   mkdirSync(imageDir, { recursive: true });
 
-  const images = new Set(["viggo.png", ...games.map((game) => game.imageFile)]);
+  const socialImage = DEFAULT_SOCIAL_IMAGE.split("/").pop();
+  const images = new Set([socialImage, ...games.map((game) => game.imageFile)]);
 
   images.forEach((imageFile) => {
     const sourcePath = resolve("src/assets", imageFile);
@@ -358,21 +311,23 @@ function renderHomeBody() {
     .map(
       (game) => `
         <li>
-          <a href="${game.routePath}">${escapeHtml(game.title)}</a>
-          <p>${escapeHtml(game.description)}</p>
+          <article>
+            <h2><a href="${game.routePath}">${escapeHtml(game.title)}</a></h2>
+            <p>${escapeHtml(game.description)}</p>
+          </article>
         </li>`,
     )
     .join("");
 
   return `
     <main data-seo-fallback>
-      <h1>viggo.games</h1>
-      <p>Free browser arcade games made by Viggo. Play Chicken Hop, Hunter Guy, Burb, Gunny, and Torpedo with keyboard, mouse, touch, or tilt controls.</p>
+      <h1>Free browser arcade games by Viggo</h1>
+      <p>Choose from five original browser games. Every mission is free, playable without a download, and built for keyboard, mouse, touch, or tilt controls.</p>
       <nav aria-label="Browser games">
         <ul>${gameItems}
         </ul>
       </nav>
-      <p><a href="/about">About viggo.games</a></p>
+      <p><a href="/about/">About viggo.games</a></p>
     </main>
   `;
 }
@@ -382,6 +337,7 @@ function renderAboutBody() {
     <main data-seo-fallback>
       <h1>About viggo.games</h1>
       <p>viggo.games is a collection of browser games made by Viggo, built for fun, learning, and arcade nostalgia.</p>
+      <p>Every current game is free to play in a modern browser, with no download required.</p>
       <p>The site is open source at <a href="https://github.com/chrhansen/viggo-games">github.com/chrhansen/viggo-games</a>.</p>
       <p><a href="/">Browse all games</a></p>
     </main>
@@ -389,59 +345,104 @@ function renderAboutBody() {
 }
 
 function renderGameBody(game) {
+  const relatedLinks = relatedGames(game)
+    .map(
+      (related) =>
+        `<li><a href="${related.routePath}">${escapeHtml(related.title)} – ${escapeHtml(related.genre)}</a></li>`,
+    )
+    .join("");
+  const steps = game.howToPlay
+    .map((step) => `<li>${escapeHtml(step)}</li>`)
+    .join("");
+  const tips = game.tips.map((tip) => `<li>${escapeHtml(tip)}</li>`).join("");
+
   return `
     <main data-seo-fallback>
-      <h1>${escapeHtml(game.title)}</h1>
-      <p>${escapeHtml(game.description)}</p>
-      <p>${escapeHtml(game.metaDescription)}</p>
-      <ul>
-        <li>Genre: ${escapeHtml(game.genre)}</li>
-        <li>Controls: ${escapeHtml(game.controls.join(", "))}</li>
-      </ul>
-      <p><a href="${game.urlPath}">Play ${escapeHtml(game.title)} directly</a></p>
-      <p><a href="/">Browse all viggo.games browser games</a></p>
+      <p><a href="/">All browser games</a></p>
+      <article>
+        <p>${escapeHtml(game.level)} · ${escapeHtml(game.genre)} · Free to play</p>
+        <h1>${escapeHtml(game.title)}</h1>
+        <p>${escapeHtml(game.tagline)}</p>
+        <p>${escapeHtml(game.description)}</p>
+        <p><a href="${game.urlPath}">Play ${escapeHtml(game.title)}</a></p>
+        <h2>How to play ${escapeHtml(game.title)}</h2>
+        <ol>${steps}</ol>
+        <h2>Controls</h2>
+        <p>${escapeHtml(game.controls.join(", "))}</p>
+        <h2>Mission tips</h2>
+        <ul>${tips}</ul>
+      </article>
+      <nav aria-label="More browser games">
+        <h2>Play another mission</h2>
+        <ul>${relatedLinks}</ul>
+      </nav>
     </main>
   `;
 }
 
-function gameJsonLd(game) {
-  return {
-    "@context": "https://schema.org",
-    "@type": "VideoGame",
-    name: game.title,
-    url: absoluteUrl(game.routePath),
-    sameAs: absoluteUrl(game.urlPath),
-    image: absoluteUrl(`/seo/${game.imageFile}`),
-    description: game.description,
-    applicationCategory: "GameApplication",
-    applicationSubCategory: game.genre,
-    operatingSystem: "Any modern web browser",
-    gamePlatform: "Web browser",
-    genre: game.genre,
-    keywords: game.keywords.join(", "),
-    creator: organizationJsonLd(),
-    publisher: organizationJsonLd(),
-    offers: {
-      "@type": "Offer",
-      price: 0,
-      priceCurrency: "USD",
-      availability: "https://schema.org/InStock",
-      url: absoluteUrl(game.routePath),
-    },
-  };
+function relatedGames(game) {
+  const index = games.findIndex((candidate) => candidate.id === game.id);
+  return [games[(index + 1) % games.length], games[(index + 2) % games.length]];
 }
 
-function organizationJsonLd() {
-  return {
-    "@type": "Organization",
-    name: SITE_NAME,
-    url: SITE_URL,
-    sameAs: ["https://github.com/chrhansen/viggo-games"],
-  };
-}
+function validateBuild(pages) {
+  const sitemap = readFileSync(resolve(distDir, "sitemap.xml"), "utf8");
+  const notFoundHtml = readFileSync(notFoundPath, "utf8");
+  const canonicalUrls = new Set();
 
-function absoluteUrl(path) {
-  return `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}`;
+  if (!notFoundHtml.includes('href="/favicon.ico"') || /(?:src|href)="\.\//.test(notFoundHtml)) {
+    throw new Error("404 page assets must resolve from the site root");
+  }
+
+  pages.forEach((page) => {
+    if (page.path !== "/" && !page.path.endsWith("/")) {
+      throw new Error(`Non-root canonical path must end in a slash: ${page.path}`);
+    }
+
+    const canonicalUrl = absoluteUrl(page.path);
+    const html = readFileSync(page.outputPath, "utf8");
+    const canonicalTags = html.match(/<link rel="canonical"/g) ?? [];
+    const expectedCanonicalTag = `<link rel="canonical" href="${canonicalUrl}" />`;
+    const fallback = html.match(/<main data-seo-fallback>[\s\S]*?<\/main>/)?.[0];
+
+    if (canonicalTags.length !== 1 || !html.includes(expectedCanonicalTag)) {
+      throw new Error(`Invalid canonical tag in ${page.outputPath}`);
+    }
+
+    if (!fallback) {
+      throw new Error(`Missing static fallback content in ${page.outputPath}`);
+    }
+
+    if (fallback.includes("<img")) {
+      throw new Error(`Static fallback must not duplicate React image downloads: ${page.outputPath}`);
+    }
+
+    if (page.depth > 0 && !html.includes(`href="${"../".repeat(page.depth)}favicon.ico"`)) {
+      throw new Error(`Invalid favicon path in ${page.outputPath}`);
+    }
+
+    if (!sitemap.includes(`<loc>${canonicalUrl}</loc>`)) {
+      throw new Error(`Sitemap is missing ${canonicalUrl}`);
+    }
+
+    if (canonicalUrls.has(canonicalUrl)) {
+      throw new Error(`Duplicate canonical URL: ${canonicalUrl}`);
+    }
+
+    canonicalUrls.add(canonicalUrl);
+  });
+
+  if (/<(?:lastmod|changefreq|priority)>/.test(sitemap)) {
+    throw new Error("Sitemap contains unsupported or synthetic metadata");
+  }
+
+  games.forEach((game) => {
+    const directHtml = readFileSync(resolve(distDir, `games/${game.id}/index.html`), "utf8");
+    const expectedCanonicalTag = `<link rel="canonical" href="${absoluteUrl(game.routePath)}" />`;
+    if (!directHtml.includes(expectedCanonicalTag)) {
+      throw new Error(`Direct game page does not canonicalize to ${game.routePath}`);
+    }
+  });
 }
 
 function safeJson(data) {

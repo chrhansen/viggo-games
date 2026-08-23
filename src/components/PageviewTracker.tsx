@@ -7,6 +7,10 @@ const PageviewTracker = () => {
   const hasTrackedInitialPageview = useRef(false);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
+  useEffect(() => {
     if (!hasTrackedInitialPageview.current) {
       hasTrackedInitialPageview.current = true;
       return;

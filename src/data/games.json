@@ -5,14 +5,28 @@
     "level": "Level 01",
     "color": "#FF4B4B",
     "urlPath": "/games/chicken-hop/",
-    "routePath": "/chicken-hop",
+    "routePath": "/chicken-hop/",
     "imageFile": "chicken-hop.webp",
+    "imageWidth": 1376,
+    "imageHeight": 768,
+    "imageAlt": "Clockwork chicken jumping between platforms in Chicken Hop artwork",
+    "seoTitle": "Chicken Hop – Free Chicken Jumping Game | viggo.games",
     "tagline": "Why did the chicken hop the road? To get to the other slide!",
     "description": "Chicken Hop is a tiny browser arcade game where a brave chicken runs through a cozy house, jumps clutter, grabs corn, and tries to keep both hearts full.",
     "metaDescription": "Play Chicken Hop, a free browser arcade game on viggo.games. Jump household obstacles, collect corn, and keep a brave chicken running.",
     "keywords": ["browser game", "arcade game", "chicken game", "jumping game", "kids game"],
     "controls": ["Keyboard", "Touch"],
-    "genre": "Arcade runner"
+    "genre": "Arcade runner",
+    "howToPlay": [
+      "Choose your chicken's name and look, then start the run.",
+      "Move left or right, jump onto obstacles, and hold jump in the air to fly for up to five seconds.",
+      "Collect corn, avoid eggs and front-on collisions, and chase a new best score."
+    ],
+    "tips": [
+      "Landing on top of an obstacle is safe.",
+      "Land and wait briefly to refill your flight fuel.",
+      "Use Down or S to drop through shelves and steps."
+    ]
   },
   {
     "id": "hunter-guy",
@@ -20,14 +34,28 @@
     "level": "Level 02",
     "color": "#22C55E",
     "urlPath": "/games/hunter-guy/",
-    "routePath": "/hunter-guy",
+    "routePath": "/hunter-guy/",
     "imageFile": "hunter-guy.webp",
+    "imageWidth": 1376,
+    "imageHeight": 768,
+    "imageAlt": "Hunter standing in a forest in Hunter Guy artwork",
+    "seoTitle": "Hunter Guy – Free 3D Forest Game | viggo.games",
     "tagline": "What did the hunter say to his snack? Nice to meat you!",
     "description": "Hunter Guy is a first-person forest prototype where you walk through the woods, switch tools on a belt, and tag foxes, deer, and bears.",
     "metaDescription": "Play Hunter Guy, a free first-person browser forest game on viggo.games with simple keyboard, mouse, and touch controls.",
     "keywords": ["browser game", "3D game", "forest game", "first person game", "prototype game"],
-    "controls": ["Keyboard", "Mouse", "Touch"],
-    "genre": "First-person forest game"
+    "controls": ["Keyboard", "Mouse", "Touch", "Device motion"],
+    "genre": "First-person forest game",
+    "howToPlay": [
+      "Start the hunt, enter the forest, and use the clearing to get your bearings.",
+      "Move and look around, then switch between the four tools on your belt.",
+      "Tag foxes, deer, and bears to build your score while they roam through the trees."
+    ],
+    "tips": [
+      "Foxes and deer take one hit; bears take two.",
+      "The squirt gun scares animals without tagging them.",
+      "On touch screens, use the D-pad to move and drag the view to look around."
+    ]
   },
   {
     "id": "burb",
@@ -35,14 +63,28 @@
     "level": "Level 03",
     "color": "#FF7A99",
     "urlPath": "/games/burb/",
-    "routePath": "/burb",
+    "routePath": "/burb/",
     "imageFile": "burb.webp",
+    "imageWidth": 1408,
+    "imageHeight": 768,
+    "imageAlt": "Futuristic rider on a neon motorcycle in Burb artwork",
+    "seoTitle": "Burb – Free 3D Cycling Game Online | viggo.games",
     "tagline": "A small bird, a big road, and very serious steering.",
     "description": "Burb is a playful browser cycling game about steering a small bird along a winding 3D road.",
     "metaDescription": "Play Burb, a free browser cycling game on viggo.games. Steer a small bird through a winding 3D road.",
     "keywords": ["browser game", "cycling game", "3D road game", "bird game", "steering game"],
     "controls": ["Keyboard", "Touch", "Device tilt"],
-    "genre": "3D cycling game"
+    "genre": "3D cycling game",
+    "howToPlay": [
+      "Start riding and use the cockpit view to line up with the road.",
+      "Steer left or right, then speed up or slow down as the route bends.",
+      "Follow the closed road loop—or leave it and explore the low-poly landscape."
+    ],
+    "tips": [
+      "Ease off the speed before a tight turn.",
+      "Touch players can use on-screen steering and speed controls.",
+      "On a supported phone, enable tilt and hold the device upright to center steering."
+    ]
   },
   {
     "id": "gunny",
@@ -50,14 +92,28 @@
     "level": "Level 04",
     "color": "#7AF6FF",
     "urlPath": "/games/gunny/",
-    "routePath": "/gunny",
+    "routePath": "/gunny/",
     "imageFile": "gunny.webp",
+    "imageWidth": 1376,
+    "imageHeight": 768,
+    "imageAlt": "Spacecraft flying over an icy canyon in Gunny artwork",
+    "seoTitle": "Gunny – Free Space Shooter Game Online | viggo.games",
     "tagline": "Space is loud. Your blaster is louder.",
     "description": "Gunny is a browser space shooter where you fly past Earth and the moon, blast red ships, dodge satellites, and clear the sector.",
     "metaDescription": "Play Gunny, a free browser space shooter on viggo.games. Fly past Earth, blast raiders, and avoid satellites.",
     "keywords": ["browser game", "space shooter", "arcade game", "flight game", "kids game"],
     "controls": ["Keyboard", "Mouse", "Touch"],
-    "genre": "Space shooter"
+    "genre": "Space shooter",
+    "howToPlay": [
+      "Launch the mission and steer your ship as it flies forward automatically.",
+      "Fire at incoming raiders while dodging their shots and drifting satellites.",
+      "Destroy 12 raiders before your hull reaches zero to clear the sector."
+    ],
+    "tips": [
+      "Each raider takes two hits.",
+      "Watch the hull, score, kills, and distance in the cockpit HUD.",
+      "Hold the mouse button or the touch fire control for continuous shots."
+    ]
   },
   {
     "id": "torpedo",
@@ -65,13 +121,27 @@
     "level": "Level 05",
     "color": "#8FE7FF",
     "urlPath": "/games/torpedo/",
-    "routePath": "/torpedo",
+    "routePath": "/torpedo/",
     "imageFile": "torpedo.webp",
+    "imageWidth": 1376,
+    "imageHeight": 768,
+    "imageAlt": "Submarine firing torpedoes in an icy underwater cavern in Torpedo artwork",
+    "seoTitle": "Torpedo – Free Submarine Game Online | viggo.games",
     "tagline": "Dive deep, fire fast, and keep the hull together.",
     "description": "Torpedo is a first-person submarine browser game where you lead an underwater patrol, dodge enemy torpedoes, fire back, and step inside the submarine between combat runs.",
     "metaDescription": "Play Torpedo, a free browser submarine game on viggo.games. Dodge enemy torpedoes, fire back, and explore the submarine interior.",
     "keywords": ["browser game", "submarine game", "torpedo game", "3D game", "arcade game"],
-    "controls": ["Keyboard", "Mouse"],
-    "genre": "Submarine combat game"
+    "controls": ["Keyboard", "Mouse", "Touch", "Device tilt"],
+    "genre": "Submarine combat game",
+    "howToPlay": [
+      "Lead the submarine formation, steer across the combat window, and line up enemies.",
+      "Fire torpedoes, dodge incoming shots, and keep your 160-point hull intact.",
+      "Open the paused submarine plan to visit rooms, use stations, and repair the engine."
+    ],
+    "tips": [
+      "Use the front, port, starboard, and periscope views to track the patrol.",
+      "Giant enemy submarines fire three-torpedo salvos.",
+      "Sink five giants and collect their prizes to reach level two."
+    ]
   }
 ]

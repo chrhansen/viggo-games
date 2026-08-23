@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { ArrowLeft, Github } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import viggoImg from "@/assets/viggo.png";
+import viggoImg from "@/assets/viggo-portrait.webp";
 import { Button } from "@/components/ui/button";
 import { withBasePath } from "@/lib/app-base";
 import { aboutSeo, usePageSeo } from "@/lib/seo";
@@ -21,7 +21,7 @@ const About = () => {
         <Button
           asChild
           variant="outline"
-          className="mb-8 font-mono uppercase tracking-widest text-xs border-2 border-primary text-primary bg-primary/10 hover:bg-primary hover:text-primary-foreground shadow-[0_0_12px_hsl(var(--primary)/0.4)]"
+          className="mb-8 min-h-11 font-mono uppercase tracking-widest text-xs border-2 border-primary text-primary bg-primary/10 hover:bg-primary hover:text-primary-foreground shadow-[0_0_12px_hsl(var(--primary)/0.4)]"
         >
           <a
             href={withBasePath("/")}
@@ -36,13 +36,16 @@ const About = () => {
         </Button>
 
         <h1 className="text-4xl md:text-5xl font-extrabold font-display tracking-tighter text-primary mb-6">
-          About
+          About viggo.games
         </h1>
 
-        <div className="space-y-6 text-foreground/80 font-mono text-sm leading-relaxed">
+        <div className="space-y-6 text-base leading-relaxed text-foreground/80 font-mono">
           <img
             src={viggoImg}
             alt="Viggo, the creator of viggo.games"
+            width="256"
+            height="256"
+            decoding="async"
             className="w-32 h-32 rounded-xl object-cover border-2 border-border shadow-md"
           />
 
@@ -53,7 +56,7 @@ const About = () => {
 
           <p>
             All games on this site are designed and developed by Viggo with a little help from his dad
-            and codex.
+            and Codex. Every mission is free to play in a modern browser, with no download required.
           </p>
 
           <p>
