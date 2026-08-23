@@ -13,6 +13,7 @@ Platform adapters own input collection, frame scheduling, rendering, effects, au
 Import from `src/index.ts`:
 
 - `createChickenHopGame(options)`
+- `emptyChickenHopInput()`
 - `startChickenHopRun(game)`
 - `advanceChickenHopGame(game, input, delta)`
 - `toggleChickenHopPause(game)`

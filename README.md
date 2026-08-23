@@ -37,6 +37,7 @@ Then port the changes intentionally. Do not blindly overwrite repo-specific wiri
 - `.github/`
   - GitHub Actions config
   - Pages deploy workflow lives in `.github/workflows/pages.yml`
+  - mobile web, shared-core, and native bundle checks live in `.github/workflows/mobile.yml`
 - `public/`
   - static files shipped as-is
   - custom domain file lives in `public/CNAME`

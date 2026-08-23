@@ -82,8 +82,10 @@ npm run test
 npm run build
 
 cd mobile
+npm ci
 npm run lint
 npm run typecheck
+npm run doctor
 npm run export:native
 ```
 
