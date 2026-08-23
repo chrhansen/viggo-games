@@ -50,6 +50,9 @@ Tap Chicken Hop on the selector, name the chicken, and choose one of four design
 - Regular corn gives `+1 Corn` and `+60 Score`; gold corn gives `+3 Corn` and `+180 Score`.
 - Eggs remove one corn, never health, and never reduce corn below zero.
 - Flight has five seconds of fuel and refills after resting on the floor.
+- Jumping and flying shed animated feathers.
+- The room and hazards use a 50% world camera while the chicken keeps its original on-screen size.
+- The game toolbar has a high-contrast pause/resume button.
 - Leaving the app pauses an active run automatically.
 
-This review slice intentionally defers sound effects, particles, persistent personalization, and persistent best-score storage. Those should follow after the native movement and game feel are approved.
+This review slice intentionally defers sound effects, persistent personalization, and persistent best-score storage. Those should follow after the native movement and game feel are approved.

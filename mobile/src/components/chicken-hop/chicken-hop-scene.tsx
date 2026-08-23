@@ -1,11 +1,13 @@
 import { StyleSheet, Text, View } from "react-native";
 
 import { ChickenAvatar } from "@/components/chicken-hop/chicken-avatar";
+import { ChickenHopFeathers } from "@/components/chicken-hop/chicken-hop-feathers";
 import { CornKernel } from "@/components/chicken-hop/corn-kernel";
 import type { ChickenProfile } from "@/game/chicken-hop/customization";
-import type {
-  ChickenHopGame,
-  ChickenHopObstacle,
+import {
+  CHICKEN_HOP_WORLD_SCALE,
+  type ChickenHopGame,
+  type ChickenHopObstacle,
 } from "@/game/chicken-hop/engine";
 
 interface ChickenHopSceneProps {
@@ -87,129 +89,171 @@ function Obstacle({ obstacle }: { obstacle: ChickenHopObstacle }) {
 }
 
 export function ChickenHopScene({ game, profile }: ChickenHopSceneProps) {
-  const dotSpacing = 48;
+  const visibleWidth = game.width * CHICKEN_HOP_WORLD_SCALE;
+  const visibleHeight = game.height * CHICKEN_HOP_WORLD_SCALE;
+  const dotSpacing = 48 / CHICKEN_HOP_WORLD_SCALE;
   const dotColumns = Math.ceil(game.width / dotSpacing) + 2;
   const dotRows = Math.ceil(game.floorY / dotSpacing);
   const wallpaperOffset = -((game.scroll * 0.13) % dotSpacing);
   const floorboardOffset = -((game.scroll * 0.72) % 54);
-  const air = Math.max(0, Math.min(1, (game.floorY - game.player.y - game.player.height) / 120));
+  const air = Math.max(
+    0,
+    Math.min(
+      1,
+      (game.floorY - game.player.y - game.player.height) /
+        (120 / CHICKEN_HOP_WORLD_SCALE),
+    ),
+  );
 
   return (
     <View pointerEvents="none" style={styles.scene}>
-      <View style={[styles.wall, { height: game.floorY }]} />
+      <View
+        style={[
+          styles.world,
+          {
+            height: game.height,
+            transform: [{ scale: CHICKEN_HOP_WORLD_SCALE }],
+            transformOrigin: "top left",
+            width: game.width,
+          },
+        ]}
+      >
+        <View style={[styles.wall, { height: game.floorY }]} />
 
-      {Array.from({ length: dotColumns * dotRows }, (_, index) => {
-        const column = index % dotColumns;
-        const row = Math.floor(index / dotColumns);
-        const color = (column + row) % 3 === 0 ? "#FF7A99" : (column + row) % 3 === 1 ? "#63F3FF" : "#FFD166";
+        {Array.from({ length: dotColumns * dotRows }, (_, index) => {
+          const column = index % dotColumns;
+          const row = Math.floor(index / dotColumns);
+          const color = (column + row) % 3 === 0 ? "#FF7A99" : (column + row) % 3 === 1 ? "#63F3FF" : "#FFD166";
 
-        return (
+          return (
+            <View
+              key={`dot-${index}`}
+              style={[
+                styles.wallpaperDot,
+                {
+                  backgroundColor: color,
+                  left: wallpaperOffset + column * dotSpacing,
+                  top: 30 + row * dotSpacing,
+                },
+              ]}
+            />
+          );
+        })}
+
+        <View style={[styles.buntingLine, { top: visibleHeight * 0.07 }]} />
+        {Array.from({ length: Math.ceil(game.width / 52) }, (_, index) => (
           <View
-            key={`dot-${index}`}
+            key={`flag-${index}`}
             style={[
-              styles.wallpaperDot,
+              styles.flag,
               {
-                backgroundColor: color,
-                left: wallpaperOffset + column * dotSpacing,
-                top: 30 + row * dotSpacing,
+                borderTopColor: index % 3 === 0 ? "#70E59B" : index % 3 === 1 ? "#FF7A99" : "#FFD60A",
+                left: index * 52 + 10,
+                top: visibleHeight * 0.07 + 2,
               },
             ]}
           />
-        );
-      })}
+        ))}
 
-      <View style={[styles.buntingLine, { top: game.height * 0.07 }]} />
-      {Array.from({ length: Math.ceil(game.width / 52) }, (_, index) => (
         <View
-          key={`flag-${index}`}
           style={[
-            styles.flag,
+            styles.window,
             {
-              borderTopColor: index % 3 === 0 ? "#70E59B" : index % 3 === 1 ? "#FF7A99" : "#FFD60A",
-              left: index * 52 + 10,
-              top: game.height * 0.07 + 2,
+              height: visibleHeight * 0.16,
+              left: visibleWidth * 0.09,
+              top: visibleHeight * 0.14,
+              width: visibleWidth * 0.2,
+            },
+          ]}
+        >
+          <View style={styles.windowVertical} />
+          <View style={styles.windowHorizontal} />
+        </View>
+        <View
+          style={[
+            styles.window,
+            {
+              height: visibleHeight * 0.16,
+              right: visibleWidth * 0.08,
+              top: visibleHeight * 0.14,
+              width: visibleWidth * 0.2,
+            },
+          ]}
+        >
+          <View style={styles.windowVertical} />
+          <View style={styles.windowHorizontal} />
+        </View>
+
+        <View style={[styles.pictureFrame, { left: visibleWidth * 0.4, top: visibleHeight * 0.18 }]} />
+        <View style={[styles.sofa, { right: visibleWidth * 0.05, top: game.floorY - 58, width: visibleWidth * 0.28 }]} />
+        <View style={[styles.lampPole, { left: visibleWidth * 0.14, top: game.floorY - 105 }]} />
+        <View style={[styles.lampShade, { left: visibleWidth * 0.14 - 18, top: game.floorY - visibleHeight * 0.15 - 28 }]} />
+
+        <View style={[styles.floor, { top: game.floorY }]}>
+          <View style={[styles.rug, { left: visibleWidth * 0.05, width: visibleWidth * 0.9 }]} />
+          {Array.from({ length: Math.ceil(game.width / 54) + 2 }, (_, index) => (
+            <View key={`board-${index}`} style={[styles.floorboard, { left: floorboardOffset + index * 54 }]} />
+          ))}
+        </View>
+        <View style={[styles.baseboard, { top: game.floorY - 5 }]} />
+
+        {game.obstacles.map((obstacle) => (
+          <Obstacle key={obstacle.id} obstacle={obstacle} />
+        ))}
+
+        {game.pickups.map((pickup) => (
+          <View
+            key={pickup.id}
+            style={[
+              styles.pickup,
+              {
+                height: pickup.radius * 2.8,
+                left: pickup.x - pickup.radius * 1.4,
+                top: pickup.y - pickup.radius * 1.4 + Math.sin(pickup.phase) * 5,
+                width: pickup.radius * 2.8,
+              },
+            ]}
+          >
+            <CornKernel
+              gold={pickup.kind === "gold-corn"}
+              radius={pickup.radius}
+              rotation={Math.sin(pickup.phase) * (pickup.kind === "gold-corn" ? 10 : 14)}
+            />
+          </View>
+        ))}
+
+        {game.eggs.map((egg) => (
+          <Text
+            accessible={false}
+            key={egg.id}
+            style={[
+              styles.egg,
+              {
+                fontSize: egg.radius * 2.05,
+                left: egg.x - egg.radius,
+                top: egg.y - egg.radius,
+                transform: [{ rotate: `${Math.sin(egg.phase) * 4}deg` }],
+              },
+            ]}
+          >
+            🥚
+          </Text>
+        ))}
+
+        <View
+          style={[
+            styles.chickenShadow,
+            {
+              left: game.player.x + 4,
+              opacity: 0.3 - air * 0.18,
+              top: game.floorY - 8,
+              width: game.player.width - 8,
             },
           ]}
         />
-      ))}
-
-      <View style={[styles.window, { height: game.height * 0.16, left: game.width * 0.09, top: game.height * 0.14, width: game.width * 0.2 }]}>
-        <View style={styles.windowVertical} />
-        <View style={styles.windowHorizontal} />
+        <ChickenAvatar game={game} profile={profile} />
+        <ChickenHopFeathers game={game} />
       </View>
-      <View style={[styles.window, { height: game.height * 0.16, right: game.width * 0.08, top: game.height * 0.14, width: game.width * 0.2 }]}>
-        <View style={styles.windowVertical} />
-        <View style={styles.windowHorizontal} />
-      </View>
-
-      <View style={[styles.pictureFrame, { left: game.width * 0.4, top: game.height * 0.18 }]} />
-      <View style={[styles.sofa, { bottom: game.height - game.floorY - 3, right: game.width * 0.05, width: game.width * 0.28 }]} />
-      <View style={[styles.lampPole, { bottom: game.height - game.floorY, left: game.width * 0.14 }]} />
-      <View style={[styles.lampShade, { bottom: game.height - game.floorY + game.height * 0.15, left: game.width * 0.14 - 18 }]} />
-
-      <View style={[styles.floor, { top: game.floorY }]}>
-        <View style={[styles.rug, { left: game.width * 0.05, width: game.width * 0.9 }]} />
-        {Array.from({ length: Math.ceil(game.width / 54) + 2 }, (_, index) => (
-          <View key={`board-${index}`} style={[styles.floorboard, { left: floorboardOffset + index * 54 }]} />
-        ))}
-      </View>
-      <View style={[styles.baseboard, { top: game.floorY - 5 }]} />
-
-      {game.obstacles.map((obstacle) => (
-        <Obstacle key={obstacle.id} obstacle={obstacle} />
-      ))}
-
-      {game.pickups.map((pickup) => (
-        <View
-          key={pickup.id}
-          style={[
-            styles.pickup,
-            {
-              height: pickup.radius * 2.8,
-              left: pickup.x - pickup.radius * 1.4,
-              top: pickup.y - pickup.radius * 1.4 + Math.sin(pickup.phase) * 5,
-              width: pickup.radius * 2.8,
-            },
-          ]}
-        >
-          <CornKernel
-            gold={pickup.kind === "gold-corn"}
-            radius={pickup.radius}
-            rotation={Math.sin(pickup.phase) * (pickup.kind === "gold-corn" ? 10 : 14)}
-          />
-        </View>
-      ))}
-
-      {game.eggs.map((egg) => (
-        <Text
-          accessible={false}
-          key={egg.id}
-          style={[
-            styles.egg,
-            {
-              fontSize: egg.radius * 2.05,
-              left: egg.x - egg.radius,
-              top: egg.y - egg.radius,
-              transform: [{ rotate: `${Math.sin(egg.phase) * 4}deg` }],
-            },
-          ]}
-        >
-          🥚
-        </Text>
-      ))}
-
-      <View
-        style={[
-          styles.chickenShadow,
-          {
-            left: game.player.x + 4,
-            opacity: 0.3 - air * 0.18,
-            top: game.floorY - 8,
-            width: game.player.width - 8,
-          },
-        ]}
-      />
-      <ChickenAvatar game={game} profile={profile} />
     </View>
   );
 }
@@ -223,6 +267,11 @@ const styles = StyleSheet.create({
     left: 0,
     overflow: "hidden",
     backgroundColor: "#14101B",
+  },
+  world: {
+    position: "absolute",
+    top: 0,
+    left: 0,
   },
   wall: {
     position: "absolute",

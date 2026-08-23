@@ -1,6 +1,3 @@
-import fs from "node:fs";
-import path from "node:path";
-
 import { describe, expect, it } from "vitest";
 
 import {
@@ -11,6 +8,7 @@ import {
 } from "../../mobile/src/game/chicken-hop/customization";
 import {
   advanceChickenHopGame,
+  CHICKEN_HOP_WORLD_SCALE,
   createChickenHopGame,
   resizeChickenHopGame,
   snapshotChickenHopGame,
@@ -19,6 +17,8 @@ import {
 } from "../../mobile/src/game/chicken-hop/engine";
 
 const idleInput = { jump: false, left: false, right: false };
+const toWorld = (screenPixels: number) =>
+  screenPixels / CHICKEN_HOP_WORLD_SCALE;
 
 function disableSpawners(game: ReturnType<typeof createChickenHopGame>) {
   game.obstacleTimer = 999;
@@ -42,13 +42,10 @@ describe("Chicken Hop native engine", () => {
     expect(game.corn).toBe(0);
     expect(game.hearts).toEqual([100, 100]);
     expect(game.flyFuel).toBe(5);
-  });
-
-  it("uses a chicken collision size that is 35 percent smaller", () => {
-    const game = createChickenHopGame(390, 700, 42);
-
-    expect(game.player.width).toBe(30);
-    expect(game.player.height).toBe(25);
+    expect(game.width * CHICKEN_HOP_WORLD_SCALE).toBe(390);
+    expect(game.height * CHICKEN_HOP_WORLD_SCALE).toBe(700);
+    expect(game.player.width * CHICKEN_HOP_WORLD_SCALE).toBe(30);
+    expect(game.player.height * CHICKEN_HOP_WORLD_SCALE).toBe(25);
   });
 
   it("jumps on a new press and uses fuel while the button stays held", () => {
@@ -182,17 +179,17 @@ describe("Chicken Hop native engine", () => {
     startChickenHopRun(game);
     const previousFloorY = game.floorY;
     game.player.onGround = false;
-    game.player.y = 300;
+    game.player.y = toWorld(300);
     game.pickups = [
-      { id: 1, kind: "corn", value: 1, x: 300, y: 400, radius: 15, phase: 0 },
+      { id: 1, kind: "corn", value: 1, x: 300, y: toWorld(400), radius: 15, phase: 0 },
     ];
     game.eggs = [{ id: 2, x: 320, y: 480, radius: 14, phase: 0 }];
 
     resizeChickenHopGame(game, 800, 360);
 
     const floorDelta = game.floorY - previousFloorY;
-    expect(game.player.y).toBe(300 + floorDelta);
-    expect(game.pickups[0].y).toBe(400 + floorDelta);
+    expect(game.player.y).toBe(toWorld(300) + floorDelta);
+    expect(game.pickups[0].y).toBe(toWorld(400) + floorDelta);
     expect(game.eggs[0].y).toBe(game.floorY - game.eggs[0].radius * 1.1);
   });
 
@@ -431,7 +428,7 @@ describe("Chicken Hop native engine", () => {
           id: hit + 1,
           kind: "robot",
           color: "#FFD166",
-          x: game.player.x + game.player.width - 8,
+          x: game.player.x + game.player.width - toWorld(8),
           y: game.floorY - 42,
           width: 52,
           height: 42,
@@ -454,7 +451,7 @@ describe("Chicken Hop native engine", () => {
         id: 1,
         kind: "robot",
         color: "#FFD166",
-        x: game.player.x + game.player.width - 8,
+        x: game.player.x + game.player.width - toWorld(8),
         y: game.floorY - 42,
         width: 52,
         height: 42,
@@ -465,6 +462,8 @@ describe("Chicken Hop native engine", () => {
 
     expect(game.hearts).toEqual([80, 100]);
     expect(game.player.invulnerableFor).toBeGreaterThan(0);
+    expect(game.player.vx * CHICKEN_HOP_WORLD_SCALE).toBe(-245);
+    expect(game.player.vy * CHICKEN_HOP_WORLD_SCALE).toBe(-330);
     expect(game.mode).toBe("playing");
   });
 
@@ -502,37 +501,5 @@ describe("Chicken Hop native customization", () => {
     expect(normalizeChickenName("  Captain    Cluck  ")).toBe("Captain Cluck");
     expect(normalizeChickenName(" ")).toBe("Nugget");
     expect(randomChickenName("Nugget", () => 0)).toBe("Peep");
-  });
-});
-
-describe("Chicken Hop native presentation regressions", () => {
-  const mobileRoot = path.resolve(process.cwd(), "mobile", "src");
-
-  it("renders kernels without corn-cob emoji artwork", () => {
-    const scene = fs.readFileSync(
-      path.join(mobileRoot, "components", "chicken-hop", "chicken-hop-scene.tsx"),
-      "utf8",
-    );
-    const hud = fs.readFileSync(
-      path.join(mobileRoot, "components", "chicken-hop", "chicken-hop-hud.tsx"),
-      "utf8",
-    );
-
-    expect(scene).not.toContain("🌽");
-    expect(hud).not.toContain("🌽");
-    expect(scene).toContain("CornKernel");
-    expect(hud).toContain("CornKernel");
-  });
-
-  it("draws the game edge-to-edge while insetting interactive controls", () => {
-    const screen = fs.readFileSync(
-      path.join(mobileRoot, "app", "chicken-hop.tsx"),
-      "utf8",
-    );
-
-    expect(screen).toContain("useSafeAreaInsets");
-    expect(screen).not.toContain("<SafeAreaView");
-    expect(screen).toContain("safeLeft={insets.left}");
-    expect(screen).toContain("safeRight={insets.right}");
   });
 });

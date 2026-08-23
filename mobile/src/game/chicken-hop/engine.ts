@@ -16,17 +16,25 @@ export type {
   ChickenHopPlayer,
 } from "./types";
 
+export const CHICKEN_HOP_WORLD_SCALE = 0.5;
+
+const worldUnits = (screenPixels: number) =>
+  screenPixels / CHICKEN_HOP_WORLD_SCALE;
+
 const tuning = {
-  gravity: 2250,
-  jumpVelocity: -735,
-  acceleration: 2100,
-  maxHorizontalVelocity: 330,
-  flyVelocity: -390,
+  gravity: worldUnits(2250),
+  jumpVelocity: worldUnits(-735),
+  acceleration: worldUnits(2100),
+  maxHorizontalVelocity: worldUnits(330),
+  flyVelocity: worldUnits(-390),
   flyDelay: 0.14,
   flyRefuelDelay: 0.75,
   damage: 20,
-  playerWidth: 30,
-  playerHeight: 25,
+  playerWidth: worldUnits(30),
+  playerHeight: worldUnits(25),
+  groundInset: worldUnits(6),
+  landingTolerance: worldUnits(2),
+  frontCollisionTolerance: worldUnits(4),
 } as const;
 
 const clamp = (value: number, minimum: number, maximum: number) =>
@@ -40,8 +48,8 @@ const intersects = (
 ) => a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y;
 
 function worldMetrics(width: number, height: number) {
-  const safeWidth = Math.max(280, width);
-  const safeHeight = Math.max(360, height);
+  const safeWidth = worldUnits(Math.max(280, width));
+  const safeHeight = worldUnits(Math.max(360, height));
 
   return {
     width: safeWidth,
@@ -83,7 +91,7 @@ export function createChickenHopGame(width = 390, height = 700, seed = Date.now(
     flyFuel: 5,
     flyFuelMax: 5,
     flyRefuelFor: 0,
-    speed: 245,
+    speed: worldUnits(245),
     difficulty: 0,
     scroll: 0,
     ...metrics,
@@ -133,7 +141,10 @@ export function resizeChickenHopGame(game: ChickenHopGame, width: number, height
 
 export function startChickenHopRun(game: ChickenHopGame) {
   const best = Math.max(game.best, Math.floor(game.score));
-  const metrics = worldMetrics(game.width, game.height);
+  const metrics = worldMetrics(
+    game.width * CHICKEN_HOP_WORLD_SCALE,
+    game.height * CHICKEN_HOP_WORLD_SCALE,
+  );
   Object.assign(game, {
     mode: "playing" as const,
     elapsed: 0,
@@ -144,7 +155,7 @@ export function startChickenHopRun(game: ChickenHopGame) {
     heartIndex: 0 as const,
     flyFuel: game.flyFuelMax,
     flyRefuelFor: 0,
-    speed: 245,
+    speed: worldUnits(245),
     difficulty: 0,
     scroll: 0,
     obstacles: [],
@@ -182,9 +193,10 @@ function moveWorld(game: ChickenHopGame, dt: number) {
     egg.x -= shift;
     egg.phase += dt * 4;
   }
-  game.obstacles = game.obstacles.filter((obstacle) => obstacle.x + obstacle.width > -60);
-  game.pickups = game.pickups.filter((pickup) => pickup.x + pickup.radius > -60);
-  game.eggs = game.eggs.filter((egg) => egg.x + egg.radius > -60);
+  const cleanupEdge = worldUnits(-60);
+  game.obstacles = game.obstacles.filter((obstacle) => obstacle.x + obstacle.width > cleanupEdge);
+  game.pickups = game.pickups.filter((pickup) => pickup.x + pickup.radius > cleanupEdge);
+  game.eggs = game.eggs.filter((egg) => egg.x + egg.radius > cleanupEdge);
 }
 
 function hurtPlayer(game: ChickenHopGame, obstacle: ChickenHopObstacle) {
@@ -193,11 +205,15 @@ function hurtPlayer(game: ChickenHopGame, obstacle: ChickenHopObstacle) {
 
   game.hearts[game.heartIndex] = Math.max(0, game.hearts[game.heartIndex] - tuning.damage);
   player.invulnerableFor = 1;
-  player.vx = -245;
-  player.vy = -330;
+  player.vx = worldUnits(-245);
+  player.vy = worldUnits(-330);
   player.onGround = false;
   player.groundObstacleId = null;
-  player.x = clamp(obstacle.x - player.width - 8, game.leftBound, game.rightBound);
+  player.x = clamp(
+    obstacle.x - player.width - worldUnits(8),
+    game.leftBound,
+    game.rightBound,
+  );
   setFeedback(game, "hurt");
 
   if (game.hearts[game.heartIndex] > 0) return;
@@ -220,7 +236,10 @@ function resolveGround(game: ChickenHopGame, previousY: number, wasGrounded: boo
 
   if (player.groundObstacleId !== null && wasGrounded) {
     const support = game.obstacles.find((obstacle) => obstacle.id === player.groundObstacleId);
-    const overlaps = support && player.x + player.width - 6 > support.x && player.x + 6 < support.x + support.width;
+    const overlaps =
+      support &&
+      player.x + player.width - tuning.groundInset > support.x &&
+      player.x + tuning.groundInset < support.x + support.width;
     if (support && overlaps) {
       player.y = support.y - player.height;
       player.vy = 0;
@@ -233,8 +252,14 @@ function resolveGround(game: ChickenHopGame, previousY: number, wasGrounded: boo
 
   if (!landed && player.vy >= 0) {
     for (const obstacle of game.obstacles) {
-      const overlaps = player.x + player.width - 6 > obstacle.x && player.x + 6 < obstacle.x + obstacle.width;
-      if (overlaps && previousBottom <= obstacle.y + 2 && bottom >= obstacle.y) {
+      const overlaps =
+        player.x + player.width - tuning.groundInset > obstacle.x &&
+        player.x + tuning.groundInset < obstacle.x + obstacle.width;
+      if (
+        overlaps &&
+        previousBottom <= obstacle.y + tuning.landingTolerance &&
+        bottom >= obstacle.y
+      ) {
         player.y = obstacle.y - player.height;
         player.vy = 0;
         player.onGround = true;
@@ -275,14 +300,17 @@ function resolveEntityCollisions(game: ChickenHopGame) {
     if (!intersects(hitbox, obstacle) || player.groundObstacleId === obstacle.id) continue;
     const playerCenter = player.x + player.width / 2;
     const obstacleCenter = obstacle.x + obstacle.width / 2;
-    if (playerCenter <= obstacleCenter && hitbox.y + hitbox.height > obstacle.y + 4) {
+    if (
+      playerCenter <= obstacleCenter &&
+      hitbox.y + hitbox.height > obstacle.y + tuning.frontCollisionTolerance
+    ) {
       hurtPlayer(game, obstacle);
       break;
     }
   }
 
   game.pickups = game.pickups.filter((pickup) => {
-    const bobY = pickup.y + Math.sin(pickup.phase) * 5;
+    const bobY = pickup.y + Math.sin(pickup.phase) * worldUnits(5);
     const pickupBox = {
       x: pickup.x - pickup.radius,
       y: bobY - pickup.radius,
@@ -318,9 +346,11 @@ export function advanceChickenHopGame(game: ChickenHopGame, input: ChickenHopInp
   game.feedback = null;
   game.elapsed += dt;
   game.difficulty = clamp(game.difficulty + dt * 0.025, 0, 1);
-  game.speed = lerp(245, 430, game.difficulty);
+  game.speed = lerp(worldUnits(245), worldUnits(430), game.difficulty);
   game.scroll += game.speed * dt;
-  game.score += dt * (18 + game.speed * 0.025);
+  game.score += dt * (
+    18 + game.speed * CHICKEN_HOP_WORLD_SCALE * 0.025
+  );
   player.invulnerableFor = Math.max(0, player.invulnerableFor - dt);
 
   if (input.left) player.vx -= tuning.acceleration * dt;

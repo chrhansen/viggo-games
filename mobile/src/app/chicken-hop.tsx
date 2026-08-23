@@ -159,9 +159,15 @@ export default function ChickenHopScreen() {
               accessibilityRole="button"
               hitSlop={6}
               onPress={togglePause}
-              style={({ pressed }) => [styles.textButton, pressed && styles.pressedButton]}
+              style={({ pressed }) => [
+                styles.pauseButton,
+                game.mode === "paused" && styles.resumeButton,
+                pressed && styles.pressedButton,
+              ]}
             >
-              <Text style={styles.textButtonLabel}>{game.mode === "paused" ? "PLAY" : "PAUSE"}</Text>
+              <Text style={styles.pauseButtonLabel}>
+                {game.mode === "paused" ? "▶  RESUME" : "Ⅱ  PAUSE"}
+              </Text>
             </Pressable>
           ) : null}
           <Pressable
@@ -261,16 +267,26 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 7,
   },
-  textButton: {
-    minHeight: 42,
+  pauseButton: {
+    minWidth: 84,
+    minHeight: 44,
+    alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 10,
+    paddingHorizontal: 9,
+    borderWidth: 2,
+    borderColor: "#FFF8E9",
+    borderRadius: 14,
+    backgroundColor: "#FFD166",
   },
-  textButtonLabel: {
-    color: "rgba(255,255,255,0.62)",
-    fontFamily: fonts.bold,
-    fontSize: 9,
-    letterSpacing: 1,
+  resumeButton: {
+    borderColor: "#FFF8E9",
+    backgroundColor: "#63F3FF",
+  },
+  pauseButtonLabel: {
+    color: "#20151B",
+    fontFamily: fonts.extraBold,
+    fontSize: 10,
+    letterSpacing: 0.8,
   },
   gameFrame: {
     flex: 1,
