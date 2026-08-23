@@ -5,7 +5,7 @@ Browser cycling game. Live deploy files at this folder root. Editable app source
 ## Deployment
 
 - Production URL: `https://viggo.games/games/burb/`
-- Embedded on homepage route: `https://viggo.games/burb`
+- Embedded on homepage route: `https://viggo.games/burb/`
 - Repo owner: `chrhansen/viggo-games`
 - Hosting: GitHub Pages from the umbrella repo
 - Deploy workflow: `/Users/chrh/dev/viggo-games/.github/workflows/pages.yml`

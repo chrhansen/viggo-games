@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
-import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { useState } from "react";
+import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
+import GameLanding from "@/components/GameLanding";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,24 +16,29 @@ import {
 import { gamesById } from "@/data/games";
 import { trackGameExit, trackGameStart } from "@/lib/analytics";
 import { gameSeo, notFoundSeo, usePageSeo } from "@/lib/seo";
+import NotFound from "@/pages/NotFound";
 
 const GamePage = () => {
   const { gameId } = useParams<{ gameId: string }>();
-  const navigate = useNavigate();
   const game = gameId ? gamesById[gameId] : null;
+  const [playingGameId, setPlayingGameId] = useState<string | null>(null);
   const [showExitDialog, setShowExitDialog] = useState(false);
   usePageSeo(game ? gameSeo(game) : notFoundSeo());
 
-  useEffect(() => {
-    if (!game) {
-      return;
-    }
-
-    trackGameStart(game);
-  }, [game]);
-
   if (!game) {
-    return <Navigate to="/" replace />;
+    return <NotFound />;
+  }
+
+  if (playingGameId !== game.id) {
+    return (
+      <GameLanding
+        game={game}
+        onPlay={() => {
+          trackGameStart(game);
+          setPlayingGameId(game.id);
+        }}
+      />
+    );
   }
 
   return (
@@ -47,7 +53,8 @@ const GamePage = () => {
         <button
           type="button"
           onClick={() => setShowExitDialog(true)}
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-foreground/10 bg-card text-muted-foreground transition-colors hover:text-foreground backdrop-blur"
+          aria-label={`Exit ${game.title}`}
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-foreground/10 bg-card text-muted-foreground transition-colors hover:text-foreground backdrop-blur"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
@@ -57,29 +64,22 @@ const GamePage = () => {
         src={game.url}
         title={game.title}
         className="h-full w-full border-0"
-        allow="autoplay; fullscreen; pointer-lock; accelerometer; gyroscope"
+        allow="autoplay; fullscreen; accelerometer; gyroscope"
       />
-
-      <main className="sr-only" aria-labelledby="game-title">
-        <h1 id="game-title">{game.title}</h1>
-        <p>{game.description}</p>
-        <p>{game.metaDescription}</p>
-        <a href={game.url}>Play {game.title} directly</a>
-        <a href="/">Browse all viggo.games browser games</a>
-      </main>
 
       <AlertDialog open={showExitDialog} onOpenChange={setShowExitDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Do you want to exit {game.title}?</AlertDialogTitle>
-            <AlertDialogDescription>You will return to the main page.</AlertDialogDescription>
+            <AlertDialogDescription>You will return to the {game.title} mission page.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 trackGameExit(game);
-                navigate("/");
+                setPlayingGameId(null);
+                setShowExitDialog(false);
               }}
             >
               Exit Game

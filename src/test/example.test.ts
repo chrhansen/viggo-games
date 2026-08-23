@@ -16,6 +16,13 @@ describe("games registry", () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
+  it("describes mobile sensor controls", () => {
+    expect(gamesById["hunter-guy"].controls).toContain("Device motion");
+    expect(gamesById.torpedo.controls).toEqual(
+      expect.arrayContaining(["Touch", "Device tilt"]),
+    );
+  });
+
   it("keeps homepage taglines available for every game", () => {
     expect(games.every((game) => game.tagline.trim().length > 0)).toBe(true);
   });
@@ -24,11 +31,14 @@ describe("games registry", () => {
     expect(
       games.every(
         (game) =>
-          game.routePath === `/${game.id}` &&
+          game.routePath === `/${game.id}/` &&
           game.urlPath === `/games/${game.id}/` &&
           game.description.length > game.tagline.length &&
           game.metaDescription.includes("viggo.games") &&
-          game.keywords.length >= 4,
+          game.keywords.length >= 4 &&
+          game.howToPlay.length === 3 &&
+          game.tips.length === 3 &&
+          game.imageAlt.length > game.title.length,
       ),
     ).toBe(true);
   });

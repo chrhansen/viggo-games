@@ -99,6 +99,6 @@ The browser stores:
 ## Deployment
 
 - Production game: `https://viggo.games/games/chicken-hop/`
-- Homepage route: `https://viggo.games/chicken-hop`
+- Homepage route: `https://viggo.games/chicken-hop/`
 - Workflow: `.github/workflows/pages.yml`
 - Trigger: push to `main`
