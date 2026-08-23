@@ -73,7 +73,6 @@ function spawnObstacle(
   x: number,
 ) {
   game.obstacles.push({
-    bob: randomBetween(game, 0, Math.PI * 2),
     color,
     height,
     id: nextEntityId(game),

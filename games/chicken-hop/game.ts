@@ -46,6 +46,7 @@ let idleElapsed = 0;
 const start = () => {
   audio.ensure();
   startChickenHopRun(game);
+  ui.persistBest(game.best);
   audio.handle(game.events);
   ui.hideOverlay();
   input.clear();

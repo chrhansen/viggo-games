@@ -1,9 +1,20 @@
+import type { ChickenColor, ChickenDesign } from "@viggo-games/chicken-hop-core";
+
+export {
+  defaultChickenProfile,
+  normalizeChickenName,
+  randomChickenName,
+  type ChickenColor,
+  type ChickenDesign,
+  type ChickenProfile,
+} from "@viggo-games/chicken-hop-core";
+
 export const chickenDesigns = [
   { id: "classic", label: "Classic" },
   { id: "spots", label: "Spots" },
   { id: "flame", label: "Flame" },
   { id: "robot", label: "Robot" },
-] as const;
+] as const satisfies readonly { id: ChickenDesign; label: string }[];
 
 export const chickenColors = [
   {
@@ -54,49 +65,14 @@ export const chickenColors = [
     wing: "#A9A7B8",
     ink: "rgba(0,0,0,0.22)",
   },
-] as const;
-
-export type ChickenDesign = (typeof chickenDesigns)[number]["id"];
-export type ChickenColor = (typeof chickenColors)[number]["id"];
-
-export interface ChickenProfile {
-  name: string;
-  design: ChickenDesign;
-  color: ChickenColor;
-}
-
-export const defaultChickenProfile: ChickenProfile = {
-  name: "Nugget",
-  design: "classic",
-  color: "butter",
-};
-
-export const chickenNames = [
-  "Nugget",
-  "Peep",
-  "Waffles",
-  "Biscuit",
-  "Sunny",
-  "Pip",
-  "Popcorn",
-  "Beans",
-  "Doodle",
-  "Sprinkles",
-  "Captain Cluck",
-  "Turbo Beak",
-] as const;
-
-export function normalizeChickenName(value: string) {
-  const name = value.replace(/\s+/g, " ").trim().slice(0, 14);
-  return name || defaultChickenProfile.name;
-}
-
-export function randomChickenName(currentName: string, random = Math.random) {
-  const normalizedCurrent = normalizeChickenName(currentName);
-  const choices = chickenNames.filter((name) => name !== normalizedCurrent);
-  const index = Math.min(choices.length - 1, Math.floor(Math.max(0, random()) * choices.length));
-  return choices[index] ?? defaultChickenProfile.name;
-}
+] as const satisfies readonly {
+  body: string;
+  id: ChickenColor;
+  ink: string;
+  label: string;
+  swatch: string;
+  wing: string;
+}[];
 
 export function getChickenPalette(color: ChickenColor) {
   return chickenColors.find((option) => option.id === color) ?? chickenColors[0];

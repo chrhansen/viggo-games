@@ -1,4 +1,4 @@
-import type { ChickenHopGame } from "@viggo-games/chicken-hop-core";
+import type { ChickenHopGame, ChickenProfile } from "@viggo-games/chicken-hop-core";
 import {
   drawChickenHopName,
   drawChickenHopPlayer,
@@ -9,7 +9,6 @@ import {
   drawChickenHopForeground,
   drawChickenHopRoom,
 } from "./canvas-room";
-import type { ChickenProfile } from "./profile";
 
 export class ChickenHopCanvasRenderer {
   private particles = new ChickenHopCanvasParticles();

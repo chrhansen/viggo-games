@@ -1,6 +1,5 @@
-import type { ChickenHopGame } from "@viggo-games/chicken-hop-core";
+import type { ChickenHopGame, ChickenProfile } from "@viggo-games/chicken-hop-core";
 import { clamp, lerp, roundedRect } from "./canvas-utils";
-import type { ChickenProfile } from "./profile";
 
 const palettes = {
   butter: {

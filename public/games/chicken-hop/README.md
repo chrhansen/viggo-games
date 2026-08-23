@@ -34,7 +34,7 @@ Touch devices show move, jump/fly, drop, pause, and restart controls.
 - Regular corn gives `+1 Corn` and `+60 Score`.
 - Gold corn gives `+3 Corn` and `+180 Score`.
 - Eggs remove one corn, never health, and never reduce corn below zero.
-- Flight has five seconds of fuel and refills after resting on the floor.
+- Flight has five seconds of fuel and refills after resting on a landing surface.
 - Obstacles spawn in clearable chunks with landing gaps.
 - Plateau shelves use stairs and one-way platform collision.
 
@@ -51,14 +51,15 @@ Shared core owns:
 - obstacles, stairs, shelves, corn, and egg spawning
 - collisions, health, score, pause, and time modes
 - semantic events such as `jump`, `flight-feather`, `land`, `hurt`, and `corn`
+- chicken profile option IDs, name normalization, and random-name selection
 
 Browser-only files under `games/chicken-hop/` own:
 
 - `game.ts`: browser loop and adapter wiring
-- `canvas-*.ts`: Canvas rendering and browser particles
+- `canvas-*.ts`: Canvas rendering, renderer palettes, and browser particles
 - `web-input.ts`: keyboard and pointer controls
 - `web-audio.ts`: WebAudio effects
-- `web-ui.ts` and `profile.ts`: DOM UI and local storage
+- `web-ui.ts`: DOM UI and local storage
 - `index.html`: browser entrypoint
 
 Native-only files under `mobile/` own:

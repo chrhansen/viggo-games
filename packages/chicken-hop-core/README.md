@@ -4,7 +4,7 @@ Platform-neutral rules engine used by both Chicken Hop renderers.
 
 ## Boundary
 
-Core owns state transitions, physics, spawning, collisions, scoring, health, deterministic randomness, pause/time modes, and semantic events. It must not import DOM, Canvas, React, React Native, audio, storage, or device APIs.
+Core owns state transitions, physics, spawning, collisions, scoring, health, deterministic randomness, pause/time modes, semantic events, and platform-neutral chicken profile rules. It must not import DOM, Canvas, React, React Native, audio, storage, or device APIs.
 
 Platform adapters own input collection, frame scheduling, rendering, effects, audio, persistence, lifecycle, and viewport projection.
 
@@ -19,6 +19,9 @@ Import from `src/index.ts`:
 - `setChickenHopTimeMode(game, mode)`
 - `resizeChickenHopGame(game, width, height)`
 - `snapshotChickenHopGame(game)`
+- `chickenColorIds`, `chickenDesignIds`, `chickenNames`, `defaultChickenProfile`
+- `normalizeChickenName(value)`
+- `randomChickenName(currentName, random?)`
 
 `advanceChickenHopGame` replaces `game.events` on every simulation step. A platform adapter must consume or publish events during that step; it must not assume events persist until a later render.
 

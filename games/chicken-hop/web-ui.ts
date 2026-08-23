@@ -1,15 +1,16 @@
-import type {
-  ChickenHopGame,
-  ChickenHopTimeMode,
-} from "@viggo-games/chicken-hop-core";
-import { lerp } from "./canvas-utils";
 import {
+  chickenColorIds,
+  chickenDesignIds,
   defaultChickenProfile,
   normalizeChickenName,
+  randomChickenName,
   type ChickenColor,
   type ChickenDesign,
+  type ChickenHopGame,
+  type ChickenHopTimeMode,
   type ChickenProfile,
-} from "./profile";
+} from "@viggo-games/chicken-hop-core";
+import { lerp } from "./canvas-utils";
 
 const BEST_KEY = "chicken_hop_best_v1";
 const NAME_KEY = "chicken_hop_name_v1";
@@ -21,15 +22,8 @@ const requiredElement = <ElementType extends Element>(id: string) => {
   return element as ElementType;
 };
 
-const allowedDesigns: ChickenDesign[] = ["classic", "spots", "flame", "robot"];
-const allowedColors: ChickenColor[] = [
-  "butter",
-  "red",
-  "blue",
-  "green",
-  "grape",
-  "charcoal",
-];
+const allowedDesigns: readonly ChickenDesign[] = chickenDesignIds;
+const allowedColors: readonly ChickenColor[] = chickenColorIds;
 
 export class ChickenHopWebUi {
   readonly cta = requiredElement<HTMLButtonElement>("cta");
@@ -184,24 +178,7 @@ export class ChickenHopWebUi {
   }
 
   private randomizeName() {
-    const names = [
-      "Nugget",
-      "Peep",
-      "Waffles",
-      "Biscuit",
-      "Sunny",
-      "Pip",
-      "Popcorn",
-      "Beans",
-      "Doodle",
-      "Sprinkles",
-      "Captain Cluck",
-      "Turbo Beak",
-    ];
-    let next = this.profile.name;
-    while (next === this.profile.name && names.length > 1) {
-      next = names[Math.floor(Math.random() * names.length)];
-    }
+    const next = randomChickenName(this.profile.name);
     this.profile.name = next;
     this.nameInput.value = next;
     this.persistProfile();

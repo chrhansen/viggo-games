@@ -9,6 +9,15 @@ export {
   toggleChickenHopPause,
 } from "./engine";
 
+export {
+  chickenColorIds,
+  chickenDesignIds,
+  chickenNames,
+  defaultChickenProfile,
+  normalizeChickenName,
+  randomChickenName,
+} from "./profile";
+
 export type {
   ChickenHopEgg,
   ChickenHopEvent,
@@ -25,3 +34,5 @@ export type {
   ChickenHopTimeMode,
   CreateChickenHopOptions,
 } from "./types";
+
+export type { ChickenColor, ChickenDesign, ChickenProfile } from "./profile";

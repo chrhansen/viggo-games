@@ -2,8 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import {
   advanceChickenHopGame as advanceCoreGame,
+  chickenColorIds,
+  chickenDesignIds,
   createChickenHopGame as createCoreGame,
   emptyChickenHopInput,
+  normalizeChickenName,
+  randomChickenName,
   resizeChickenHopGame as resizeCoreGame,
   setChickenHopTimeMode,
   snapshotChickenHopGame as snapshotCoreGame,
@@ -15,8 +19,6 @@ import {
 import {
   chickenColors,
   chickenDesigns,
-  normalizeChickenName,
-  randomChickenName,
 } from "../../mobile/src/game/chicken-hop/customization";
 import {
   advanceChickenHopGame as advanceMobileGame,
@@ -48,7 +50,6 @@ function placeFrontObstacle(game: ChickenHopCoreGame, id: number) {
   player.invulnerableFor = 0;
   game.obstacles = [
     {
-      bob: 0,
       color: "#FFD166",
       height: 40,
       id,
@@ -338,12 +339,8 @@ describe("Chicken Hop shared engine", () => {
 
 describe("Chicken Hop native customization", () => {
   it("matches the browser game's designs and color swatches", () => {
-    expect(chickenDesigns.map(({ id }) => id)).toEqual([
-      "classic",
-      "spots",
-      "flame",
-      "robot",
-    ]);
+    expect(chickenDesigns.map(({ id }) => id)).toEqual(chickenDesignIds);
+    expect(chickenColors.map(({ id }) => id)).toEqual(chickenColorIds);
     expect(chickenColors.map(({ id, swatch }) => [id, swatch])).toEqual([
       ["butter", "#FFF7EA"],
       ["red", "#FF3B30"],

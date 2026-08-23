@@ -1,5 +1,4 @@
 import {
-  finishChickenHopRunIfFallen,
   resolveChickenHopGround,
   resolveChickenHopInteractions,
 } from "./collisions";
@@ -82,7 +81,6 @@ export function createChickenHopGame(
     gravity: 2400,
     heartIndex: 0,
     hearts: [100, 100],
-    lastDelta: 0,
     mode: "ready",
     nextEntityId: 1,
     obstacleSpawner: {
@@ -134,7 +132,6 @@ function resetChickenHopRun(game: ChickenHopGame) {
     flyRefuelFor: 0,
     heartIndex: 0 as const,
     hearts: [100, 100] as [number, number],
-    lastDelta: 0,
     obstacleSpawner: {
       cooldown: 0.35,
       needsLanding: false,
@@ -216,7 +213,6 @@ export function advanceChickenHopGame(
 
   const realDelta = clamp(rawDelta, 0, 1 / 20);
   const dt = clamp(realDelta * game.timeScale, 0, 1 / 15);
-  game.lastDelta = dt;
   game.elapsed += dt;
   game.difficulty = clamp(game.difficulty + dt * 0.035, 0, 1);
   game.speed = lerp(360, 620, game.difficulty);
@@ -320,7 +316,6 @@ export function advanceChickenHopGame(
     : 0.4;
   player.animation += dt * runSpeed;
   resolveChickenHopInteractions(game);
-  finishChickenHopRunIfFallen(game);
 }
 
 export function snapshotChickenHopGame(game: ChickenHopGame): ChickenHopGame {

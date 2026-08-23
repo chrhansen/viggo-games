@@ -34,7 +34,6 @@ export interface ChickenHopGroundRef {
 export type ChickenHopObstacleKind = "block" | "book" | "plant" | "robot";
 
 export interface ChickenHopObstacle {
-  bob: number;
   color: string;
   height: number;
   id: number;
@@ -127,7 +126,6 @@ export interface ChickenHopGame {
   hearts: [number, number];
   height: number;
   jumpVelocity: number;
-  lastDelta: number;
   leftBound: number;
   mode: ChickenHopMode;
   nextEntityId: number;

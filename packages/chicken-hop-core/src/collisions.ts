@@ -204,7 +204,3 @@ export function resolveChickenHopInteractions(game: ChickenHopGame) {
     emitChickenHopEvent(game, "egg", { x: egg.x, y: egg.y });
   }
 }
-
-export function finishChickenHopRunIfFallen(game: ChickenHopGame) {
-  if (game.player.y > game.height + 80) endChickenHopRun(game);
-}
