@@ -3,7 +3,10 @@
     "name": "Viggo Games",
     "slug": "viggo-games",
     "version": "0.1.0",
-    "platforms": ["ios", "android"],
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "orientation": "default",
     "icon": "./assets/app-icon.png",
     "scheme": "viggo",
@@ -45,7 +48,8 @@
           "imageWidth": 180,
           "resizeMode": "contain"
         }
-      ]
+      ],
+      "expo-image"
     ],
     "experiments": {
       "typedRoutes": true

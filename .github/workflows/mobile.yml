@@ -4,11 +4,17 @@ on:
   pull_request:
     paths:
       - "mobile/**"
+      - "games/chicken-hop/**"
+      - "packages/chicken-hop-core/**"
+      - "src/test/chicken-hop-*.test.ts"
       - ".github/workflows/mobile.yml"
   push:
     branches: [main]
     paths:
       - "mobile/**"
+      - "games/chicken-hop/**"
+      - "packages/chicken-hop-core/**"
+      - "src/test/chicken-hop-*.test.ts"
       - ".github/workflows/mobile.yml"
   workflow_dispatch:
 
@@ -16,6 +22,34 @@ permissions:
   contents: read
 
 jobs:
+  shared-core:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
   native-bundle:
     runs-on: ubuntu-latest
     defaults:
@@ -23,10 +57,10 @@ jobs:
         working-directory: mobile
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm

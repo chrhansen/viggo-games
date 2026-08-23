@@ -30,6 +30,10 @@ npm run doctor
 npm run export:native
 ```
 
+Mobile CI runs this gate plus the root web/test gate for changes to the mobile app, shared Chicken Hop core, browser adapter, parity tests, or the workflow itself.
+
+`package.json` overrides only `xcode`'s deprecated `uuid` dependency. Remove that override once Expo's config plugins adopt an `xcode` release that no longer depends on `uuid@7`.
+
 ## Product constraints
 
 - Phones only for the first release. iPad support is disabled; Android layouts target compact phone screens.
@@ -49,7 +53,7 @@ Tap Chicken Hop on the selector, name the chicken, and choose one of four design
 - Front collisions with clutter drain two 100-point hearts; stairs and shelves are safe.
 - Regular corn gives `+1 Corn` and `+60 Score`; gold corn gives `+3 Corn` and `+180 Score`.
 - Eggs remove one corn, never health, and never reduce corn below zero.
-- Flight has five seconds of fuel and refills after resting on the floor.
+- Flight has five seconds of fuel and refills after resting on a landing surface.
 - Jumping and flying shed animated feathers.
 - The room and hazards use a 50% world camera while the chicken keeps its original on-screen size.
 - The game toolbar has a high-contrast pause/resume button.

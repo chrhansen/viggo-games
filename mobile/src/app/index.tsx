@@ -1,9 +1,11 @@
 import { StatusBar } from "expo-status-bar";
+import Constants from "expo-constants";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   Animated,
   type LayoutChangeEvent,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -15,6 +17,14 @@ import { ArcadeBackdrop } from "@/components/arcade-backdrop";
 import { MissionCard } from "@/components/mission-card";
 import { colors, fonts } from "@/constants/theme";
 import { gamePreviews } from "@/data/games";
+
+const configuredBuild =
+  Platform.OS === "ios"
+    ? Constants.expoConfig?.ios?.buildNumber
+    : Constants.expoConfig?.android?.versionCode;
+const buildLabel = configuredBuild
+  ? `BUILD ${String(configuredBuild).padStart(3, "0")}`
+  : "DEVELOPMENT BUILD";
 
 export default function GameSelectorScreen() {
   const router = useRouter();
@@ -79,7 +89,7 @@ export default function GameSelectorScreen() {
                 <View style={styles.onlineDot} />
                 <Text style={styles.systemText}>MOBILE ARCADE ONLINE</Text>
               </View>
-              <Text style={styles.buildText}>BUILD 002</Text>
+              <Text style={styles.buildText}>{buildLabel}</Text>
             </View>
 
             <Text
