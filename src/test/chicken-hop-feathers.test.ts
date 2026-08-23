@@ -7,28 +7,50 @@ import {
   type FeatherParticle,
 } from "../../mobile/src/components/chicken-hop/chicken-hop-feather-model";
 import {
+  advanceChickenHopGame,
   CHICKEN_HOP_WORLD_SCALE,
   createChickenHopGame,
   snapshotChickenHopGame,
   startChickenHopRun,
+  type ChickenHopEvent,
+  type ChickenHopGame,
 } from "../../mobile/src/game/chicken-hop/engine";
 
 const runningGame = () => {
-  const game = createChickenHopGame(390, 700, 42);
-  startChickenHopRun(game);
-  return game;
+  const engine = createChickenHopGame(390, 700, 42);
+  startChickenHopRun(engine);
+  return { engine, game: snapshotChickenHopGame(engine) };
 };
 
-describe("Chicken Hop native feathers", () => {
-  it("emits a deterministic nine-feather burst when the chicken jumps", () => {
-    const previous = runningGame();
-    const game = snapshotChickenHopGame(previous);
-    game.elapsed = 1 / 60;
-    game.player.onGround = false;
-    game.player.vy = -500;
+function withEvent(
+  previous: ChickenHopGame,
+  event: Omit<ChickenHopEvent, "id">,
+): ChickenHopGame {
+  const id =
+    previous.events.reduce(
+      (latest, current) => Math.max(latest, current.id),
+      0,
+    ) + 1;
+  return {
+    ...previous,
+    elapsed: previous.elapsed + 0.01,
+    events: [{ id, ...event }],
+  };
+}
 
+describe("Chicken Hop native feathers", () => {
+  it("turns the shared jump event into a deterministic nine-feather burst", () => {
+    const { engine, game: previous } = runningGame();
+
+    advanceChickenHopGame(
+      engine,
+      { jump: true, left: false, right: false },
+      1 / 60,
+    );
+    const game = snapshotChickenHopGame(engine);
     const state = advanceFeatherState(createFeatherState(), previous, game);
 
+    expect(game.events.map(({ type }) => type)).toContain("jump");
     expect(state.particles).toHaveLength(9);
     expect(state.particles.map(({ id }) => id)).toEqual([
       1, 2, 3, 4, 5, 6, 7, 8, 9,
@@ -39,13 +61,13 @@ describe("Chicken Hop native feathers", () => {
     }
   });
 
-  it("throttles repeated flight bursts and stops when fuel use stops", () => {
-    const previous = runningGame();
-    previous.player.onGround = false;
-    const firstFlight = snapshotChickenHopGame(previous);
-    firstFlight.elapsed = 0.2;
-    firstFlight.flyFuel -= 0.1;
-
+  it("consumes every shared flight event exactly once", () => {
+    const { game: previous } = runningGame();
+    const firstFlight = withEvent(previous, {
+      type: "flight-feather",
+      x: 200,
+      y: 300,
+    });
     const firstState = advanceFeatherState(
       createFeatherState(),
       previous,
@@ -53,37 +75,28 @@ describe("Chicken Hop native feathers", () => {
     );
     expect(firstState.particles).toHaveLength(3);
 
-    const throttledFlight = snapshotChickenHopGame(firstFlight);
-    throttledFlight.elapsed = 0.25;
-    throttledFlight.flyFuel -= 0.1;
-    const throttledState = advanceFeatherState(
-      firstState,
-      firstFlight,
-      throttledFlight,
-    );
-    expect(throttledState).toBe(firstState);
+    const duplicate = { ...firstFlight, elapsed: firstFlight.elapsed + 0.01 };
+    expect(advanceFeatherState(firstState, firstFlight, duplicate)).toBe(firstState);
 
-    const nextFlight = snapshotChickenHopGame(throttledFlight);
-    nextFlight.elapsed = 0.32;
-    nextFlight.flyFuel -= 0.1;
-    const nextState = advanceFeatherState(
-      throttledState,
-      throttledFlight,
-      nextFlight,
-    );
+    const nextFlight = withEvent(duplicate, {
+      type: "flight-feather",
+      x: 202,
+      y: 298,
+    });
+    const nextState = advanceFeatherState(firstState, duplicate, nextFlight);
     expect(nextState.particles).toHaveLength(6);
 
-    const coasting = snapshotChickenHopGame(nextFlight);
-    coasting.elapsed = 0.36;
+    const coasting = {
+      ...nextFlight,
+      elapsed: nextFlight.elapsed + 0.01,
+      events: [],
+    };
     expect(advanceFeatherState(nextState, nextFlight, coasting)).toBe(nextState);
   });
 
   it("emits hurt feathers, caps the field, expires particles, and resets runs", () => {
-    const previous = runningGame();
-    const hurtGame = snapshotChickenHopGame(previous);
-    hurtGame.elapsed = 0.01;
-    hurtGame.feedback = "hurt";
-    hurtGame.feedbackId += 1;
+    const { game: previous } = runningGame();
+    const hurtGame = withEvent(previous, { type: "hurt" });
     const hurtState = advanceFeatherState(
       createFeatherState(),
       previous,
@@ -99,16 +112,16 @@ describe("Chicken Hop native feathers", () => {
       })),
       nextParticleId: 56,
     };
-    const nextHurt = snapshotChickenHopGame(hurtGame);
-    nextHurt.elapsed = 0.02;
-    nextHurt.feedbackId += 1;
+    const nextHurt = withEvent(hurtGame, { type: "hurt" });
     const cappedState = advanceFeatherState(crowdedState, hurtGame, nextHurt);
     expect(cappedState.particles).toHaveLength(56);
     expect(cappedState.nextParticleId).toBe(67);
 
-    const expiredGame = snapshotChickenHopGame(nextHurt);
-    expiredGame.elapsed = 1;
-    expiredGame.feedback = null;
+    const expiredGame = {
+      ...nextHurt,
+      elapsed: 1,
+      events: [],
+    };
     const expiredState = advanceFeatherState(
       cappedState,
       nextHurt,
@@ -116,16 +129,18 @@ describe("Chicken Hop native feathers", () => {
     );
     expect(expiredState.particles).toHaveLength(0);
 
-    expiredState.lastFlightBurstAt = 0.5;
-    const readyGame = snapshotChickenHopGame(expiredGame);
-    readyGame.mode = "ready";
+    const restartedGame = {
+      ...expiredGame,
+      elapsed: 0,
+      events: [{ id: cappedState.lastEventId + 1, type: "start" as const }],
+    };
     const resetState = advanceFeatherState(
-      expiredState,
+      cappedState,
       expiredGame,
-      readyGame,
+      restartedGame,
     );
     expect(resetState.particles).toHaveLength(0);
-    expect(resetState.lastFlightBurstAt).toBe(Number.NEGATIVE_INFINITY);
+    expect(resetState.lastEventId).toBe(cappedState.lastEventId + 1);
   });
 
   it("computes particle position, spin, and fade from elapsed game time", () => {

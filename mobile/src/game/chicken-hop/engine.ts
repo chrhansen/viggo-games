@@ -1,414 +1,189 @@
-import type {
-  ChickenHopGame,
-  ChickenHopInput,
-  ChickenHopObstacle,
-  ChickenHopPlayer,
-} from "./types";
-import { updateChickenHopSpawners } from "./spawners";
-
-export type {
-  ChickenHopEgg,
-  ChickenHopGame,
-  ChickenHopInput,
-  ChickenHopMode,
-  ChickenHopObstacle,
-  ChickenHopPickup,
-  ChickenHopPlayer,
-} from "./types";
+import {
+  advanceChickenHopGame as advanceCoreGame,
+  createChickenHopGame as createCoreGame,
+  resizeChickenHopGame as resizeCoreGame,
+  snapshotChickenHopGame as snapshotCoreGame,
+  startChickenHopRun,
+  toggleChickenHopPause,
+  type ChickenHopEvent,
+  type ChickenHopGame as ChickenHopEngine,
+  type ChickenHopMode,
+} from "@viggo-games/chicken-hop-core";
 
 export const CHICKEN_HOP_WORLD_SCALE = 0.5;
 
 const worldUnits = (screenPixels: number) =>
   screenPixels / CHICKEN_HOP_WORLD_SCALE;
 
-const tuning = {
-  gravity: worldUnits(2250),
-  jumpVelocity: worldUnits(-735),
-  acceleration: worldUnits(2100),
-  maxHorizontalVelocity: worldUnits(330),
-  flyVelocity: worldUnits(-390),
-  flyDelay: 0.14,
-  flyRefuelDelay: 0.75,
-  damage: 20,
-  playerWidth: worldUnits(30),
-  playerHeight: worldUnits(25),
-  groundInset: worldUnits(6),
-  landingTolerance: worldUnits(2),
-  frontCollisionTolerance: worldUnits(4),
-} as const;
-
-const clamp = (value: number, minimum: number, maximum: number) =>
-  Math.max(minimum, Math.min(maximum, value));
-
-const lerp = (from: number, to: number, amount: number) => from + (to - from) * amount;
-
-const intersects = (
-  a: { x: number; y: number; width: number; height: number },
-  b: { x: number; y: number; width: number; height: number },
-) => a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y;
-
-function worldMetrics(width: number, height: number) {
-  const safeWidth = worldUnits(Math.max(280, width));
-  const safeHeight = worldUnits(Math.max(360, height));
-
-  return {
-    width: safeWidth,
-    height: safeHeight,
-    floorY: Math.floor(safeHeight * 0.72),
-    leftBound: Math.floor(safeWidth * 0.06),
-    rightBound: Math.floor(safeWidth * 0.64),
-  };
+export interface ChickenHopInput {
+  jump: boolean;
+  left: boolean;
+  right: boolean;
 }
 
-function createPlayer(metrics: ReturnType<typeof worldMetrics>): ChickenHopPlayer {
-  return {
-    x: metrics.leftBound + Math.floor(metrics.width * 0.15),
-    y: metrics.floorY - tuning.playerHeight,
-    vx: 0,
-    vy: 0,
-    width: tuning.playerWidth,
-    height: tuning.playerHeight,
-    onGround: true,
-    groundObstacleId: null,
-    jumpBuffer: 0,
-    coyote: 0.1,
-    flyHold: 0,
-    invulnerableFor: 0,
-  };
+export interface ChickenHopPlayer {
+  height: number;
+  invulnerableFor: number;
+  onGround: boolean;
+  vx: number;
+  vy: number;
+  width: number;
+  x: number;
+  y: number;
 }
 
-export function createChickenHopGame(width = 390, height = 700, seed = Date.now()): ChickenHopGame {
-  const metrics = worldMetrics(width, height);
-
-  return {
-    mode: "ready",
-    elapsed: 0,
-    score: 0,
-    best: 0,
-    corn: 0,
-    hearts: [100, 100],
-    heartIndex: 0,
-    flyFuel: 5,
-    flyFuelMax: 5,
-    flyRefuelFor: 0,
-    speed: worldUnits(245),
-    difficulty: 0,
-    scroll: 0,
-    ...metrics,
-    player: createPlayer(metrics),
-    obstacles: [],
-    pickups: [],
-    eggs: [],
-    obstacleTimer: 1.25,
-    platformTimer: 1.35,
-    pickupTimer: 1.75,
-    eggTimer: 3.4,
-    randomSeed: seed >>> 0,
-    nextEntityId: 1,
-    jumpWasHeld: false,
-    feedback: null,
-    feedbackId: 0,
-  };
+export interface ChickenHopObstacle {
+  color: string;
+  height: number;
+  id: number;
+  kind: "block" | "book" | "plant" | "robot" | "shelf" | "step";
+  width: number;
+  x: number;
+  y: number;
 }
 
-export function resizeChickenHopGame(game: ChickenHopGame, width: number, height: number) {
-  const previousFloorY = game.floorY;
-  const wasGrounded = game.player.onGround;
-  const metrics = worldMetrics(width, height);
-  const floorDelta = metrics.floorY - previousFloorY;
-  Object.assign(game, metrics);
-  game.player.x = clamp(game.player.x, game.leftBound, game.rightBound);
-  for (const obstacle of game.obstacles) {
-    obstacle.y =
-      game.floorY - (obstacle.floorOffset ?? obstacle.height);
-  }
-  for (const pickup of game.pickups) pickup.y += floorDelta;
-  for (const egg of game.eggs) egg.y = game.floorY - egg.radius * 1.1;
-
-  if (wasGrounded) {
-    const support = game.obstacles.find(
-      (obstacle) => obstacle.id === game.player.groundObstacleId,
-    );
-    game.player.y = (support?.y ?? game.floorY) - game.player.height;
-  } else {
-    game.player.y = clamp(
-      game.player.y + floorDelta,
-      Math.floor(game.height * 0.06),
-      game.floorY - game.player.height,
-    );
-  }
+export interface ChickenHopPickup {
+  id: number;
+  kind: "corn" | "gold-corn";
+  phase: number;
+  radius: number;
+  x: number;
+  y: number;
 }
 
-export function startChickenHopRun(game: ChickenHopGame) {
-  const best = Math.max(game.best, Math.floor(game.score));
-  const metrics = worldMetrics(
-    game.width * CHICKEN_HOP_WORLD_SCALE,
-    game.height * CHICKEN_HOP_WORLD_SCALE,
-  );
-  Object.assign(game, {
-    mode: "playing" as const,
-    elapsed: 0,
-    score: 0,
-    best,
-    corn: 0,
-    hearts: [100, 100] as [number, number],
-    heartIndex: 0 as const,
-    flyFuel: game.flyFuelMax,
-    flyRefuelFor: 0,
-    speed: worldUnits(245),
-    difficulty: 0,
-    scroll: 0,
-    obstacles: [],
-    pickups: [],
-    eggs: [],
-    obstacleTimer: 1.15,
-    platformTimer: 1.35,
-    pickupTimer: 1.6,
-    eggTimer: 3.2,
-    jumpWasHeld: false,
-    feedback: null,
-    ...metrics,
-  });
-  game.player = createPlayer(metrics);
+export interface ChickenHopEgg {
+  id: number;
+  phase: number;
+  radius: number;
+  x: number;
+  y: number;
 }
 
-export function toggleChickenHopPause(game: ChickenHopGame) {
-  if (game.mode === "playing") game.mode = "paused";
-  else if (game.mode === "paused") game.mode = "playing";
+export interface ChickenHopGame {
+  best: number;
+  corn: number;
+  eggs: ChickenHopEgg[];
+  elapsed: number;
+  events: ChickenHopEvent[];
+  flyFuel: number;
+  flyFuelMax: number;
+  floorY: number;
+  hearts: [number, number];
+  height: number;
+  mode: ChickenHopMode;
+  obstacles: ChickenHopObstacle[];
+  pickups: ChickenHopPickup[];
+  player: ChickenHopPlayer;
+  score: number;
+  scroll: number;
+  width: number;
 }
 
-function setFeedback(game: ChickenHopGame, feedback: ChickenHopGame["feedback"]) {
-  game.feedback = feedback;
-  game.feedbackId += 1;
-}
+export type { ChickenHopEngine, ChickenHopEvent, ChickenHopMode };
+export { startChickenHopRun, toggleChickenHopPause };
 
-function moveWorld(game: ChickenHopGame, dt: number) {
-  const shift = game.speed * dt;
-  for (const obstacle of game.obstacles) obstacle.x -= shift;
-  for (const pickup of game.pickups) {
-    pickup.x -= shift;
-    pickup.phase += dt * 6;
-  }
-  for (const egg of game.eggs) {
-    egg.x -= shift;
-    egg.phase += dt * 4;
-  }
-  const cleanupEdge = worldUnits(-60);
-  game.obstacles = game.obstacles.filter((obstacle) => obstacle.x + obstacle.width > cleanupEdge);
-  game.pickups = game.pickups.filter((pickup) => pickup.x + pickup.radius > cleanupEdge);
-  game.eggs = game.eggs.filter((egg) => egg.x + egg.radius > cleanupEdge);
-}
-
-function hurtPlayer(game: ChickenHopGame, obstacle: ChickenHopObstacle) {
-  const player = game.player;
-  if (player.invulnerableFor > 0) return;
-
-  game.hearts[game.heartIndex] = Math.max(0, game.hearts[game.heartIndex] - tuning.damage);
-  player.invulnerableFor = 1;
-  player.vx = worldUnits(-245);
-  player.vy = worldUnits(-330);
-  player.onGround = false;
-  player.groundObstacleId = null;
-  player.x = clamp(
-    obstacle.x - player.width - worldUnits(8),
-    game.leftBound,
-    game.rightBound,
-  );
-  setFeedback(game, "hurt");
-
-  if (game.hearts[game.heartIndex] > 0) return;
-  if (game.heartIndex === 0) {
-    game.heartIndex = 1;
-    player.invulnerableFor = 1.3;
-    setFeedback(game, "life");
-    return;
-  }
-
-  game.mode = "gameover";
-  game.best = Math.max(game.best, Math.floor(game.score));
-}
-
-function resolveGround(game: ChickenHopGame, previousY: number, wasGrounded: boolean) {
-  const player = game.player;
-  const previousBottom = previousY + player.height;
-  const bottom = player.y + player.height;
-  let landed = false;
-
-  if (player.groundObstacleId !== null && wasGrounded) {
-    const support = game.obstacles.find((obstacle) => obstacle.id === player.groundObstacleId);
-    const overlaps =
-      support &&
-      player.x + player.width - tuning.groundInset > support.x &&
-      player.x + tuning.groundInset < support.x + support.width;
-    if (support && overlaps) {
-      player.y = support.y - player.height;
-      player.vy = 0;
-      player.onGround = true;
-      landed = true;
-    } else {
-      player.groundObstacleId = null;
-    }
-  }
-
-  if (!landed && player.vy >= 0) {
-    for (const obstacle of game.obstacles) {
-      const overlaps =
-        player.x + player.width - tuning.groundInset > obstacle.x &&
-        player.x + tuning.groundInset < obstacle.x + obstacle.width;
-      if (
-        overlaps &&
-        previousBottom <= obstacle.y + tuning.landingTolerance &&
-        bottom >= obstacle.y
-      ) {
-        player.y = obstacle.y - player.height;
-        player.vy = 0;
-        player.onGround = true;
-        player.groundObstacleId = obstacle.id;
-        landed = true;
-        break;
-      }
-    }
-  }
-
-  if (!landed && player.y + player.height >= game.floorY) {
-    player.y = game.floorY - player.height;
-    player.vy = 0;
-    player.onGround = true;
-    player.groundObstacleId = null;
-    landed = true;
-  }
-
-  if (!landed) {
-    player.onGround = false;
-    player.groundObstacleId = null;
-  }
-}
-
-function resolveEntityCollisions(game: ChickenHopGame) {
-  const player = game.player;
-  const horizontalInset = Math.max(4, player.width * 0.17);
-  const verticalInset = Math.max(3, player.height * 0.16);
-  const hitbox = {
-    x: player.x + horizontalInset,
-    y: player.y + verticalInset,
-    width: player.width - horizontalInset * 2,
-    height: player.height - verticalInset * 1.45,
-  };
-
-  for (const obstacle of game.obstacles) {
-    if (obstacle.kind === "shelf" || obstacle.kind === "step") continue;
-    if (!intersects(hitbox, obstacle) || player.groundObstacleId === obstacle.id) continue;
-    const playerCenter = player.x + player.width / 2;
-    const obstacleCenter = obstacle.x + obstacle.width / 2;
-    if (
-      playerCenter <= obstacleCenter &&
-      hitbox.y + hitbox.height > obstacle.y + tuning.frontCollisionTolerance
-    ) {
-      hurtPlayer(game, obstacle);
-      break;
-    }
-  }
-
-  game.pickups = game.pickups.filter((pickup) => {
-    const bobY = pickup.y + Math.sin(pickup.phase) * worldUnits(5);
-    const pickupBox = {
-      x: pickup.x - pickup.radius,
-      y: bobY - pickup.radius,
-      width: pickup.radius * 2,
-      height: pickup.radius * 2,
-    };
-    if (!intersects(hitbox, pickupBox)) return true;
-    game.corn += pickup.value;
-    game.score += 60 * pickup.value;
-    setFeedback(game, "corn");
-    return false;
-  });
-
-  game.eggs = game.eggs.filter((egg) => {
-    const eggBox = {
-      x: egg.x - egg.radius,
-      y: egg.y - egg.radius,
-      width: egg.radius * 2,
-      height: egg.radius * 2,
-    };
-    if (!intersects(hitbox, eggBox)) return true;
-    game.corn = Math.max(0, game.corn - 1);
-    setFeedback(game, "egg");
-    return false;
+export function createChickenHopGame(
+  width = 390,
+  height = 700,
+  seed = Date.now(),
+): ChickenHopEngine {
+  return createCoreGame({
+    height: worldUnits(height),
+    seed,
+    width: worldUnits(width),
   });
 }
 
-export function advanceChickenHopGame(game: ChickenHopGame, input: ChickenHopInput, rawDt: number) {
-  if (game.mode !== "playing") return;
-
-  const dt = clamp(rawDt, 0, 1 / 20);
-  const player = game.player;
-  game.feedback = null;
-  game.elapsed += dt;
-  game.difficulty = clamp(game.difficulty + dt * 0.025, 0, 1);
-  game.speed = lerp(worldUnits(245), worldUnits(430), game.difficulty);
-  game.scroll += game.speed * dt;
-  game.score += dt * (
-    18 + game.speed * CHICKEN_HOP_WORLD_SCALE * 0.025
-  );
-  player.invulnerableFor = Math.max(0, player.invulnerableFor - dt);
-
-  if (input.left) player.vx -= tuning.acceleration * dt;
-  if (input.right) player.vx += tuning.acceleration * dt;
-  if (!input.left && !input.right) player.vx *= Math.pow(0.0008, dt);
-  player.vx = clamp(player.vx, -tuning.maxHorizontalVelocity, tuning.maxHorizontalVelocity);
-
-  if (input.jump && !game.jumpWasHeld) player.jumpBuffer = 0.12;
-  else player.jumpBuffer = Math.max(0, player.jumpBuffer - dt);
-  player.coyote = player.onGround ? 0.1 : Math.max(0, player.coyote - dt);
-  player.flyHold = input.jump ? player.flyHold + dt : 0;
-
-  if (player.jumpBuffer > 0 && player.coyote > 0) {
-    player.jumpBuffer = 0;
-    player.coyote = 0;
-    player.onGround = false;
-    player.groundObstacleId = null;
-    player.vy = tuning.jumpVelocity;
-  }
-
-  const flying = input.jump && !player.onGround && player.flyHold > tuning.flyDelay && game.flyFuel > 0;
-  if (flying) {
-    game.flyFuel = Math.max(0, game.flyFuel - dt);
-    game.flyRefuelFor = tuning.flyRefuelDelay;
-    player.vy = lerp(player.vy, tuning.flyVelocity, 1 - Math.pow(0.002, dt));
-  }
-
-  const wasGrounded = player.onGround;
-  const previousY = player.y;
-  player.vy += tuning.gravity * dt;
-  player.x = clamp(player.x + player.vx * dt, game.leftBound, game.rightBound);
-  player.y += player.vy * dt;
-  const ceiling = Math.floor(game.height * 0.06);
-  if (player.y < ceiling) {
-    player.y = ceiling;
-    player.vy = Math.max(0, player.vy);
-  }
-
-  updateChickenHopSpawners(game, dt);
-  moveWorld(game, dt);
-  resolveGround(game, previousY, wasGrounded);
-  resolveEntityCollisions(game);
-
-  if (player.onGround && game.flyFuel < game.flyFuelMax) {
-    game.flyRefuelFor = Math.max(0, game.flyRefuelFor - dt);
-    if (game.flyRefuelFor <= 0) game.flyFuel = game.flyFuelMax;
-  }
-
-  game.jumpWasHeld = input.jump;
+export function resizeChickenHopGame(
+  game: ChickenHopEngine,
+  width: number,
+  height: number,
+) {
+  resizeCoreGame(game, worldUnits(width), worldUnits(height));
 }
 
-export function snapshotChickenHopGame(game: ChickenHopGame): ChickenHopGame {
+export function advanceChickenHopGame(
+  game: ChickenHopEngine,
+  input: ChickenHopInput,
+  rawDelta: number,
+) {
+  advanceCoreGame(game, { ...input, down: false }, rawDelta);
+}
+
+export function snapshotChickenHopGame(
+  engine: ChickenHopEngine,
+): ChickenHopGame {
+  const game = snapshotCoreGame(engine);
+  const visualWidth = worldUnits(30);
+  const visualHeight = worldUnits(25);
+  const playerX = game.player.x - (visualWidth - game.player.width) / 2;
+  const playerY = game.player.y - (visualHeight - game.player.height);
+
   return {
-    ...game,
-    hearts: [game.hearts[0], game.hearts[1]],
-    player: { ...game.player },
-    obstacles: game.obstacles.map((obstacle) => ({ ...obstacle })),
-    pickups: game.pickups.map((pickup) => ({ ...pickup })),
-    eggs: game.eggs.map((egg) => ({ ...egg })),
+    best: game.best,
+    corn: game.corn,
+    eggs: game.eggs
+      .filter(({ smashed }) => !smashed)
+      .map((egg) => ({
+        id: egg.id,
+        phase: egg.elapsed,
+        radius: egg.radius,
+        x: egg.x,
+        y: egg.y,
+      })),
+    elapsed: game.elapsed,
+    events: game.events,
+    flyFuel: game.flyFuel,
+    flyFuelMax: game.flyFuelMax,
+    floorY: game.floorY,
+    hearts: game.hearts,
+    height: game.height,
+    mode: game.mode,
+    obstacles: [
+      ...game.obstacles.map((obstacle) => ({
+        color: obstacle.color,
+        height: obstacle.height,
+        id: obstacle.id,
+        kind: obstacle.kind,
+        width: obstacle.width,
+        x: obstacle.x,
+        y: obstacle.y,
+      })),
+      ...game.platforms.map((platform) => ({
+        color: "#2EE59D",
+        height:
+          platform.kind === "step"
+            ? platform.floorOffset
+            : platform.height,
+        id: platform.id,
+        kind: platform.kind,
+        width: platform.width,
+        x: platform.x,
+        y: platform.y,
+      })),
+    ],
+    pickups: game.pickups
+      .filter(({ taken }) => !taken)
+      .map((pickup) => ({
+        id: pickup.id,
+        kind: pickup.kind,
+        phase: pickup.elapsed,
+        radius: pickup.radius,
+        x: pickup.x,
+        y: pickup.y,
+      })),
+    player: {
+      height: visualHeight,
+      invulnerableFor: game.player.invulnerableFor,
+      onGround: game.player.onGround,
+      vx: game.player.vx,
+      vy: game.player.vy,
+      width: visualWidth,
+      x: playerX,
+      y: playerY,
+    },
+    score: game.score,
+    scroll: game.scroll,
+    width: game.width,
   };
 }

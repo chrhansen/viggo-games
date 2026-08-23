@@ -100,7 +100,10 @@ export default function ChickenHopScreen() {
       const wasPlaying = engine.mode === "playing";
       advanceChickenHopGame(engine, inputRef.current, dt);
 
-      if (wasPlaying && time - previousRender >= 1000 / 30) {
+      if (
+        wasPlaying &&
+        (engine.events.length > 0 || time - previousRender >= 1000 / 30)
+      ) {
         publishGame();
         previousRender = time;
       }

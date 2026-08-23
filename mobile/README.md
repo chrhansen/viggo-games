@@ -35,7 +35,7 @@ npm run export:native
 - Phones only for the first release. iPad support is disabled; Android layouts target compact phone screens.
 - Child-directed app: no analytics, advertising, accounts, external links, or data collection. Production requests no runtime permissions; development clients may request local-network access to reach Metro.
 - No WebView. Games must be implemented with React Native and Expo-compatible native libraries.
-- Chicken Hop is implemented with React Native views and a TypeScript game engine; it does not reuse the browser canvas or WebView.
+- Chicken Hop uses React Native views around the same platform-neutral TypeScript engine as the browser game. It does not reuse the browser Canvas renderer or a WebView.
 
 Any future analytics, third-party SDK, account, communication, or external-link feature needs a child-privacy review before implementation.
 
@@ -56,3 +56,13 @@ Tap Chicken Hop on the selector, name the chicken, and choose one of four design
 - Leaving the app pauses an active run automatically.
 
 This review slice intentionally defers sound effects, persistent personalization, and persistent best-score storage. Those should follow after the native movement and game feel are approved.
+
+## Chicken Hop architecture
+
+- `../packages/chicken-hop-core/`: shared state, deterministic random stream, physics, movement, spawning, collision rules, scoring, health, pause/time modes, and semantic game events.
+- `src/game/chicken-hop/engine.ts`: native adapter. Converts phone pixels to the 50% world camera and projects shared state into the React Native render model.
+- `src/components/chicken-hop/`: native renderer and native-only effects.
+- `../games/chicken-hop/`: browser Canvas renderer, browser controls, WebAudio, and local storage UI.
+- `metro.config.js`: lets Metro watch and bundle the shared package outside `mobile/`.
+
+Browser and mobile parity is covered by a seeded input-timeline test in `../src/test/chicken-hop-engine.test.ts`. A gameplay rule belongs in the shared package unless it requires a browser or React Native API.

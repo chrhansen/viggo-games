@@ -6,6 +6,14 @@ import { componentTagger } from "lovable-tagger";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   base: "./",
+  build: {
+    rollupOptions: {
+      input: {
+        chickenHop: path.resolve(__dirname, "games/chicken-hop/index.html"),
+        main: path.resolve(__dirname, "index.html"),
+      },
+    },
+  },
   server: {
     host: "::",
     port: 8080,

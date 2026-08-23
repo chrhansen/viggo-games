@@ -60,8 +60,10 @@ describe("Chicken Hop native presentation regressions", () => {
     expect(scene).toContain("ChickenHopFeathers");
     expect(scene).toContain("transformOrigin: \"top left\"");
     expect(feathers).toContain("advanceFeatherState");
-    expect(featherModel).toContain("previous.player.onGround");
-    expect(featherModel).toContain("previous.flyFuel > game.flyFuel");
+    expect(featherModel).toContain("game.events");
+    expect(featherModel).toContain('event.type === "jump"');
+    expect(featherModel).toContain('event.type === "flight-feather"');
+    expect(screen).toContain("engine.events.length > 0");
     expect(screen).toContain('game.mode === "paused" ? "▶  RESUME" : "Ⅱ  PAUSE"');
     expect(screen).toContain("styles.pauseButton");
   });

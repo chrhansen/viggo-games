@@ -17,13 +17,13 @@ export interface FeatherParticle {
 }
 
 export interface FeatherState {
-  lastFlightBurstAt: number;
+  lastEventId: number;
   nextParticleId: number;
   particles: FeatherParticle[];
 }
 
 export const createFeatherState = (): FeatherState => ({
-  lastFlightBurstAt: Number.NEGATIVE_INFINITY,
+  lastEventId: 0,
   nextParticleId: 1,
   particles: [],
 });
@@ -45,32 +45,21 @@ export function advanceFeatherState(
   game: ChickenHopGame,
 ): FeatherState {
   if (game.mode === "ready" || game.elapsed < previous.elapsed) {
-    if (
-      state.particles.length === 0 &&
-      state.lastFlightBurstAt === Number.NEGATIVE_INFINITY
-    ) {
-      return state;
-    }
+    const lastEventId = game.events.reduce(
+      (latest, event) => Math.max(latest, event.id),
+      state.lastEventId,
+    );
+    if (state.particles.length === 0 && lastEventId === state.lastEventId) return state;
     return {
       ...state,
-      lastFlightBurstAt: Number.NEGATIVE_INFINITY,
+      lastEventId,
       particles: [],
     };
   }
 
-  const jumped =
-    previous.player.onGround &&
-    !game.player.onGround &&
-    game.player.vy < 0;
-  const flying =
-    !game.player.onGround &&
-    previous.flyFuel > game.flyFuel;
-  const hurt =
-    game.feedback === "hurt" &&
-    game.feedbackId !== previous.feedbackId;
   const spawned: FeatherParticle[] = [];
   let nextParticleId = state.nextParticleId;
-  let lastFlightBurstAt = state.lastFlightBurstAt;
+  let lastEventId = state.lastEventId;
 
   const spawnBurst = (count: number, x: number, y: number) => {
     for (let index = 0; index < count; index += 1) {
@@ -92,14 +81,16 @@ export function advanceFeatherState(
     }
   };
 
-  const originX = game.player.x + game.player.width * 0.48;
-  const originY = game.player.y + game.player.height * 0.62;
-  if (jumped) spawnBurst(9, originX, originY);
-  if (flying && game.elapsed - lastFlightBurstAt >= 0.11) {
-    spawnBurst(3, originX, originY);
-    lastFlightBurstAt = game.elapsed;
+  for (const event of game.events) {
+    if (event.id <= state.lastEventId) continue;
+    lastEventId = Math.max(lastEventId, event.id);
+    const originX = event.x ?? game.player.x + game.player.width * 0.48;
+    const originY = event.y ?? game.player.y + game.player.height * 0.62;
+    if (event.type === "jump") spawnBurst(9, originX, originY);
+    else if (event.type === "flight-feather") spawnBurst(3, originX, originY);
+    else if (event.type === "hurt") spawnBurst(11, originX, originY);
+    else if (event.type === "corn") spawnBurst(8, originX, originY);
   }
-  if (hurt) spawnBurst(11, originX, originY);
 
   const particles = state.particles.filter(
     (feather) => game.elapsed - feather.bornAt < feather.lifetime,
@@ -107,13 +98,13 @@ export function advanceFeatherState(
   if (
     spawned.length === 0 &&
     particles.length === state.particles.length &&
-    lastFlightBurstAt === state.lastFlightBurstAt
+    lastEventId === state.lastEventId
   ) {
     return state;
   }
 
   return {
-    lastFlightBurstAt,
+    lastEventId,
     nextParticleId,
     particles: [...particles, ...spawned].slice(-56),
   };
