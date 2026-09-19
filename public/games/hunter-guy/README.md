@@ -1,6 +1,6 @@
 # Hunter Guy (Browser Prototype)
 
-Simple first-person browser game.
+First-person browser game with a detailed procedural forest.
 Player in forest.
 Tools on belt.
 Targets: foxes, deer, bears.
@@ -92,14 +92,22 @@ If behavior looks stale, hard refresh (`Cmd+Shift+R`).
   - Dense tree population with a small spawn clearing
   - Main animation loop
   - controls card auto-hide timing
+- `collisions.js`
+  - Player movement collision, sliding, and tree/animal/hunter body bounds
 - `player-controls.js`
   - Desktop pointer-lock look + keyboard movement
   - Touch D-pad movement + drag-to-look
   - Device orientation look offset on supported phones/tablets
   - Relative motion baseline + rotation-aware device look handling
   - session active hook used by helper-card timing
+- `forest.js`
+  - Instanced pine and broadleaf trees, grass, rocks, fallen logs, and a static sky
+- `nature-materials.js`
+  - Seeded procedural bark, foliage, ground, and fur textures; grass wind shader
+- `animal-models.js`
+  - Rounded fox, deer, and bear anatomy, facial details, antlers, paws, and legs
 - `wildlife.js`
-  - Animal models/spawn counts
+  - Animal spawn counts
   - Animal roaming behavior
   - Damage/HP logic (`applyDamage`)
   - Scare logic (`squirt`)
@@ -112,11 +120,23 @@ If behavior looks stale, hard refresh (`Cmd+Shift+R`).
   - Procedural SFX for rifle, bow, knife, and squirt gun
   - Lazy audio init + browser-safe warmup/resume on user click
 
+## Visual Detail
+
+- Textures are generated locally at startup; no extra downloads or build step.
+- Trees, foliage, grass, rocks, and logs use shared instanced geometry.
+- Pine and broadleaf canopies, tapered trunks, textured ground, and a worn trail add depth. Grass sways; canopies and clouds stay static. Animals have alternating leg movement, subtle body/head motion, and fox tail sway.
+- Fur bump maps, eyes, muzzles, ears, branched antlers, hooves, claws, and lower-resolution rounded bodies distinguish the animals.
+- Warm sunlight, atmospheric haze, and a 1024px shadow map follow the player.
+- Rendering uses 18,000 grass blades, 14 pine / 12 broadleaf foliage cards per tree, and a maximum 1.25 pixel ratio. Foliage casts no shadows.
+- The player collides with tree trunks, living animals, and hunters, sliding around them. Grass, rocks, logs, and foliage remain decorative.
+- Collision uses a static tree grid, moving body circles, and movement substeps to prevent crossing trunks during slow frames. Tagged animals stop blocking movement.
+
 ## Current Defaults
 
 - Tree density: `TREE_COUNT = 540` (`game.js`)
 - Spawn clearing: `PLAYER_CLEARING_RADIUS = 14` (`game.js`)
 - Knife reach: `weaponStats.knife.range = 5` (`game.js`)
+- Human patrol pace: `HUNTER_SPEED_SCALE = 0.4` (`game.js`), 40% of the original speed
 - Wildlife pace: `ANIMAL_SPEED_SCALE = 0.5` (`wildlife.js`)
 - Wildlife move/idle windows: `moveMin/moveMax` + `idleMin/idleMax` per species (`wildlife.js`)
 
