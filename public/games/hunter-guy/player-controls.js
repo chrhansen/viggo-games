@@ -25,7 +25,7 @@ export function createPlayerControls({
   fireBtn,
   lookRangeRadians,
   terrainHeight,
-  clampToWorld,
+  movePlayer,
   playerHeight,
   setMessage,
   warmupAudio,
@@ -507,18 +507,20 @@ export function createPlayerControls({
     const strafeInput = touchMove.x;
     const inputLength = Math.hypot(strafeInput, forwardInput);
 
+    let dx = 0;
+    let dz = 0;
     if (inputLength > 0) {
       const moveYaw = manualYaw + deviceLook.yaw;
       const distance = speed * delta;
       const forward = forwardInput / Math.max(1, inputLength);
       const strafe = strafeInput / Math.max(1, inputLength);
-      camera.position.x +=
+      dx =
         (-Math.sin(moveYaw) * forward + Math.cos(moveYaw) * strafe) * distance;
-      camera.position.z +=
+      dz =
         (-Math.cos(moveYaw) * forward - Math.sin(moveYaw) * strafe) * distance;
     }
 
-    clampToWorld(camera);
+    movePlayer(dx, dz);
     camera.position.y = terrainHeight(camera.position.x, camera.position.z) + playerHeight;
   }
 

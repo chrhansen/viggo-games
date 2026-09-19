@@ -3,10 +3,14 @@ import { createPlayerControls } from "./player-controls.js";
 import { createWeaponEffects } from "./weapon-effects.js";
 import { createWeaponSoundEffects } from "./weapon-sfx.js";
 import { createWildlife } from "./wildlife.js";
+import { createForest, createSky } from "./forest.js";
+import { createCollisionWorld, movingBodyCircles } from "./collisions.js";
+import { natureTexture } from "./nature-materials.js";
 
 const WORLD_HALF = 180;
 const PLAYER_HEIGHT = 1.8;
 const HUNTER_COUNT = 5;
+const HUNTER_SPEED_SCALE = 0.4;
 const TREE_COUNT = 540;
 const PLAYER_CLEARING_RADIUS = 14;
 
@@ -25,7 +29,7 @@ const fireBtn = document.getElementById("fire-btn");
 const CONTROLS_CARD_TIMEOUT_MS = 10000;
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.Fog(0x9fc3a3, 55, 320);
+scene.fog = new THREE.Fog(0xb9ccca, 65, 290);
 
 const camera = new THREE.PerspectiveCamera(
   72,
@@ -37,37 +41,35 @@ camera.rotation.order = "YXZ";
 scene.add(camera);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.15;
 root.appendChild(renderer.domElement);
 
 const LOOK_RANGE_RADIANS = THREE.MathUtils.degToRad(15);
 
-const hemiLight = new THREE.HemisphereLight(0xb9e0ff, 0x355426, 1.06);
+const hemiLight = new THREE.HemisphereLight(0xc3d9ed, 0x5b6040, 1.8);
 scene.add(hemiLight);
 
-const sun = new THREE.DirectionalLight(0xfff2d6, 1.1);
-sun.position.set(70, 120, 20);
+const sun = new THREE.DirectionalLight(0xffe3b0, 2.5);
+sun.position.set(-45, 65, -35);
 sun.castShadow = true;
 sun.shadow.mapSize.width = 1024;
 sun.shadow.mapSize.height = 1024;
-sun.shadow.camera.left = -190;
-sun.shadow.camera.right = 190;
-sun.shadow.camera.top = 190;
-sun.shadow.camera.bottom = -190;
+sun.shadow.camera.left = -48;
+sun.shadow.camera.right = 48;
+sun.shadow.camera.top = 48;
+sun.shadow.camera.bottom = -48;
+sun.shadow.bias = -0.0003;
+sun.shadow.normalBias = 0.035;
 scene.add(sun);
+scene.add(sun.target);
 
-const sky = new THREE.Mesh(
-  new THREE.SphereGeometry(500, 32, 16),
-  new THREE.MeshBasicMaterial({
-    color: 0x9fc3a3,
-    side: THREE.BackSide,
-  })
-);
-scene.add(sky);
+createSky(scene);
 
 function terrainHeight(x, z) {
   return (
@@ -95,10 +97,25 @@ for (let i = 0; i < terrainPos.count; i += 1) {
   terrainPos.setY(i, terrainHeight(x, z));
 }
 terrainGeo.computeVertexNormals();
+const groundTexture = natureTexture("ground");
+groundTexture.repeat.set(95, 95);
+const groundColors = [];
+const groundTint = new THREE.Color();
+for (let i = 0; i < terrainPos.count; i++) {
+  const x = terrainPos.getX(i), z = terrainPos.getZ(i);
+  const path = Math.exp(-Math.pow((x - Math.sin(z * 0.032) * 8) / 3, 2));
+  groundTint.set(0x5b6940).lerp(new THREE.Color(0x998369), path * 0.8);
+  groundTint.multiplyScalar(0.88 + Math.sin(x * 0.3) * Math.cos(z * 0.25) * 0.12);
+  groundColors.push(groundTint.r, groundTint.g, groundTint.b);
+}
+terrainGeo.setAttribute("color", new THREE.Float32BufferAttribute(groundColors, 3));
 const terrain = new THREE.Mesh(
   terrainGeo,
   new THREE.MeshStandardMaterial({
-    color: 0x466f3c,
+    map: groundTexture,
+    bumpMap: groundTexture,
+    bumpScale: 0.08,
+    vertexColors: true,
     roughness: 0.9,
     metalness: 0,
   })
@@ -106,35 +123,7 @@ const terrain = new THREE.Mesh(
 terrain.receiveShadow = true;
 scene.add(terrain);
 
-const treeTrunkMat = new THREE.MeshStandardMaterial({ color: 0x654124, roughness: 0.95 });
-const treeLeafMat = new THREE.MeshStandardMaterial({ color: 0x2c6f33, roughness: 0.85 });
-
-for (let i = 0; i < TREE_COUNT; i += 1) {
-  const x = randomInWorld(8);
-  const z = randomInWorld(8);
-  if (Math.hypot(x, z) < PLAYER_CLEARING_RADIUS) {
-    continue;
-  }
-
-  const h = THREE.MathUtils.randFloat(3.5, 8.7);
-  const trunk = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.32, 0.4, h, 6),
-    treeTrunkMat
-  );
-  const baseY = terrainHeight(x, z);
-  trunk.position.set(x, baseY + h / 2, z);
-  trunk.castShadow = true;
-  trunk.receiveShadow = true;
-  scene.add(trunk);
-
-  const leaves = new THREE.Mesh(
-    new THREE.ConeGeometry(THREE.MathUtils.randFloat(1.8, 3.4), h * 0.92, 8),
-    treeLeafMat
-  );
-  leaves.position.set(x, baseY + h + 1.6, z);
-  leaves.castShadow = true;
-  scene.add(leaves);
-}
+const forest = createForest(scene, terrainHeight, TREE_COUNT, PLAYER_CLEARING_RADIUS);
 
 const wildlife = createWildlife({
   scene,
@@ -349,7 +338,14 @@ function tryUseWeapon() {
   }
 }
 
+const collisions = createCollisionWorld(
+  forest.colliders,
+  () => movingBodyCircles(wildlife.animals, hunters),
+  WORLD_HALF
+);
+
 const controls = createPlayerControls({
+  movePlayer: (dx, dz) => collisions.move(camera.position, dx, dz),
   camera,
   renderer,
   overlay,
@@ -384,7 +380,7 @@ controls.showStartPrompt();
 
 function updateHunters(delta) {
   hunters.forEach((hunter) => {
-    hunter.angle += hunter.speed * delta;
+    hunter.angle += hunter.speed * HUNTER_SPEED_SCALE * delta;
     const x = hunter.center.x + Math.cos(hunter.angle) * hunter.patrolRadius;
     const z = hunter.center.y + Math.sin(hunter.angle) * hunter.patrolRadius;
     hunter.group.position.set(x, terrainHeight(x, z), z);
@@ -407,11 +403,14 @@ function animate() {
     }
   }
 
-  controls.update(delta);
   wildlife.update(delta);
   updateHunters(delta);
+  controls.update(delta);
   weaponEffects.update(delta, worldTime);
 
+  forest.update(worldTime);
+  sun.position.set(camera.position.x - 45, camera.position.y + 65, camera.position.z - 35);
+  sun.target.position.copy(camera.position);
   renderer.render(scene, camera);
 }
 

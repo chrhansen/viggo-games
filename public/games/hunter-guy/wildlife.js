@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { buildFox, buildDeer, buildBear, animateAnimal } from "./animal-models.js";
 
 const FOX_COUNT = 14;
 const DEER_COUNT = 10;
@@ -7,142 +8,6 @@ const ANIMAL_SPEED_SCALE = 0.5;
 
 function rand(min, max) {
   return THREE.MathUtils.randFloat(min, max);
-}
-
-function buildFox() {
-  const group = new THREE.Group();
-  const foxOrange = new THREE.MeshStandardMaterial({ color: 0xcf5f1b, roughness: 0.75 });
-  const foxWhite = new THREE.MeshStandardMaterial({ color: 0xf9e9d8, roughness: 0.85 });
-
-  const body = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.55, 0.58), foxOrange);
-  body.position.y = 0.38;
-  body.castShadow = true;
-  group.add(body);
-
-  const chest = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.33, 0.44), foxWhite);
-  chest.position.set(0.1, 0.26, 0);
-  group.add(chest);
-
-  const head = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.38, 0.44), foxOrange);
-  head.position.set(0.74, 0.52, 0);
-  head.castShadow = true;
-  group.add(head);
-
-  const tail = new THREE.Mesh(new THREE.ConeGeometry(0.18, 0.92, 7), foxOrange);
-  tail.position.set(-0.72, 0.52, 0);
-  tail.rotation.z = -Math.PI / 2.2;
-  tail.castShadow = true;
-  group.add(tail);
-
-  return { group, hitMeshes: [body, head, tail] };
-}
-
-function buildDeer() {
-  const group = new THREE.Group();
-  const coat = new THREE.MeshStandardMaterial({ color: 0x9a6f45, roughness: 0.85 });
-  const cream = new THREE.MeshStandardMaterial({ color: 0xe8d7ba, roughness: 0.86 });
-  const antlerMat = new THREE.MeshStandardMaterial({ color: 0x8f7b59, roughness: 0.88 });
-
-  const body = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.82, 0.62), coat);
-  body.position.y = 0.66;
-  body.castShadow = true;
-  group.add(body);
-
-  const neck = new THREE.Mesh(new THREE.BoxGeometry(0.33, 0.53, 0.28), coat);
-  neck.position.set(0.84, 0.95, 0);
-  neck.rotation.z = -0.25;
-  neck.castShadow = true;
-  group.add(neck);
-
-  const head = new THREE.Mesh(new THREE.BoxGeometry(0.56, 0.34, 0.3), cream);
-  head.position.set(1.2, 1.05, 0);
-  head.castShadow = true;
-  group.add(head);
-
-  const earL = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.18, 0.05), coat);
-  earL.position.set(1.34, 1.28, 0.1);
-  earL.rotation.z = 0.2;
-  group.add(earL);
-
-  const earR = earL.clone();
-  earR.position.z = -0.1;
-  earR.rotation.z = -0.2;
-  group.add(earR);
-
-  const antlerL = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.25, 0.04), antlerMat);
-  antlerL.position.set(1.28, 1.44, 0.09);
-  antlerL.rotation.z = -0.18;
-  group.add(antlerL);
-
-  const antlerR = antlerL.clone();
-  antlerR.position.z = -0.09;
-  antlerR.rotation.z = 0.18;
-  group.add(antlerR);
-
-  const legGeo = new THREE.CylinderGeometry(0.06, 0.07, 0.78, 8);
-  const legOffsets = [
-    [0.62, 0.32],
-    [0.62, -0.32],
-    [-0.62, 0.32],
-    [-0.62, -0.32],
-  ];
-  legOffsets.forEach(([x, z]) => {
-    const leg = new THREE.Mesh(legGeo, coat);
-    leg.position.set(x, 0.33, z);
-    leg.castShadow = true;
-    group.add(leg);
-  });
-
-  return { group, hitMeshes: [body, neck, head] };
-}
-
-function buildBear() {
-  const group = new THREE.Group();
-  const fur = new THREE.MeshStandardMaterial({ color: 0x5b432e, roughness: 0.92 });
-  const snout = new THREE.MeshStandardMaterial({ color: 0xa38460, roughness: 0.85 });
-
-  const body = new THREE.Mesh(new THREE.BoxGeometry(2.25, 1.16, 0.92), fur);
-  body.position.y = 0.92;
-  body.castShadow = true;
-  group.add(body);
-
-  const shoulder = new THREE.Mesh(new THREE.BoxGeometry(0.78, 0.72, 0.84), fur);
-  shoulder.position.set(0.88, 1.2, 0);
-  shoulder.castShadow = true;
-  group.add(shoulder);
-
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.37, 12, 12), fur);
-  head.position.set(1.38, 1.25, 0);
-  head.castShadow = true;
-  group.add(head);
-
-  const muzzle = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.22, 0.22), snout);
-  muzzle.position.set(1.62, 1.2, 0);
-  group.add(muzzle);
-
-  const earL = new THREE.Mesh(new THREE.SphereGeometry(0.11, 8, 8), fur);
-  earL.position.set(1.18, 1.56, 0.2);
-  group.add(earL);
-
-  const earR = earL.clone();
-  earR.position.z = -0.2;
-  group.add(earR);
-
-  const legGeo = new THREE.CylinderGeometry(0.16, 0.18, 0.78, 8);
-  const legOffsets = [
-    [0.72, 0.36],
-    [0.72, -0.36],
-    [-0.72, 0.36],
-    [-0.72, -0.36],
-  ];
-  legOffsets.forEach(([x, z]) => {
-    const leg = new THREE.Mesh(legGeo, fur);
-    leg.position.set(x, 0.38, z);
-    leg.castShadow = true;
-    group.add(leg);
-  });
-
-  return { group, hitMeshes: [body, shoulder, head, muzzle] };
 }
 
 function animalName(type) {
@@ -214,7 +79,7 @@ export function createWildlife({ scene, terrainHeight, randomInWorld, clampToWor
         pad: 28,
         speedMin: 2.2,
         speedMax: 3.2,
-        heightOffset: 0.18,
+        heightOffset: 0,
         turnMin: 0.9,
         turnMax: 2.3,
         scareBoost: 1.8,
@@ -236,7 +101,7 @@ export function createWildlife({ scene, terrainHeight, randomInWorld, clampToWor
         pad: 34,
         speedMin: 1.6,
         speedMax: 2.4,
-        heightOffset: 0.06,
+        heightOffset: 0,
         turnMin: 1.2,
         turnMax: 2.8,
         scareBoost: 1.45,
@@ -258,7 +123,7 @@ export function createWildlife({ scene, terrainHeight, randomInWorld, clampToWor
         pad: 42,
         speedMin: 1.2,
         speedMax: 1.8,
-        heightOffset: 0.1,
+        heightOffset: 0,
         turnMin: 1.5,
         turnMax: 3.3,
         scareBoost: 1.2,
@@ -344,9 +209,10 @@ export function createWildlife({ scene, terrainHeight, randomInWorld, clampToWor
           animal.direction += Math.PI * 0.72;
         }
 
-        animal.group.rotation.y = -animal.direction + Math.PI / 2;
+        animal.group.rotation.y = -animal.direction;
       }
 
+      animateAnimal(animal, delta);
       clampToWorld(animal.group);
       animal.group.position.y =
         terrainHeight(animal.group.position.x, animal.group.position.z) + animal.heightOffset;
