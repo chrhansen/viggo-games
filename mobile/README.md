@@ -63,7 +63,7 @@ This review slice intentionally defers sound effects, persistent personalization
 
 ## Chicken Hop architecture
 
-- `../packages/chicken-hop-core/`: shared state, deterministic random stream, physics, movement, spawning, collision rules, scoring, health, pause/time modes, and semantic game events.
+- `../games/chicken-hop/core/`: shared state, deterministic random stream, physics, movement, spawning, collision rules, scoring, health, pause/time modes, and semantic game events, all within this repository.
 - `src/game/chicken-hop/engine.ts`: native adapter. Converts phone pixels to the 50% world camera and projects shared state into the React Native render model.
 - `src/components/chicken-hop/`: native renderer and native-only effects.
 - `../games/chicken-hop/`: browser Canvas renderer, browser controls, WebAudio, and local storage UI.

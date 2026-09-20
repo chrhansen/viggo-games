@@ -3,8 +3,10 @@ import { writeFile } from 'node:fs/promises';
 import { setTimeout as delay } from 'node:timers/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
+import { createRequire } from 'node:module';
 
 const root = resolve(new URL('..', import.meta.url).pathname);
+const require = createRequire(import.meta.url);
 const appPort = Number(process.env.SMOKE_PORT || 4173);
 const debugPort = Number(process.env.CDP_PORT || 9224);
 const appUrl = `http://127.0.0.1:${appPort}/`;
@@ -16,8 +18,8 @@ if (!chromePath) {
 }
 
 const vite = spawn(
-  resolve(root, 'node_modules/.bin/vite'),
-  ['--host', '127.0.0.1', '--port', String(appPort), '--strictPort'],
+  process.execPath,
+  [resolve(require.resolve('vite/package.json'), '../bin/vite.js'), '--host', '127.0.0.1', '--port', String(appPort), '--strictPort'],
   { cwd: root, stdio: ['ignore', 'pipe', 'pipe'] }
 );
 

@@ -40,7 +40,7 @@ Touch devices show move, jump/fly, drop, pause, and restart controls.
 
 ## Architecture
 
-The browser and React Native app both call `packages/chicken-hop-core/src/`.
+The browser and React Native app both call `games/chicken-hop/core/src/` within this repository.
 The core is pure TypeScript: no DOM, Canvas, React, or React Native imports.
 
 Shared core owns:
@@ -69,11 +69,11 @@ Native-only files under `mobile/` own:
 - native feather rendering
 - phone lifecycle behavior, including auto-pause
 
-`public/games/chicken-hop/styles.css` remains a static browser asset. Vite bundles the browser TypeScript entry and writes `dist/games/chicken-hop/index.html`.
+`games/chicken-hop/styles.css` is bundled alongside the browser TypeScript entry. The root Vite build writes `dist/games/chicken-hop/index.html`.
 
 ## Changing behavior
 
-A gameplay rule belongs in `packages/chicken-hop-core/src/`. Add or update its parity coverage in `src/test/chicken-hop-engine.test.ts`, then run both gates:
+A gameplay rule belongs in `games/chicken-hop/core/src/`. Add or update its parity coverage in `src/test/chicken-hop-engine.test.ts`, then run both gates:
 
 ```sh
 npm run lint

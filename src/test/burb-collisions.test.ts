@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createRideCollisions, obstaclePush, RIDER_RADIUS, type Obstacle } from '../../public/games/burb/source/src/collisions';
+import { createRideCollisions, obstaclePush, RIDER_RADIUS, type Obstacle } from '../../games/burb/src/collisions';
 
 const tree: Obstacle = { kind: 'circle', center: { x: 0, z: 0 }, radius: 0.3 };
 const mountain: Obstacle = { kind: 'polygon', points: [{ x: 0, z: -8 }, { x: 12, z: -8 }, { x: 12, z: 8 }, { x: 0, z: 8 }] };
@@ -46,4 +46,3 @@ describe('Burb ride collisions', () => {
     expect(obstacles.every((obstacle) => !obstaclePush(position, obstacle))).toBe(true);
   });
 });
-

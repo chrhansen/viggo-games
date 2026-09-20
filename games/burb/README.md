@@ -29,46 +29,20 @@ Small browser cycling game prototype. First-person road riding, visible cockpit,
 
 ## Start
 
-Requirements:
+From the repository root (Node.js 22.12 or later):
 
-- Node.js
-- npm
-
-Install:
-
-```bash
+```sh
 npm ci
-```
-
-Run dev server:
-
-```bash
 npm run dev
 ```
 
-Open the local URL printed by Vite.
+Open `http://localhost:8080/games/burb/`. A standalone server is also available with `npm run dev --workspace burb -- --port 4174`.
 
-If you want the same fixed URL used during testing or while collaborating on live edits:
-
-```bash
-npm run dev -- --host 127.0.0.1 --port 4174 --strictPort
-```
-
-Then open:
+For a standalone server behind an HTTPS reverse proxy, set a comma-separated host allowlist in `games/burb/.env`:
 
 ```text
-http://127.0.0.1:4174/
+BURB_ALLOWED_HOSTS=your-proxy-hostname
 ```
-
-`--strictPort` keeps the URL stable. If port `4174` is busy, Vite exits instead of silently moving to a different port.
-
-If you expose the dev server through Tailscale Serve or another reverse proxy hostname, add a local `.env` file with the host allowlist:
-
-```bash
-BURB_ALLOWED_HOSTS=your-machine.your-tailnet.ts.net
-```
-
-Use a comma-separated list if you need more than one host. `.env` is ignored by git.
 
 ## Controls
 
@@ -106,8 +80,15 @@ Tilt steering notes:
 
 ## Build
 
-Production build:
+From the repository root, `npm run build` compiles every game into `dist/`, including `dist/games/burb/`. Nothing is copied into public folders.
 
-```bash
-npm run build
-```
+## Collision and scenery detail
+
+- Bike movement stops or slides against tree trunks and mountain bases, with speed reduced on impact. Steering remains available to ride away.
+- Collision uses a local spatial grid and small movement steps to avoid crossing thin trunks at high speed. Mountain boundaries follow their generated base geometry, including overlapping foothills.
+- The full road loop and shoulders are kept clear of mountain footprints. Shrubs, roadside posts, and signs remain decorative.
+- Mountains use vertex colors for green lower slopes, ridged rock, and uneven snow lines on the actual peaks. Trees have shared bark texture, tapered trunks, and irregular layered foliage. No extra animated foliage or shadows.
+- `src/collisions.ts` owns movement constraints; `mountains.ts` owns peak geometry and bounds; `tree-detail.ts` owns bark and pine detail; `route.ts` owns the shared route and surface sampling.
+- Regression tests: run `npm test -- src/test/burb-collisions.test.ts` from the umbrella repository. Run Burb's own build to typecheck its source.
+
+All touch controls block text selection and iOS long-press callouts.

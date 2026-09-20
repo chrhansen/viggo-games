@@ -10,20 +10,20 @@ Source of truth: this folder inside `chrhansen/viggo-games`.
 ## Stack
 
 - Vanilla HTML/CSS/JS
-- `three.js` from CDN import map (no npm install)
+- `three.js` installed through the root npm workspace and bundled by Vite
 - Custom first-person controls with pointer lock + touch input
 - Web Audio API (procedural tool SFX)
 
 ## Run
 
-Use a local server (not `file://`):
+From the repository root:
 
-```bash
-cd /Users/chrh/dev/viggo-games/public/games/hunter-guy
-python3 -m http.server 4173
+```sh
+npm ci
+npm run dev
 ```
 
-Open `http://127.0.0.1:4173`.
+Open `http://localhost:8080/games/hunter-guy/`. For a standalone server, use `npm run dev --workspace hunter-guy` after the root install.
 If behavior looks stale, hard refresh (`Cmd+Shift+R`).
 
 ## Deployment
@@ -32,7 +32,7 @@ If behavior looks stale, hard refresh (`Cmd+Shift+R`).
 - Embedded on homepage route: `https://viggo.games/hunter-guy/`
 - Repo owner: `chrhansen/viggo-games`
 - Hosting: GitHub Pages from the umbrella repo
-- Deploy workflow: `/Users/chrh/dev/viggo-games/.github/workflows/pages.yml`
+- Deploy workflow: `.github/workflows/pages.yml`
 - Trigger: push to `main` in `chrhansen/viggo-games`
 
 ## Controls
@@ -81,7 +81,7 @@ If behavior looks stale, hard refresh (`Cmd+Shift+R`).
 
 - `index.html`
   - HUD, belt buttons, start overlay
-  - import map for `three` and addons
+  - Vite bundles local `three` and addon imports
 - `style.css`
   - UI styling (HUD, crosshair, overlay, belt, touch controls)
   - top-positioned weapon belt
@@ -122,7 +122,7 @@ If behavior looks stale, hard refresh (`Cmd+Shift+R`).
 
 ## Visual Detail
 
-- Textures are generated locally at startup; no extra downloads or build step.
+- Textures are generated locally at startup; no texture downloads. The root build bundles the game.
 - Trees, foliage, grass, rocks, and logs use shared instanced geometry.
 - Pine and broadleaf canopies, tapered trunks, textured ground, and a worn trail add depth. Grass sways; canopies and clouds stay static. Animals have alternating leg movement, subtle body/head motion, and fox tail sway.
 - Fur bump maps, eyes, muzzles, ears, branched antlers, hooves, claws, and lower-resolution rounded bodies distinguish the animals.
@@ -152,7 +152,7 @@ If behavior looks stale, hard refresh (`Cmd+Shift+R`).
 
 - Keep controls kid-simple.
 - Desktop turning stays on horizontal plane only.
-- Preserve static-server workflow unless build tooling is added on purpose.
+- Use the root npm install and build; generated files belong in `dist/`.
 
 ## Verification
 

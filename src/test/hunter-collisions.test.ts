@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createCollisionWorld, movingBodyCircles, PLAYER_RADIUS } from "../../public/games/hunter-guy/collisions.js";
+import { createCollisionWorld, movingBodyCircles, PLAYER_RADIUS } from "../../games/hunter-guy/collisions.js";
 
 const position = (x: number, z: number) => ({ x, y: 3, z });
 
