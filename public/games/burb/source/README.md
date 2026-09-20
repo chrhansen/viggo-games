@@ -1,5 +1,7 @@
 # Burb Ride
 
+Source of truth: this folder in `chrhansen/viggo-games`.
+
 Small browser cycling game prototype. First-person road riding, visible cockpit, stylized low-poly scenery, browser-only stack.
 
 ## What we have
@@ -9,7 +11,7 @@ Small browser cycling game prototype. First-person road riding, visible cockpit,
 - Detailed bike cockpit with bars, fork, wheel, cables, computer mount, and fitted ride height
 - Asphalt road loop with lane markings and gravel shoulders
 - Shared ground plane for grass, road, trees, posts, mountains, and rider position
-- Varied low-poly trees, shrubs, roadside posts, mountains, clouds, and sky dome
+- Textured tree trunks, irregular pine foliage, shrubs, roadside posts, green foothills, ridged mountains with surface snow, clouds, and sky dome
 - Foliage placement keeps clear of the full road loop, including tight nearby segments
 - Large roadside signboard that says `67 mph` with a small `haha`
 - HUD speed meter plus a dismissible helper card
@@ -35,7 +37,7 @@ Requirements:
 Install:
 
 ```bash
-npm install
+npm ci
 ```
 
 Run dev server:
@@ -49,16 +51,16 @@ Open the local URL printed by Vite.
 If you want the same fixed URL used during testing or while collaborating on live edits:
 
 ```bash
-npm run dev -- --host 127.0.0.1 --port 4173 --strictPort
+npm run dev -- --host 127.0.0.1 --port 4174 --strictPort
 ```
 
 Then open:
 
 ```text
-http://127.0.0.1:4173/
+http://127.0.0.1:4174/
 ```
 
-`--strictPort` keeps the URL stable. If port `4173` is busy, Vite exits instead of silently moving to a different port.
+`--strictPort` keeps the URL stable. If port `4174` is busy, Vite exits instead of silently moving to a different port.
 
 If you expose the dev server through Tailscale Serve or another reverse proxy hostname, add a local `.env` file with the host allowlist:
 
@@ -95,7 +97,7 @@ Tilt steering notes:
 ## Current behavior
 
 - Steering rotates the bike freely in world space with no heading clamp
-- Bike can ride anywhere on the map instead of snapping to a lane
+- Bike can leave the road freely, but stops or slides around tree trunks and mountain bases. Speed drops on impact, and steering can turn the bike away.
 - Handlebar visuals follow steering while keeping the riding direction logic separate
 - Camera can lean slightly while steering
 - The route is a visible closed road loop built on the shared ground plane

@@ -1,7 +1,8 @@
 import './style.css';
+import { createRideCollisions } from './collisions';
+import { createRoute, buildRoadSamples, getSurfaceHeight } from './route';
 import {
   ACESFilmicToneMapping,
-  CatmullRomCurve3,
   Clock,
   Color,
   DirectionalLight,
@@ -23,8 +24,6 @@ import {
   createScenery,
   createSky,
   fitHandlebarRig,
-  GROUND_LEVEL,
-  ROAD_SURFACE_LIFT,
 } from './sceneBuilders';
 
 type InputState = {
@@ -40,11 +39,6 @@ type DeviceMotionConstructorWithPermission = typeof DeviceMotionEvent & {
   requestPermission?: () => Promise<SensorPermissionResult>;
 };
 
-type RoadSample = {
-  position: Vector3;
-  surfaceHeight: number;
-};
-
 type TiltSteeringState = {
   enabled: boolean;
   pending: boolean;
@@ -56,7 +50,6 @@ type TiltSteeringState = {
   lastSampleAt: number;
 };
 
-const ROAD_WIDTH = 14;
 const EYE_HEIGHT = 1.45;
 const MAX_CAMERA_ROLL = 0.1;
 const TURN_RATE = 1.55;
@@ -148,39 +141,7 @@ sun.position.set(90, 120, 40);
 scene.add(sun);
 scene.add(createSky());
 
-const roadPoints = [
-  [0, 0],
-  [20, 28],
-  [58, 64],
-  [108, 54],
-  [146, 6],
-  [136, -52],
-  [92, -92],
-  [28, -86],
-  [-22, -54],
-  [-72, -70],
-  [-128, -36],
-  [-146, 30],
-  [-116, 92],
-  [-56, 118],
-  [8, 96],
-  [54, 132],
-  [112, 162],
-  [170, 126],
-  [192, 58],
-  [170, -16],
-  [118, -82],
-  [42, -126],
-  [-42, -118],
-  [-118, -88],
-  [-188, -12],
-  [-174, 82],
-  [-100, 150],
-  [-6, 176],
-  [88, 154],
-].map(([x, z]) => new Vector3(x, GROUND_LEVEL, z));
-
-const curve = new CatmullRomCurve3(roadPoints, true, 'centripetal', 0.45);
+const curve = createRoute();
 const startProgress = 0.02;
 const startPoint = curve.getPointAt(startProgress);
 const startTangent = curve.getTangentAt(startProgress).normalize();
@@ -188,8 +149,10 @@ const roadSamples = buildRoadSamples(curve, 720);
 
 scene.add(createGround(renderer.capabilities.getMaxAnisotropy()));
 scene.add(createRoad(curve, renderer.capabilities.getMaxAnisotropy()));
-scene.add(createScenery(curve));
-scene.add(createMountains());
+const scenery = createScenery(curve);
+const mountains = createMountains(curve);
+scene.add(scenery.group, mountains.group);
+const collisions = createRideCollisions([...scenery.colliders, ...mountains.colliders]);
 
 const handlebarRig = createHandlebars();
 fitHandlebarRig(handlebarRig, EYE_HEIGHT);
@@ -327,7 +290,8 @@ renderer.setAnimationLoop(() => {
   const bobSide = Math.sin(bobPhase * 0.5) * 0.018;
   const bikeForward = new Vector3(Math.sin(state.heading), 0, Math.cos(state.heading));
   const renderRight = new Vector3().crossVectors(UP, bikeForward).normalize();
-  state.position.addScaledVector(bikeForward, state.speed * delta);
+  const movement = collisions.move(state.position, bikeForward.x * state.speed * delta, bikeForward.z * state.speed * delta);
+  if (movement.collided && delta > 0) state.speed = Math.min(state.speed, movement.distance / delta);
   state.position.y = getSurfaceHeight(state.position, roadSamples);
 
   camera.position
@@ -567,38 +531,4 @@ function mapTiltAngleToSteer(tiltAngle: number) {
     ((absTilt - TILT_DEAD_ZONE) / (TILT_FULL_STEER - TILT_DEAD_ZONE)) *
     Math.sign(clampedTilt)
   );
-}
-
-function buildRoadSamples(curvePath: CatmullRomCurve3, sampleCount: number) {
-  const samples: RoadSample[] = [];
-
-  for (let index = 0; index < sampleCount; index += 1) {
-    const point = curvePath.getPointAt(index / sampleCount);
-    samples.push({
-      position: point,
-      surfaceHeight: point.y + ROAD_SURFACE_LIFT,
-    });
-  }
-
-  return samples;
-}
-
-function getSurfaceHeight(worldPosition: Vector3, roadSamplePoints: RoadSample[]) {
-  let nearestDistanceSquared = Number.POSITIVE_INFINITY;
-  let nearestRoadHeight = 0;
-
-  for (const sample of roadSamplePoints) {
-    const dx = worldPosition.x - sample.position.x;
-    const dz = worldPosition.z - sample.position.z;
-    const distanceSquared = dx * dx + dz * dz;
-
-    if (distanceSquared < nearestDistanceSquared) {
-      nearestDistanceSquared = distanceSquared;
-      nearestRoadHeight = sample.surfaceHeight;
-    }
-  }
-
-  const nearestDistance = Math.sqrt(nearestDistanceSquared);
-  const roadBlend = 1 - MathUtils.smoothstep(nearestDistance, ROAD_WIDTH * 0.45, ROAD_WIDTH * 0.95);
-  return MathUtils.lerp(GROUND_LEVEL, nearestRoadHeight, roadBlend);
 }

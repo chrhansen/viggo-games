@@ -153,18 +153,7 @@ See `mobile/README.md` for the mobile gate, environment requirements, and child-
 
 ## Burb Sync
 
-Local Burb work currently starts in `/Users/chrh/dev/burb`.
-
-To refresh the vendored source snapshot in this repo:
-
-```sh
-rsync -a --delete \
-  --exclude .git \
-  --exclude node_modules \
-  --exclude dist \
-  /Users/chrh/dev/burb/ \
-  /Users/chrh/dev/viggo-games/public/games/burb/source/
-```
+Burb's current source of truth is `public/games/burb/source/` in this repository. Edit it directly. The original `~/dev/burb` copy is historical: compare and port changes deliberately rather than syncing it over current source.
 
 Then rebuild the deploy files with relative asset paths:
 
@@ -289,7 +278,7 @@ Pages/domain notes:
 - Local sibling repo for Torpedo: `/Users/chrh/dev/torpedo`
 - `chicken-hop` is a Vite multi-page entry under `games/chicken-hop/`; `hunter-guy` remains hosted from `public/games/`
 - Root homepage code and game source code are intentionally separate
-- Burb authoring source lives at `/Users/chrh/dev/burb`; sync it into `public/games/burb/source/` before rebuilding deploy files
+- Burb source of truth is `public/games/burb/source/`; rebuild its deploy files after editing it
 - Gunny authoring source lives at `/Users/chrh/dev/gunny`; sync it into `public/games/gunny/source/` before rebuilding deploy files
 - Torpedo authoring source lives at `/Users/chrh/dev/torpedo`; sync it into `public/games/torpedo/source/` before rebuilding deploy files
 - If syncing new Lovable work, diff it first and preserve repo-specific files like:

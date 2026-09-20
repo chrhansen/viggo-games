@@ -1,9 +1,7 @@
 import {
-  BackSide,
   BoxGeometry,
   CanvasTexture,
   CatmullRomCurve3,
-  Color,
   ConeGeometry,
   CylinderGeometry,
   DoubleSide,
@@ -11,14 +9,14 @@ import {
   IcosahedronGeometry,
   MathUtils,
   Mesh,
-  MeshBasicMaterial,
   MeshStandardMaterial,
   PlaneGeometry,
-  SphereGeometry,
   SRGBColorSpace,
   Vector3,
 } from 'three';
 import { GROUND_LEVEL } from './track';
+import { createBarkTexture, detailedPineGeometry } from './tree-detail';
+import type { Obstacle } from './collisions';
 
 const ROAD_WIDTH = 14;
 const ROAD_HALF_WIDTH = ROAD_WIDTH * 0.5;
@@ -29,65 +27,34 @@ const FOLIAGE_ROADSIDE_MARGIN = 2.5;
 const MAX_SHRUB_REACH = 3.5;
 const UP = new Vector3(0, 1, 0);
 
-export function createSky() {
-  const group = new Group();
-  const skyTexture = createSkyTexture();
-  const cloudTexture = createCloudTexture();
-  const dome = new Mesh(
-    new SphereGeometry(720, 36, 24),
-    new MeshBasicMaterial({
-      map: skyTexture,
-      side: BackSide,
-      fog: false,
-    }),
-  );
-  const cloudMaterial = new MeshBasicMaterial({
-    map: cloudTexture,
-    transparent: true,
-    opacity: 0.72,
-    depthWrite: false,
-    fog: false,
-  });
-
-  group.add(dome);
-
-  for (let index = 0; index < 20; index += 1) {
-    const angle = (index / 20) * Math.PI * 2 + hash(index * 2.7) * 0.2;
-    const radius = 250 + hash(index * 4.1) * 150;
-    const width = 48 + hash(index * 5.6) * 72;
-    const height = width * (0.24 + hash(index * 6.2) * 0.16);
-    const cloud = new Mesh(new PlaneGeometry(width, height), cloudMaterial);
-    const cloudHeight = 110 + hash(index * 3.9) * 58;
-
-    cloud.position.set(Math.cos(angle) * radius, cloudHeight, Math.sin(angle) * radius);
-    cloud.lookAt(0, cloudHeight - 16, 0);
-    cloud.rotateZ((hash(index * 7.4) - 0.5) * 0.6);
-    group.add(cloud);
-  }
-
-  return group;
-}
-
 export function createScenery(curvePath: CatmullRomCurve3) {
   const group = new Group();
+  const colliders: Obstacle[] = [];
+  const bark = createBarkTexture();
   const roadSamplePoints = sampleRoadPoints(curvePath, FOLIAGE_ROAD_SAMPLE_COUNT);
   const trunkMaterial = new MeshStandardMaterial({
     color: '#6d4728',
+    map: bark,
+    bumpMap: bark,
+    bumpScale: 0.035,
     roughness: 1,
     flatShading: true,
   });
   const barkMaterial = new MeshStandardMaterial({
     color: '#84552f',
+    map: bark,
     roughness: 1,
     flatShading: true,
   });
   const pineDarkMaterial = new MeshStandardMaterial({
     color: '#2a6030',
+    vertexColors: true,
     roughness: 1,
     flatShading: true,
   });
   const pineLightMaterial = new MeshStandardMaterial({
     color: '#3f8644',
+    vertexColors: true,
     roughness: 1,
     flatShading: true,
   });
@@ -106,12 +73,12 @@ export function createScenery(curvePath: CatmullRomCurve3) {
     roughness: 1,
     flatShading: true,
   });
-  const trunkGeometry = new CylinderGeometry(0.18, 0.28, 2.8, 7);
+  const trunkGeometry = new CylinderGeometry(0.1, 0.34, 2.8, 9, 3);
   const branchGeometry = new CylinderGeometry(0.03, 0.06, 1.05, 5);
-  const pineLargeGeometry = new ConeGeometry(1.7, 2.9, 8);
-  const pineMediumGeometry = new ConeGeometry(1.35, 2.45, 8);
-  const pineSmallGeometry = new ConeGeometry(1.05, 2, 8);
-  const leafBlobGeometry = new IcosahedronGeometry(1.15, 0);
+  const pineLargeGeometry = detailedPineGeometry(1.7, 2.9);
+  const pineMediumGeometry = detailedPineGeometry(1.35, 2.45);
+  const pineSmallGeometry = detailedPineGeometry(1.05, 2);
+  const leafBlobGeometry = new IcosahedronGeometry(1.15, 1);
   const shrubGeometry = new IcosahedronGeometry(0.55, 0);
   const postGeometry = new BoxGeometry(0.12, 0.9, 0.12);
   const postMaterial = new MeshStandardMaterial({ color: '#f4f0e7', roughness: 0.95 });
@@ -170,6 +137,7 @@ export function createScenery(curvePath: CatmullRomCurve3) {
     tree.rotation.y = hash(index * 9.2) * Math.PI * 2;
     tree.rotation.z = (hash(index * 6.8) - 0.5) * 0.06 * side;
     group.add(tree);
+    colliders.push({ kind: 'circle', center: { x: tree.position.x, z: tree.position.z }, radius: 0.34 * scale });
 
     const shrubCount = hash(index * 8.6) > 0.42 ? 2 : 1;
     for (let shrubIndex = 0; shrubIndex < shrubCount; shrubIndex += 1) {
@@ -212,34 +180,7 @@ export function createScenery(curvePath: CatmullRomCurve3) {
 
   group.add(createSpeedSign(curvePath));
 
-  return group;
-}
-
-export function createMountains() {
-  const group = new Group();
-
-  for (let index = 0; index < 22; index += 1) {
-    const angle = (index / 22) * Math.PI * 2;
-    const radius = 275 + hash(index * 7.4) * 95;
-    const mountain = createMountain(index);
-
-    mountain.position.set(Math.cos(angle) * radius, GROUND_LEVEL, Math.sin(angle) * radius);
-    mountain.rotation.y = hash(index * 6.8) * Math.PI;
-    group.add(mountain);
-
-    if (hash(index * 2.1) > 0.44) {
-      const shoulder = createMountain(index + 40, 0.68);
-      shoulder.position.set(
-        Math.cos(angle + 0.06) * (radius - 18),
-        GROUND_LEVEL,
-        Math.sin(angle + 0.06) * (radius - 18),
-      );
-      shoulder.rotation.y = hash(index * 5.2) * Math.PI;
-      group.add(shoulder);
-    }
-  }
-
-  return group;
+  return { group, colliders };
 }
 
 function createPineTree(
@@ -265,8 +206,10 @@ function createPineTree(
   baseCanopy.scale.setScalar(1.02 * scale);
   midCanopy.position.y = 3.65 * scale;
   midCanopy.scale.setScalar(0.88 * scale);
+  midCanopy.rotation.y = 0.7;
   topCanopy.position.y = 4.55 * scale;
   topCanopy.scale.setScalar(0.68 * scale);
+  topCanopy.rotation.y = 1.5;
 
   tree.add(trunk, baseCanopy, midCanopy, topCanopy);
   return tree;
@@ -332,45 +275,6 @@ function createShrub(scale: number, shrubGeometry: IcosahedronGeometry, shrubMat
   return shrub;
 }
 
-function createMountain(seed: number, scale = 1) {
-  const group = new Group();
-  const baseRadius = (42 + hash(seed * 5.1) * 36) * scale;
-  const height = (82 + hash(seed * 2.6) * 92) * scale;
-  const rockColor = new Color('#5f748f').lerp(new Color('#8aa0bb'), hash(seed * 4.2) * 0.38);
-  const foothillColor = rockColor.clone().lerp(new Color('#54657a'), 0.35);
-  const rockMaterial = new MeshStandardMaterial({
-    color: rockColor,
-    roughness: 1,
-    flatShading: true,
-  });
-  const foothillMaterial = new MeshStandardMaterial({
-    color: foothillColor,
-    roughness: 1,
-    flatShading: true,
-  });
-  const snowMaterial = new MeshStandardMaterial({
-    color: '#eef3fb',
-    roughness: 0.9,
-    flatShading: true,
-  });
-  const foothill = new Mesh(createMountainGeometry(baseRadius * 1.32, height * 0.42, seed + 19), foothillMaterial);
-  const peak = new Mesh(createMountainGeometry(baseRadius, height, seed), rockMaterial);
-
-  foothill.position.y = -2;
-  group.add(foothill, peak);
-
-  if (height > 118 || hash(seed * 3.3) > 0.72) {
-    const snowCap = new Mesh(
-      createMountainGeometry(baseRadius * 0.28, height * 0.25, seed + 71),
-      snowMaterial,
-    );
-    snowCap.position.y = height * 0.68;
-    group.add(snowCap);
-  }
-
-  return group;
-}
-
 function sampleRoadPoints(curvePath: CatmullRomCurve3, sampleCount: number) {
   return Array.from({ length: sampleCount + 1 }, (_, index) => curvePath.getPointAt(index / sampleCount));
 }
@@ -427,32 +331,6 @@ function getRoadDistanceSquared(position: Vector3, roadSamplePoints: Vector3[]) 
   return nearestDistanceSquared;
 }
 
-function createMountainGeometry(baseRadius: number, height: number, seed: number) {
-  const geometry = new CylinderGeometry(0.6, baseRadius, height, 10, 5, false);
-  const position = geometry.getAttribute('position');
-  const ridgeCount = 3 + Math.floor(hash(seed * 1.9) * 4);
-  const cragCount = 5 + Math.floor(hash(seed * 3.4) * 5);
-
-  for (let index = 0; index < position.count; index += 1) {
-    const x = position.getX(index);
-    const y = position.getY(index);
-    const z = position.getZ(index);
-    const angle = Math.atan2(z, x);
-    const heightMix = (y + height * 0.5) / height;
-    const ridgeWave = Math.sin(angle * ridgeCount + seed * 0.9) * 0.08;
-    const cragWave = Math.cos(angle * cragCount - seed * 0.6) * 0.05;
-    const noise = (hash(seed * 11.4 + index * 0.37) - 0.5) * 0.18;
-    const spread = 1 + (ridgeWave + cragWave + noise) * (0.4 + (1 - heightMix) * 0.8);
-    const uplift = Math.max(0, heightMix - 0.72) * (hash(seed * 2.8 + angle) - 0.5) * height * 0.22;
-
-    position.setXYZ(index, x * spread, y + uplift, z * spread);
-  }
-
-  geometry.translate(0, height * 0.5, 0);
-  geometry.computeVertexNormals();
-  return geometry;
-}
-
 function createSpeedSign(curvePath: CatmullRomCurve3) {
   const t = 0.08;
   const side = 1;
@@ -495,99 +373,6 @@ function createSpeedSign(curvePath: CatmullRomCurve3) {
   group.rotation.y = Math.atan2(signForward.x, signForward.z);
 
   return group;
-}
-
-function createSkyTexture() {
-  const canvasTexture = document.createElement('canvas');
-  canvasTexture.width = 1024;
-  canvasTexture.height = 512;
-  const context = canvasTexture.getContext('2d');
-
-  if (!context) {
-    throw new Error('Canvas 2D context unavailable for sky texture.');
-  }
-
-  const skyGradient = context.createLinearGradient(0, 0, 0, canvasTexture.height);
-  skyGradient.addColorStop(0, '#487fb9');
-  skyGradient.addColorStop(0.38, '#89c1eb');
-  skyGradient.addColorStop(0.72, '#d7e9ef');
-  skyGradient.addColorStop(1, '#f4dca8');
-  context.fillStyle = skyGradient;
-  context.fillRect(0, 0, canvasTexture.width, canvasTexture.height);
-
-  const glow = context.createRadialGradient(780, 122, 18, 780, 122, 230);
-  glow.addColorStop(0, 'rgba(255, 249, 220, 0.95)');
-  glow.addColorStop(0.2, 'rgba(255, 231, 176, 0.42)');
-  glow.addColorStop(1, 'rgba(255, 231, 176, 0)');
-  context.fillStyle = glow;
-  context.fillRect(0, 0, canvasTexture.width, canvasTexture.height);
-
-  const haze = context.createLinearGradient(0, canvasTexture.height * 0.56, 0, canvasTexture.height);
-  haze.addColorStop(0, 'rgba(255, 255, 255, 0)');
-  haze.addColorStop(1, 'rgba(255, 218, 160, 0.33)');
-  context.fillStyle = haze;
-  context.fillRect(0, 0, canvasTexture.width, canvasTexture.height);
-
-  for (let index = 0; index < 26; index += 1) {
-    const x = hash(index * 1.8) * canvasTexture.width;
-    const y = 70 + hash(index * 2.6) * 180;
-    const width = 90 + hash(index * 3.7) * 220;
-    const height = 16 + hash(index * 4.9) * 24;
-    context.fillStyle = `rgba(255, 255, 255, ${0.03 + hash(index * 6.1) * 0.06})`;
-    context.beginPath();
-    context.ellipse(x, y, width, height, hash(index * 5.4) * Math.PI, 0, Math.PI * 2);
-    context.fill();
-  }
-
-  for (let index = 0; index < 18; index += 1) {
-    context.strokeStyle = `rgba(255, 255, 255, ${0.05 + hash(index * 1.9) * 0.04})`;
-    context.lineWidth = 3 + hash(index * 3.2) * 4;
-    context.beginPath();
-    context.moveTo(hash(index * 5.4) * canvasTexture.width, 120 + hash(index * 6.8) * 160);
-    context.bezierCurveTo(
-      hash(index * 8.1) * canvasTexture.width,
-      90 + hash(index * 4.4) * 140,
-      hash(index * 9.5) * canvasTexture.width,
-      130 + hash(index * 2.2) * 160,
-      hash(index * 7.3) * canvasTexture.width,
-      95 + hash(index * 3.5) * 170,
-    );
-    context.stroke();
-  }
-
-  const texture = new CanvasTexture(canvasTexture);
-  texture.colorSpace = SRGBColorSpace;
-  return texture;
-}
-
-function createCloudTexture() {
-  const canvasTexture = document.createElement('canvas');
-  canvasTexture.width = 256;
-  canvasTexture.height = 128;
-  const context = canvasTexture.getContext('2d');
-
-  if (!context) {
-    throw new Error('Canvas 2D context unavailable for cloud texture.');
-  }
-
-  context.clearRect(0, 0, canvasTexture.width, canvasTexture.height);
-
-  for (let index = 0; index < 9; index += 1) {
-    const x = 32 + hash(index * 2.3) * 188;
-    const y = 38 + hash(index * 4.1) * 44;
-    const radius = 22 + hash(index * 5.7) * 30;
-    const puff = context.createRadialGradient(x, y, 4, x, y, radius);
-    puff.addColorStop(0, 'rgba(255, 255, 255, 0.45)');
-    puff.addColorStop(1, 'rgba(255, 255, 255, 0)');
-    context.fillStyle = puff;
-    context.beginPath();
-    context.arc(x, y, radius, 0, Math.PI * 2);
-    context.fill();
-  }
-
-  const texture = new CanvasTexture(canvasTexture);
-  texture.colorSpace = SRGBColorSpace;
-  return texture;
 }
 
 function createSpeedSignTexture() {
