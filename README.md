@@ -1,137 +1,65 @@
 # viggo.games
 
-Production/source-of-truth repo for `viggo.games`.
+Self-contained source repository for the website, all five games, and the native Expo app. Games are ordinary tracked folders, not Git submodules. No sibling checkout, external source remote, or manual source synchronization is required.
 
-This repo owns:
+## Repository map
 
-- the homepage shell at `https://viggo.games/`
-- the hosted game code under `https://viggo.games/games/<slug>/`
-- the native Expo app under `mobile/`
-- the GitHub Pages deploy for the custom domain
-- current live games/slots: `chicken-hop`, `hunter-guy`, `burb`, `gunny`, `torpedo`
+| Folder | Purpose |
+| --- | --- |
+| `games/chicken-hop/` | Chicken Hop browser renderer, controls, audio, styles, and entrypoint |
+| `games/chicken-hop/core/` | Platform-neutral Chicken Hop rules shared by browser and native |
+| `games/hunter-guy/` | Hunter Guy source, procedural forest, animals, controls, and audio |
+| `games/burb/` | Burb source, scenery, bike controls, and collisions |
+| `games/gunny/` | Gunny source, starfield, combat, and hull warnings |
+| `games/torpedo/` | Torpedo source, submarine combat, interior rooms, and artwork |
+| `src/` | React website, game cards, descriptive landing pages, and iframe player |
+| `mobile/` | Native Expo shell and Chicken Hop native rendering/controls |
+| `public/` | Website static files, including `CNAME`; no copied game builds |
+| `scripts/` | Build and deployment validation |
+| `.github/workflows/` | Website deployment and mobile checks |
+| `docs/seo.md` | Search metadata, canonical URLs, and indexing rules |
+| `dist/` | Generated website and all five games; ignored by Git |
 
-Do not treat the old single-game repos as deploy targets anymore. The game code that matters now lives here.
+Each game's README describes its controls, architecture, and maintenance. Native platform adapters stay under `mobile/`; shared gameplay rules live under `games/chicken-hop/core/`.
 
-## Where code comes from
+## Install and develop
 
-- Homepage UI source started in `chrhansen/viggo-games-lovable`
-- Chicken Hop source was copied in from `chrhansen/chicken-hop`; local sibling repo: `/Users/chrh/dev/chicken-hop`
-- Hunter Guy source was copied in from `chrhansen/hunter-guy`; local sibling repo: `/Users/chrh/dev/hunter-guy`
-- Burb source is synced in from local authoring folder `/Users/chrh/dev/burb`
-- Gunny originally came from `/Users/chrh/dev/gunny`; current source lives in this repository
-- Torpedo source is synced in from local authoring folder `/Users/chrh/dev/torpedo`
-
-This repo is now the place to edit and deploy all of it.
-
-The old Lovable repo is still useful as an upstream design/source reference. This repo keeps a `source-lovable` git remote for that purpose. If Lovable changes need to come over:
-
-```sh
-git fetch source-lovable
-git diff <old-commit> <new-commit>
-```
-
-Then port the changes intentionally. Do not blindly overwrite repo-specific wiring in this repo.
-
-## Repo map
-
-- `.github/`
-  - GitHub Actions config
-  - Pages deploy workflow lives in `.github/workflows/pages.yml`
-  - mobile web, shared-core, and native bundle checks live in `.github/workflows/mobile.yml`
-- `public/`
-  - static files shipped as-is
-  - custom domain file lives in `public/CNAME`
-- `public/games/`
-  - hosted game payloads grouped by slug
-- `games/chicken-hop/`
-  - Chicken Hop browser entrypoint, Canvas renderer, web input, audio, and UI
-- `packages/chicken-hop-core/`
-  - platform-neutral Chicken Hop state, physics, spawning, collisions, and events
-- `public/games/chicken-hop/`
-  - Chicken Hop static stylesheet and operating notes copied into the build
-- `public/games/hunter-guy/`
-  - full Hunter Guy source
-- `public/games/burb/`
-  - deploy-ready Burb build at folder root
-- `public/games/burb/source/`
-  - editable Burb source snapshot synced from `/Users/chrh/dev/burb`
-- `public/games/gunny/`
-  - deploy-ready Gunny build at folder root
-- `public/games/gunny/source/`
-  - authoritative editable Gunny source
-- `public/games/torpedo/`
-  - deploy-ready Torpedo build at folder root
-- `public/games/torpedo/source/`
-  - editable Torpedo source snapshot synced from `/Users/chrh/dev/torpedo`
-- `scripts/`
-  - build/deploy helper scripts
-  - `prepare-pages.mjs` prepares and validates static route pages, `404.html`, `sitemap.xml`, and LLM crawler files after Vite builds
-- `mobile/`
-  - native React Native and Expo app for iOS and Android phones
-  - owns its dependencies, build profiles, native assets, landing screen, and mobile CI gate
-- `docs/seo.md`
-  - search metadata, canonical URL, content, and post-deploy indexing rules
-- `src/`
-  - React/Vite homepage app
-  - routing, cards, descriptive game landing pages, and on-demand iframe player
-- `src/assets/`
-  - homepage card art, using optimized WebP title images
-- `src/components/`
-  - homepage UI components
-- `src/data/`
-  - game registry data
-  - `src/data/games.json` defines slug, label, SEO copy, image filename, controls, genre, and hosted URL paths
-  - `src/data/games.ts` maps registry rows to imported homepage artwork and runtime URLs
-- `src/hooks/`
-  - shared React hooks
-- `src/lib/`
-  - shared utilities
-  - `src/lib/app-base.ts` handles custom-domain vs GitHub Pages base paths
-- `src/pages/`
-  - homepage route, about route, game wrapper route, not-found route
-- `src/test/`
-  - Vitest setup and app tests
-- `dist/`
-  - build output only; do not edit by hand
-
-## What to edit
-
-- Homepage layout, card UI, iframe wrapper, routing:
-  - edit files in `src/`
-- Chicken Hop rules and tuning shared by browser and native:
-  - edit `packages/chicken-hop-core/`
-- Chicken Hop browser rendering, controls, audio, and browser persistence:
-  - edit `games/chicken-hop/`
-- Chicken Hop native rendering and phone controls:
-  - edit `mobile/src/components/chicken-hop/` and the thin adapter in `mobile/src/game/chicken-hop/engine.ts`
-- Other game-specific logic, controls, art, tuning:
-  - edit files inside that game's folder under `public/games/<slug>/`
-  - for bundled games like `burb`, `gunny`, and `torpedo`, edit `public/games/<slug>/source/` and rebuild the deploy files at folder root
-- Game-specific docs:
-  - keep them in `public/games/<slug>/README.md`
-  - do not put game-specific operating notes in this top-level README
-
-## Local dev
-
-Install deps:
+Use Node.js 22.12 or later and npm. From the repository root:
 
 ```sh
 npm ci
-```
-
-Run the homepage app locally:
-
-```sh
 npm run dev
 ```
 
-This serves the React shell and the bundled Chicken Hop browser entrypoint. Other static games are loaded from `public/games/...`.
+The root lockfile installs all browser-game workspaces. One server serves the website and every game:
 
-If a specific game has its own preferred local workflow, use that game's README.
+- `http://localhost:8080/`
+- `http://localhost:8080/games/chicken-hop/`
+- `http://localhost:8080/games/hunter-guy/`
+- `http://localhost:8080/games/burb/`
+- `http://localhost:8080/games/gunny/`
+- `http://localhost:8080/games/torpedo/`
 
-## Mobile app
+If needed, run only one standalone game using `npm run dev --workspace gunny` (also supported for `burb`, `hunter-guy`, and `torpedo`). Stop local servers when testing is finished.
 
-The native app is separate from the Vite website renderer and does not use a WebView. Chicken Hop imports the same platform-neutral game engine as the browser build. Install and run it from its own folder:
+Games retain their own declared library versions. Hunter Guy's Three.js is installed and bundled locally. Third-party packages still come from npm; optional Google Fonts and website analytics are network services, not external game-source dependencies.
+
+## Build and verify
+
+```sh
+npm run lint
+npm run typecheck
+npm test -- --maxWorkers=1
+npm run build
+```
+
+The tests include Gunny's lightweight Node checks followed by the website and game regressions. Typechecking includes Burb's stricter configuration. A single Vite build compiles all five game entrypoints from `games/` and writes playable pages to `dist/games/<slug>/`. Do not commit generated bundles or copy files into `public/games/`.
+
+The build also prepares and validates descriptive route pages, canonical tags, `404.html`, `sitemap.xml`, `llms.txt`, `llms-full.txt`, and SEO artwork. Run `npm run preview` to serve the built site. See [SEO documentation](docs/seo.md) before changing routes or metadata.
+
+## Native app
+
+The native app uses React Native rather than a WebView. It consumes the local shared Chicken Hop core and keeps a separate dependency lockfile to isolate Expo/React Native versions:
 
 ```sh
 cd mobile
@@ -140,139 +68,37 @@ npm run ios
 # or: npm run android
 ```
 
-See `mobile/README.md` for the mobile gate, environment requirements, and child-directed product constraints.
+The entire repository must be checked out; the core dependency resolves to `../games/chicken-hop/core/` within it. See [mobile/README.md](mobile/README.md) for platform requirements, native checks, and child-directed product constraints.
 
-## Analytics
+## What to edit
 
-- Umami is installed at the shell level in `index.html`
-- Initial pageviews come from the standard Umami script
-- Client-side route changes are tracked from the React shell
-- Custom events currently tracked from the React shell:
-  - `Game Start`
-  - `Game Exit`
+- Game logic, controls, artwork, tuning, and documentation: `games/<slug>/`.
+- Shared Chicken Hop rules: `games/chicken-hop/core/`; retain browser/native parity coverage.
+- Native rendering and phone lifecycle: `mobile/src/`.
+- Website layout, navigation, and embedded-player behavior: `src/`.
+- Game registry and SEO copy: `src/data/games.json`; artwork mapping: `src/data/games.ts`.
+- Website card art: optimized WebP files in `src/assets/`.
 
-## Burb Sync
+Keep edits in this repository. There is no external authoring folder or source-sync step.
 
-Burb's current source of truth is `public/games/burb/source/` in this repository. Edit it directly. The original `~/dev/burb` copy is historical: compare and port changes deliberately rather than syncing it over current source.
+## Adding a game
 
-Then rebuild the deploy files with relative asset paths:
+1. Add its full source and README to `games/<slug>/`.
+2. If it needs package dependencies, add its package manifest to root `workspaces` and update the root lockfile with `npm install`.
+3. Add its HTML entrypoint to `vite.config.ts`.
+4. Register its route, controls, genre, SEO copy, and artwork in `src/data/games.json` and `src/data/games.ts`.
+5. Keep the direct playable URL at `/games/<slug>/`, with the descriptive landing page at `/<slug>/`.
+6. Run the full gate above. Generated output belongs only in `dist/`.
 
-```sh
-cd /Users/chrh/dev/viggo-games/public/games/burb/source
-npm run build -- --base ./ --outDir /tmp/burb-dist
-```
+Prefer relative imports and asset paths so games also work under a GitHub Pages base path.
 
-Copy `/tmp/burb-dist/index.html` and `/tmp/burb-dist/assets/` into `/Users/chrh/dev/viggo-games/public/games/burb/`.
+## Deployment
 
-## Gunny Source
+Pushes to `main` trigger `.github/workflows/pages.yml`: install from the root lockfile, lint, typecheck, test, build all games, and deploy `dist/` to GitHub Pages.
 
-Edit `public/games/gunny/source/` here. `/Users/chrh/dev/gunny` is a historical copy; compare and port changes deliberately rather than overwriting current gameplay work.
+- Production: `https://viggo.games/`
+- Pages preview: `https://chrhansen.github.io/viggo-games/`
+- Preserve `public/CNAME` and GitHub Pages' Actions configuration.
+- `.github/workflows/mobile.yml` validates shared gameplay and native bundles.
 
-Then rebuild the deploy files with relative asset paths:
-
-```sh
-cd /Users/chrh/dev/viggo-games/public/games/gunny/source
-npm run build -- --base ./ --outDir /tmp/gunny-dist
-```
-
-Copy `/tmp/gunny-dist/index.html` and `/tmp/gunny-dist/assets/` into `/Users/chrh/dev/viggo-games/public/games/gunny/`.
-
-## Torpedo Sync
-
-Local Torpedo work currently starts in `/Users/chrh/dev/torpedo`.
-
-To refresh the vendored source snapshot in this repo:
-
-```sh
-rsync -a --delete \
-  --exclude .git \
-  --exclude node_modules \
-  --exclude dist \
-  /Users/chrh/dev/torpedo/ \
-  /Users/chrh/dev/viggo-games/public/games/torpedo/source/
-```
-
-Then rebuild the deploy files with relative asset paths:
-
-```sh
-cd /Users/chrh/dev/viggo-games/public/games/torpedo/source
-npm run build -- --base=./ --outDir /tmp/torpedo-dist
-```
-
-Copy `/tmp/torpedo-dist/index.html` and `/tmp/torpedo-dist/assets/` into `/Users/chrh/dev/viggo-games/public/games/torpedo/`.
-
-## Adding a new game
-
-1. Copy the full game source into `public/games/<slug>/` or `public/games/<slug>/source/` if the game needs a build step
-2. Add or update `public/games/<slug>/README.md` with game-specific instructions
-3. Add homepage title artwork to `src/assets/`
-   - Title images are always WebP
-   - Keep the source image sharp and high quality, but encode it for web delivery
-   - Do not over-downsample; optimize format/quality before reducing dimensions
-4. Register the game in `src/data/games.json` and map its artwork in `src/data/games.ts`
-5. Point the game URL at `withBasePath("/games/<slug>/")`
-6. Add accurate how-to steps, tips, image alt text, and a unique search title to the registry
-7. If the game needs special iframe handling, update `src/pages/GamePage.tsx`
-8. Run the gate
-9. Push to `main` to deploy
-
-Rules:
-
-- Copy source, not just a production build
-- If the game uses Vite or another bundler, keep deploy files at `public/games/<slug>/` and source under `public/games/<slug>/source/`
-- Prefer relative asset paths inside each game folder so static hosting from `/games/<slug>/` works
-- Keep each game's behavior/docs self-contained in its own folder
-
-## Gate
-
-```sh
-npm run lint
-npm run typecheck
-npm run test
-npm run build
-```
-
-`npm run build` also writes `dist/404.html` so SPA routes work on GitHub Pages.
-It also writes static HTML entrypoints for each public route, `dist/sitemap.xml`, `dist/llms.txt`, `dist/llms-full.txt`, and SEO image copies under `dist/seo/`.
-The build validates canonical URL shape, static fallback content, sitemap entries, and direct-game canonical tags. See `docs/seo.md` before changing public routes or metadata.
-
-## Deploy
-
-Pushes to `main` trigger GitHub Actions in `.github/workflows/pages.yml`.
-
-Deploy flow:
-
-1. `npm ci`
-2. `npm run lint`
-3. `npm run typecheck`
-4. `npm run test`
-5. `npm run build`
-6. upload `dist/`
-7. deploy to GitHub Pages
-
-Pages/domain notes:
-
-- Preview/default Pages URL: `https://chrhansen.github.io/viggo-games/`
-- Custom domain target: `https://viggo.games/`
-- GitHub Pages must stay enabled on this repo and set to build from GitHub Actions
-- `public/CNAME` must stay in place for the custom domain
-
-## Notes For Future Agents
-
-- This repo is the deploy target
-- Local sibling repo for Chicken Hop: `/Users/chrh/dev/chicken-hop`
-- Local sibling repo for Hunter Guy: `/Users/chrh/dev/hunter-guy`
-- Local sibling repo for Burb: `/Users/chrh/dev/burb`
-- Local sibling repo for Gunny: `/Users/chrh/dev/gunny`
-- Local sibling repo for Torpedo: `/Users/chrh/dev/torpedo`
-- `chicken-hop` is a Vite multi-page entry under `games/chicken-hop/`; `hunter-guy` remains hosted from `public/games/`
-- Root homepage code and game source code are intentionally separate
-- Burb source of truth is `public/games/burb/source/`; rebuild its deploy files after editing it
-- Gunny source of truth is `public/games/gunny/source/`; rebuild its deploy files after editing it
-- Torpedo authoring source lives at `/Users/chrh/dev/torpedo`; sync it into `public/games/torpedo/source/` before rebuilding deploy files
-- If syncing new Lovable work, diff it first and preserve repo-specific files like:
-  - `src/data/games.ts`
-  - `src/lib/app-base.ts`
-  - `.github/workflows/pages.yml`
-  - `public/CNAME`
-  - `scripts/prepare-pages.mjs`
+The website's Umami integration in `index.html` tracks pageviews and the `Game Start`/`Game Exit` events. The native app has no analytics.

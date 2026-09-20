@@ -5,7 +5,8 @@ on:
     paths:
       - "mobile/**"
       - "games/chicken-hop/**"
-      - "packages/chicken-hop-core/**"
+      - "package.json"
+      - "package-lock.json"
       - "src/test/chicken-hop-*.test.ts"
       - ".github/workflows/mobile.yml"
   push:
@@ -13,7 +14,8 @@ on:
     paths:
       - "mobile/**"
       - "games/chicken-hop/**"
-      - "packages/chicken-hop-core/**"
+      - "package.json"
+      - "package-lock.json"
       - "src/test/chicken-hop-*.test.ts"
       - ".github/workflows/mobile.yml"
   workflow_dispatch:

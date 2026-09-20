@@ -59,20 +59,18 @@ You pilot one ship through open space while the camera follows from behind. Enem
 - Touch buttons: steer + fire
 - All buttons disable text selection and iOS long-press callouts.
 
-## Run Locally
+## Run and verify
 
-```bash
-npm install
+From the repository root:
+
+```sh
+npm ci
 npm run dev
 ```
 
-Open the local Vite URL in a browser. Default: `http://localhost:5173/`.
+Open `http://localhost:8080/games/gunny/`. A standalone server is available with `npm run dev --workspace gunny -- --host 127.0.0.1 --port 4175`.
 
-## Build
-
-```bash
-npm run build
-```
+`npm test --workspace gunny` runs the lightweight starfield, blast, and hull-warning checks. The root `npm test` includes them too. `npm run build` at the root bundles all five games, including `dist/games/gunny/`. Do not copy or commit generated bundles.
 
 ## Tech
 

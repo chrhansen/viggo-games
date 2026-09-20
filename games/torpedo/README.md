@@ -4,17 +4,6 @@ Torpedo is a browser-based first-person submarine game prototype. It is a kid-fr
 
 The player submarine has fictional windows, even though real military submarines do not. The front window is the main combat view, the side windows let you look port or starboard, and the periscope gives a tighter forward view.
 
-## Deployment
-
-- Production URL: `https://viggo.games/games/torpedo/`
-- Embedded on homepage route: `https://viggo.games/torpedo/`
-- Repo owner: `chrhansen/viggo-games`
-- Hosting: GitHub Pages from the umbrella repo
-- Deploy workflow: `/Users/chrh/dev/viggo-games/.github/workflows/pages.yml`
-- Trigger: push to `main` in `chrhansen/viggo-games`
-
-Deploy files live at this folder root. Editable source is vendored in `source/` from `/Users/chrh/dev/torpedo`.
-
 ## How The Game Works
 
 You lead the point of a V-shaped formation. Three helper submarines travel off your port side and three travel off your starboard side, each one farther out and slightly farther back. You usually cannot see the helper submarines because they are behind and off to the sides, but you can see their torpedoes streak forward during combat.
@@ -79,53 +68,25 @@ All on-screen buttons and their text are non-selectable so touch controls do not
 - CSS: cockpit frames, mobile controls, submarine interior plan, room scenes, HUD, and responsive layout
 - Chrome DevTools Protocol smoke test: launches local Chrome, runs the game, checks rendering, and verifies desktop and mobile flows
 
-## Run Locally
+## Run and build
+
+From the repository root (Node.js 22.12 or later):
 
 ```sh
-npm install
+npm ci
 npm run dev
 ```
 
-Open the local URL that Vite prints. By default it is:
+Open `http://localhost:8080/games/torpedo/`. For a standalone server use `npm run dev --workspace torpedo`.
 
-```text
-http://127.0.0.1:5173/
-```
+For phone testing, expose only the intended development server using `npm run dev --workspace torpedo -- --host 0.0.0.0`. Motion permission on iOS requires HTTPS; if using a reverse proxy, set `TORPEDO_ALLOWED_HOSTS` to its hostname in `games/torpedo/.env`. There is no machine-specific hostname in the repository.
 
-## Run On A Phone
-
-For phone testing on the local network or over Tailscale, start Vite on an external interface:
-
-```sh
-npm run dev -- --host 0.0.0.0 --port 5174
-```
-
-To make iOS motion controls work through Tailscale, serve the local Vite server through Tailscale HTTPS:
-
-```sh
-tailscale serve --bg http://127.0.0.1:5174
-```
-
-Then open the HTTPS MagicDNS URL for this laptop on the phone. This repo allows the current Tailscale host in `vite.config.js`:
-
-```text
-macbook-pro-1.tailcc07d5.ts.net
-```
-
-If the Tailscale host name changes, update `server.allowedHosts` in `vite.config.js`.
-
-## Build
-
-```sh
-npm run build
-```
-
-The build output goes to `dist/`.
+Run `npm run build` from the repository root to generate the complete site and every game in `dist/`. Torpedo's playable output is `dist/games/torpedo/`.
 
 ## Verify
 
 ```sh
-npm run smoke
+npm run smoke --workspace torpedo
 ```
 
 The smoke test starts a temporary Vite server, opens Chrome headlessly, exercises desktop and mobile viewports, and verifies:
@@ -146,5 +107,5 @@ The smoke test starts a temporary Vite server, opens Chrome headlessly, exercise
 If Chrome is installed somewhere unusual, set `CHROME_PATH`:
 
 ```sh
-CHROME_PATH="/path/to/chrome" npm run smoke
+CHROME_PATH="/path/to/chrome" npm run smoke --workspace torpedo
 ```

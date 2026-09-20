@@ -10,6 +10,10 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       input: {
         chickenHop: path.resolve(__dirname, "games/chicken-hop/index.html"),
+        hunterGuy: path.resolve(__dirname, "games/hunter-guy/index.html"),
+        burb: path.resolve(__dirname, "games/burb/index.html"),
+        gunny: path.resolve(__dirname, "games/gunny/index.html"),
+        torpedo: path.resolve(__dirname, "games/torpedo/index.html"),
         main: path.resolve(__dirname, "index.html"),
       },
     },

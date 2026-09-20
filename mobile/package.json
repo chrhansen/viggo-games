@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@expo-google-fonts/bricolage-grotesque": "^0.4.1",
-    "@viggo-games/chicken-hop-core": "file:../packages/chicken-hop-core",
+    "@viggo-games/chicken-hop-core": "file:../games/chicken-hop/core",
     "expo": "~57.0.15",
     "expo-constants": "~57.0.5",
     "expo-dev-client": "~57.0.14",
