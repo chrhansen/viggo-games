@@ -61,6 +61,7 @@ Then copy `/tmp/burb-dist/index.html` plus the referenced files in `/tmp/burb-di
 - `D` / `ArrowRight`: steer right
 - Touch: `Left`, `Right`, `Fast`, `Slow`
 - Touch tilt: `Enable tilt`, hold upright to center, lean left/right to steer
+- Control labels disable text selection and iOS touch callouts so holding a button does not bring up copy/paste menus.
 
 ## Source Notes
 
