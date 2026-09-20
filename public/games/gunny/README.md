@@ -1,6 +1,6 @@
 # Gunny
 
-Browser space shooter. Deploy files at this folder root. Editable source snapshot in `source/`.
+Browser space shooter. Deploy files at this folder root. Authoritative editable source in `source/`.
 
 ## Deployment
 
@@ -18,20 +18,11 @@ Browser space shooter. Deploy files at this folder root. Editable source snapsho
 - `assets/`
   - built JS/CSS emitted by Vite with relative asset paths
 - `source/`
-  - vendored source snapshot synced from `/Users/chrh/dev/gunny`
+  - current editable game source
 
-## Sync From Local Gunny
+## Source of Truth
 
-Refresh the vendored source copy from the local authoring folder:
-
-```bash
-rsync -a --delete \
-  --exclude .git \
-  --exclude node_modules \
-  --exclude dist \
-  /Users/chrh/dev/gunny/ \
-  /Users/chrh/dev/viggo-games/public/games/gunny/source/
-```
+Edit `source/` here. `/Users/chrh/dev/gunny` is a historical authoring copy; compare and port changes deliberately rather than overwriting current gameplay work.
 
 ## Local Dev
 
@@ -60,11 +51,19 @@ Then copy `/tmp/gunny-dist/index.html` plus `/tmp/gunny-dist/assets/` into `/Use
 - `Space`: fire
 - Hold mouse button: fire
 - Touch controls: steer + fire
+- All buttons block text selection and iOS long-press callouts.
 
 ## Goal
 
 - Drop 12 raiders before hull hits zero
 - Avoid satellites while pushing score
+- Keep clear of expanding raider explosions: each blast can damage your hull once, with less damage near its edge. The final blast resolves before victory.
+- At 10% hull or less, the hull percentage flashes red and beeps once a second during focused play. Reduced-motion settings use steady red.
+- Nearby stars continuously recycle ahead of the ship; distant stars remain in the background. The fixed pool does not grow during long flights.
+
+## Verification
+
+Run `npm test` in `source/` for lightweight single-process starfield, blast-damage, and hull-warning regression checks. Run `npm run build -- --base ./` to rebuild. Verify visual motion, sound, and touch controls in a browser when local game rendering is appropriate.
 
 ## Source Notes
 

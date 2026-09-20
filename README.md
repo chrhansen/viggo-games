@@ -18,7 +18,7 @@ Do not treat the old single-game repos as deploy targets anymore. The game code 
 - Chicken Hop source was copied in from `chrhansen/chicken-hop`; local sibling repo: `/Users/chrh/dev/chicken-hop`
 - Hunter Guy source was copied in from `chrhansen/hunter-guy`; local sibling repo: `/Users/chrh/dev/hunter-guy`
 - Burb source is synced in from local authoring folder `/Users/chrh/dev/burb`
-- Gunny source is synced in from local authoring folder `/Users/chrh/dev/gunny`
+- Gunny originally came from `/Users/chrh/dev/gunny`; current source lives in this repository
 - Torpedo source is synced in from local authoring folder `/Users/chrh/dev/torpedo`
 
 This repo is now the place to edit and deploy all of it.
@@ -58,7 +58,7 @@ Then port the changes intentionally. Do not blindly overwrite repo-specific wiri
 - `public/games/gunny/`
   - deploy-ready Gunny build at folder root
 - `public/games/gunny/source/`
-  - editable Gunny source snapshot synced from `/Users/chrh/dev/gunny`
+  - authoritative editable Gunny source
 - `public/games/torpedo/`
   - deploy-ready Torpedo build at folder root
 - `public/games/torpedo/source/`
@@ -164,20 +164,9 @@ npm run build -- --base ./ --outDir /tmp/burb-dist
 
 Copy `/tmp/burb-dist/index.html` and `/tmp/burb-dist/assets/` into `/Users/chrh/dev/viggo-games/public/games/burb/`.
 
-## Gunny Sync
+## Gunny Source
 
-Local Gunny work currently starts in `/Users/chrh/dev/gunny`.
-
-To refresh the vendored source snapshot in this repo:
-
-```sh
-rsync -a --delete \
-  --exclude .git \
-  --exclude node_modules \
-  --exclude dist \
-  /Users/chrh/dev/gunny/ \
-  /Users/chrh/dev/viggo-games/public/games/gunny/source/
-```
+Edit `public/games/gunny/source/` here. `/Users/chrh/dev/gunny` is a historical copy; compare and port changes deliberately rather than overwriting current gameplay work.
 
 Then rebuild the deploy files with relative asset paths:
 
@@ -279,7 +268,7 @@ Pages/domain notes:
 - `chicken-hop` is a Vite multi-page entry under `games/chicken-hop/`; `hunter-guy` remains hosted from `public/games/`
 - Root homepage code and game source code are intentionally separate
 - Burb source of truth is `public/games/burb/source/`; rebuild its deploy files after editing it
-- Gunny authoring source lives at `/Users/chrh/dev/gunny`; sync it into `public/games/gunny/source/` before rebuilding deploy files
+- Gunny source of truth is `public/games/gunny/source/`; rebuild its deploy files after editing it
 - Torpedo authoring source lives at `/Users/chrh/dev/torpedo`; sync it into `public/games/torpedo/source/` before rebuilding deploy files
 - If syncing new Lovable work, diff it first and preserve repo-specific files like:
   - `src/data/games.ts`
