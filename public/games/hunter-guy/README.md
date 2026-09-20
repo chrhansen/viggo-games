@@ -105,7 +105,7 @@ If behavior looks stale, hard refresh (`Cmd+Shift+R`).
 - `nature-materials.js`
   - Seeded procedural bark, foliage, ground, and fur textures; grass wind shader
 - `animal-models.js`
-  - Rounded fox, deer, and bear anatomy, facial details, antlers, paws, and legs
+  - Rounded fox, deer, and bear anatomy, facial details, antlers, paws, and animated legs
 - `wildlife.js`
   - Animal spawn counts
   - Animal roaming behavior
@@ -153,3 +153,9 @@ If behavior looks stale, hard refresh (`Cmd+Shift+R`).
 - Keep controls kid-simple.
 - Desktop turning stays on horizontal plane only.
 - Preserve static-server workflow unless build tooling is added on purpose.
+
+## Verification
+
+From the repository root, run `npm test -- src/test/hunter-collisions.test.ts` for movement regressions. The full gate is `npm run lint`, `npm run typecheck`, `npm test`, and `npm run build`.
+
+Also open the game to check rendering, grass sway, animal gait, slow human patrols, and movement against trunks and live animals. Use a browser with pointer-lock support for desktop play; embedded previews may reject mouse capture.

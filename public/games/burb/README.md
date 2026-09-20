@@ -18,20 +18,11 @@ Browser cycling game. Live deploy files at this folder root. Editable app source
 - `assets/`
   - built JS/CSS emitted by Vite with relative asset paths
 - `source/`
-  - vendored TypeScript + Three.js source snapshot synced from `/Users/chrh/dev/burb`
+  - authoritative TypeScript + Three.js source for the deployed game
 
-## Sync From Local Burb
+## Source of Truth
 
-Refresh the vendored source copy from the local authoring folder:
-
-```bash
-rsync -a --delete \
-  --exclude .git \
-  --exclude node_modules \
-  --exclude dist \
-  /Users/chrh/dev/burb/ \
-  /Users/chrh/dev/viggo-games/public/games/burb/source/
-```
+Edit `source/` in this repository. `/Users/chrh/dev/burb` is a historical authoring copy; do not sync it over this folder wholesale. Compare any changes there and port them deliberately so current collision and scenery work is preserved.
 
 ## Local Dev
 
@@ -39,9 +30,11 @@ Use the source app:
 
 ```bash
 cd /Users/chrh/dev/viggo-games/public/games/burb/source
-npm install
-npm run dev
+npm ci
+npm run dev -- --port 4174
 ```
+
+Open `http://127.0.0.1:4174/`; port 4173 can remain available for Hunter Guy.
 
 If you need motion access over a remote HTTPS host such as Tailscale Serve, add a local `.env` in `source/`:
 
@@ -58,7 +51,7 @@ cd /Users/chrh/dev/viggo-games/public/games/burb/source
 npm run build -- --base ./ --outDir /tmp/burb-dist
 ```
 
-Then copy `/tmp/burb-dist/index.html` plus `/tmp/burb-dist/assets/` into `/Users/chrh/dev/viggo-games/public/games/burb/`.
+Then copy `/tmp/burb-dist/index.html` plus the referenced files in `/tmp/burb-dist/assets/` into this folder. Remove superseded generated bundles with `trash`. Commit the source, rebuilt entrypoint, and assets together. Run the root repository gate before publishing.
 
 ## Controls
 
@@ -75,3 +68,12 @@ Then copy `/tmp/burb-dist/index.html` plus `/tmp/burb-dist/assets/` into `/Users
 - The homepage card art/registry live outside this folder in:
   - `/Users/chrh/dev/viggo-games/src/assets/burb.webp`
   - `/Users/chrh/dev/viggo-games/src/data/games.ts`
+
+## Collision and scenery detail
+
+- Bike movement stops or slides against tree trunks and mountain bases, with speed reduced on impact. Steering remains available to ride away.
+- Collision uses a local spatial grid and small movement steps to avoid crossing thin trunks at high speed. Mountain boundaries follow their generated base geometry, including overlapping foothills.
+- The full road loop and shoulders are kept clear of mountain footprints. Shrubs, roadside posts, and signs remain decorative.
+- Mountains use vertex colors for green lower slopes, ridged rock, and uneven snow lines on the actual peaks. Trees have shared bark texture, tapered trunks, and irregular layered foliage. No extra animated foliage or shadows.
+- `source/src/collisions.ts` owns movement constraints; `mountains.ts` owns peak geometry and bounds; `tree-detail.ts` owns bark and pine detail; `route.ts` owns the shared route and surface sampling.
+- Regression tests: run `npm test -- src/test/burb-collisions.test.ts` from the umbrella repository. Run Burb's own build to typecheck its source.
