@@ -26,13 +26,15 @@ You pilot one ship through open space while the camera follows from behind. Enem
 - Raider collisions damage the hull.
 - Satellite collisions damage the hull.
 - Raider shots damage the hull.
+- Destroyed raiders release a short expanding blast. Each blast can damage your hull once, with less damage near its edge. Steer away before reaching it; the final kill's blast must clear before victory.
 - Hull and score update live in the HUD.
+- At 10% hull or less, the percentage pulses red and a short beep repeats once per second during play. Audio starts through the launch gesture and stays silent while the game is unfocused; reduced-motion users see steady red.
 
 ### World motion
 
 - Ship flies continuously forward.
 - Camera trails behind and gently follows steering.
-- Starfield scrolls with motion.
+- A fixed pool of nearby stars recycles behind the camera to ahead of the ship, indefinitely. Perspective makes nearby stars move faster; distant stars stay in a separate background layer.
 - Earth stays nearby with cloud layer, atmosphere glow, and night-light detail.
 - Moon stays in view with crater texture.
 
@@ -55,6 +57,7 @@ You pilot one ship through open space while the camera follows from behind. Enem
 - `Space`: fire
 - Hold mouse button: fire
 - Touch buttons: steer + fire
+- All buttons disable text selection and iOS long-press callouts.
 
 ## Run Locally
 
@@ -83,10 +86,12 @@ npm run build
 
 - `src/game.js`: renderer, scene setup, DOM wiring
 - `src/mission-runtime.js`: gameplay loop, spawning, combat, damage
+- `src/flight-effects.js`: nearby star recycling and raider blast damage
+- `src/hull-warning.js`: low-hull warning sound
 - `src/entities.js`: ship, raider, satellite, planet builders
 - `src/procedural-textures.js`: Earth, moon, solar panel texture generation
 - `src/style.css`: HUD and menu styling
 
 ## Current Scope
 
-Prototype slice. No sound, no levels, no save system, no multiplayer, no asset pipeline yet.
+Prototype slice. Low-hull warning sound only; no levels, no save system, no multiplayer, no asset pipeline yet.

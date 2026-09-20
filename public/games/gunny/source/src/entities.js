@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { STAR_DEPTH, STAR_BEHIND } from "./flight-effects.js";
 import {
   getEarthMaps,
   getMoonMaps,
@@ -408,7 +409,7 @@ export function createPlanet(radius, kind) {
   return planet;
 }
 
-export function createStars(count = 2600) {
+export function createStars(count = 1500, nearby = false) {
   const positions = new Float32Array(count * 3);
   const colors = new Float32Array(count * 3);
   const palette = [
@@ -419,9 +420,11 @@ export function createStars(count = 2600) {
 
   for (let index = 0; index < count; index += 1) {
     const stride = index * 3;
-    positions[stride] = (Math.random() - 0.5) * 1400;
-    positions[stride + 1] = (Math.random() - 0.5) * 900;
-    positions[stride + 2] = -Math.random() * 2200;
+    positions[stride] = (Math.random() - 0.5) * (nearby ? 500 : 1400);
+    positions[stride + 1] = (Math.random() - 0.5) * (nearby ? 320 : 900);
+    positions[stride + 2] = nearby
+      ? STAR_BEHIND - Math.random() * (STAR_DEPTH + STAR_BEHIND)
+      : -900 - Math.random() * 1300;
 
     const color = palette[index % palette.length];
     const intensity = 0.7 + Math.random() * 0.35;
@@ -434,10 +437,10 @@ export function createStars(count = 2600) {
   geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
   geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
 
-  return new THREE.Points(
+  const stars = new THREE.Points(
     geometry,
     new THREE.PointsMaterial({
-      size: 2.2,
+      size: nearby ? 1.1 : 2.2,
       sizeAttenuation: true,
       transparent: true,
       opacity: 0.9,
@@ -445,6 +448,11 @@ export function createStars(count = 2600) {
       depthWrite: false,
     })
   );
+  if (nearby) {
+    geometry.attributes.position.setUsage(THREE.DynamicDrawUsage);
+    geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 0, -438), 550);
+  }
+  return stars;
 }
 
 export function createProjectile(color, radius) {

@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { MISSION_KILLS } from "./config.js";
 import { createPlanet, createPlayerShip, createStars } from "./entities.js";
 import { runtimeMethods } from "./mission-runtime.js";
+import { HullWarning } from "./hull-warning.js";
 
 export class GunnyGame {
   constructor(dom) {
@@ -13,6 +14,7 @@ export class GunnyGame {
     this.enemySpawnTimer = 0;
     this.satelliteSpawnTimer = 0;
     this.waveIntensity = 1;
+    this.hullWarning = new HullWarning();
 
     this.setupRenderer();
     this.setupScene();
@@ -79,6 +81,9 @@ export class GunnyGame {
 
     this.starField = createStars();
     this.scene.add(this.starField);
+    this.nearStars = createStars(1100, true);
+    this.scene.add(this.nearStars);
+    this.lastStarPlayerZ = 0;
 
     this.earth = createPlanet(58, "earth");
     this.earth.position.set(-150, -52, -430);
@@ -180,6 +185,7 @@ export class GunnyGame {
   }
 
   startMission = () => {
+    this.hullWarning.unlock();
     this.dom.introPanel.classList.add("panel--hidden");
     this.dom.statusPanel.classList.add("panel--hidden");
     this.resetMission();
@@ -280,9 +286,13 @@ export class GunnyGame {
       ? `Score ${this.state.score}. Earth still shining.`
       : `You clipped too much metal. Score ${this.state.score}.`;
     this.dom.statusPanel.classList.remove("panel--hidden");
+    this.updateHud();
   }
 
   updateHud() {
+    const critical = this.started && !this.finished && this.state.health > 0 && this.state.health <= 10;
+    this.dom.healthValue.classList.toggle("stat__value--critical", critical);
+    this.hullWarning.update(critical && !document.hidden && document.hasFocus());
     this.dom.healthValue.textContent = `${Math.max(0, Math.round(this.state.health))}%`;
     this.dom.scoreValue.textContent = this.state.score.toString();
     this.dom.killsValue.textContent = `${this.state.kills} / ${MISSION_KILLS}`;

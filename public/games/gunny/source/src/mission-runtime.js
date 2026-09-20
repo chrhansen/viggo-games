@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { MISSION_KILLS } from "./config.js";
+import { advanceStars, BLAST_LIFETIME, BLAST_RADIUS, raiderBlastDamage } from "./flight-effects.js";
 import {
   createEnemyShip,
   createExplosion,
@@ -105,8 +106,12 @@ export const runtimeMethods = {
   updateBackdrop(delta) {
     const playerZ = this.player.mesh.position.z;
 
-    this.starField.position.z = playerZ * 0.12;
-    this.starField.rotation.z += delta * 0.005;
+    this.starField.position.z = playerZ;
+    const positions = this.nearStars.geometry.attributes.position;
+    advanceStars(positions.array, this.lastStarPlayerZ - playerZ);
+    positions.needsUpdate = true;
+    this.nearStars.position.z = playerZ;
+    this.lastStarPlayerZ = playerZ;
 
     this.earth.position.z = playerZ - 430;
     this.earth.rotation.y += delta * 0.03;
@@ -240,7 +245,7 @@ export const runtimeMethods = {
 
       if (enemy.mesh.position.distanceTo(this.player.mesh.position) < enemy.radius + 2.5) {
         this.damagePlayer(28);
-        this.spawnExplosion(enemy.mesh.position, 0xff8d52, 3.2);
+        this.spawnExplosion(enemy.mesh.position, 0xff8d52, 3.8, true);
         this.removeEnemy(index);
       }
     }
@@ -289,7 +294,7 @@ export const runtimeMethods = {
         if (enemy.hp <= 0) {
           this.state.kills += 1;
           this.state.score += 150;
-          this.spawnExplosion(enemy.mesh.position, 0xffb96e, 3.8);
+          this.spawnExplosion(enemy.mesh.position, 0xffb96e, 3.8, true);
           this.removeEnemy(enemyIndex);
         }
         break;
@@ -325,13 +330,27 @@ export const runtimeMethods = {
     for (let index = this.explosions.length - 1; index >= 0; index -= 1) {
       const explosion = this.explosions[index];
       explosion.life -= delta;
-      explosion.mesh.scale.addScalar(delta * explosion.growth);
+      if (explosion.raiderBlast) {
+        const age = BLAST_LIFETIME - explosion.life;
+        explosion.mesh.scale.setScalar((3.8 + (BLAST_RADIUS - 3.8) * Math.min(1, age / BLAST_LIFETIME)) / 1.2);
+        const damage = raiderBlastDamage(
+          explosion.mesh.position.distanceTo(this.player.mesh.position), age
+        );
+        if (!explosion.damagedPlayer && damage > 0) {
+          this.damagePlayer(damage);
+          explosion.damagedPlayer = true;
+        }
+      } else {
+        explosion.mesh.scale.addScalar(delta * explosion.growth);
+      }
       explosion.mesh.material.opacity = Math.max(0, explosion.life * 1.4);
       explosion.mesh.rotation.x += delta * 2;
       explosion.mesh.rotation.y += delta * 1.4;
 
       if (explosion.life <= 0) {
         this.scene.remove(explosion.mesh);
+        explosion.mesh.geometry.dispose();
+        explosion.mesh.material.dispose();
         this.explosions.splice(index, 1);
       }
     }
@@ -342,15 +361,17 @@ export const runtimeMethods = {
     this.player.damageFlash = 1;
   },
 
-  spawnExplosion(position, color, scale) {
+  spawnExplosion(position, color, scale, raiderBlast = false) {
     const mesh = createExplosion(color);
     mesh.position.copy(position);
     mesh.scale.setScalar(scale);
     this.scene.add(mesh);
     this.explosions.push({
       mesh,
-      life: 0.55,
+      life: raiderBlast ? BLAST_LIFETIME : 0.55,
       growth: scale * 2.4,
+      raiderBlast,
+      damagedPlayer: false,
     });
   },
 
@@ -360,7 +381,7 @@ export const runtimeMethods = {
       return;
     }
 
-    if (this.state.kills >= MISSION_KILLS) {
+    if (this.state.kills >= MISSION_KILLS && !this.explosions.some((explosion) => explosion.raiderBlast)) {
       this.finishMission(true);
     }
   },
