@@ -5,18 +5,22 @@ on:
     paths:
       - "mobile/**"
       - "games/chicken-hop/**"
+      - "games/hunter-guy/**"
       - "package.json"
       - "package-lock.json"
       - "src/test/chicken-hop-*.test.ts"
+      - "src/test/hunter-*.test.ts"
       - ".github/workflows/mobile.yml"
   push:
     branches: [main]
     paths:
       - "mobile/**"
       - "games/chicken-hop/**"
+      - "games/hunter-guy/**"
       - "package.json"
       - "package-lock.json"
       - "src/test/chicken-hop-*.test.ts"
+      - "src/test/hunter-*.test.ts"
       - ".github/workflows/mobile.yml"
   workflow_dispatch:
 

@@ -20,8 +20,7 @@ function applyEnvelope(gainParam, start, peak, attack, release) {
   gainParam.exponentialRampToValueAtTime(0.0001, start + attackTime + releaseTime);
 }
 
-export function createWeaponSoundEffects() {
-  const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+export function createWeaponSoundEffects(AudioContextCtor = globalThis.AudioContext || globalThis.webkitAudioContext) {
   if (!AudioContextCtor) {
     return {
       warmup() {},
@@ -63,7 +62,7 @@ export function createWeaponSoundEffects() {
     if (!ensureAudioGraph()) {
       return;
     }
-    if (context.state === "running") {
+    if (context.state === "running" || typeof context.startRendering === "function") {
       run();
       return;
     }

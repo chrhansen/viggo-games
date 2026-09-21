@@ -1,8 +1,7 @@
 import * as THREE from "three";
+import { touchMoveVector, TOUCH_LOOK_SENSITIVITY } from "./core/world.js";
 
 const DESKTOP_LOOK_SENSITIVITY = 0.0024;
-const TOUCH_LOOK_SENSITIVITY = 0.0042;
-const TOUCH_DPAD_DEAD_ZONE = 0.3;
 const TOUCH_DPAD_THUMB_TRAVEL = 34;
 const DEVICE_FORWARD = new THREE.Vector3(0, 0, -1);
 const DEVICE_SCREEN_AXIS = new THREE.Vector3(0, 0, 1);
@@ -24,9 +23,6 @@ export function createPlayerControls({
   dpadThumb,
   fireBtn,
   lookRangeRadians,
-  terrainHeight,
-  movePlayer,
-  playerHeight,
   setMessage,
   warmupAudio,
   onUseWeapon,
@@ -181,16 +177,8 @@ export function createPlayerControls({
       -1,
       1
     );
-    const snappedX = Math.abs(rawX) > TOUCH_DPAD_DEAD_ZONE ? Math.sign(rawX) : 0;
-    const snappedY = Math.abs(rawY) > TOUCH_DPAD_DEAD_ZONE ? Math.sign(rawY) : 0;
-
-    if (snappedX === 0 && snappedY === 0) {
-      setTouchMoveVector(0, 0);
-      return;
-    }
-
-    const length = Math.hypot(snappedX, snappedY);
-    setTouchMoveVector(snappedX / length, snappedY / length);
+    const vector = touchMoveVector(rawX, rawY);
+    setTouchMoveVector(vector.x, vector.y);
   }
 
   function handleDeviceOrientation(event) {
@@ -482,7 +470,8 @@ export function createPlayerControls({
     }
   });
 
-  window.addEventListener("blur", clearMovementState);
+  window.addEventListener("blur", () => setSessionActive(false));
+  document.addEventListener("visibilitychange", () => { if (document.hidden) setSessionActive(false); });
   window.addEventListener("orientationchange", resetDeviceLook);
   window.screen?.orientation?.addEventListener?.("change", resetDeviceLook);
 
@@ -491,7 +480,6 @@ export function createPlayerControls({
       return;
     }
 
-    const speed = 10;
     const turnSpeed = 0.95;
 
     if (move.turnLeft) {
@@ -505,23 +493,7 @@ export function createPlayerControls({
     const forwardInput =
       (move.forward ? 1 : 0) - (move.backward ? 1 : 0) + touchMove.y;
     const strafeInput = touchMove.x;
-    const inputLength = Math.hypot(strafeInput, forwardInput);
-
-    let dx = 0;
-    let dz = 0;
-    if (inputLength > 0) {
-      const moveYaw = manualYaw + deviceLook.yaw;
-      const distance = speed * delta;
-      const forward = forwardInput / Math.max(1, inputLength);
-      const strafe = strafeInput / Math.max(1, inputLength);
-      dx =
-        (-Math.sin(moveYaw) * forward + Math.cos(moveYaw) * strafe) * distance;
-      dz =
-        (-Math.cos(moveYaw) * forward - Math.sin(moveYaw) * strafe) * distance;
-    }
-
-    movePlayer(dx, dz);
-    camera.position.y = terrainHeight(camera.position.x, camera.position.z) + playerHeight;
+    return { forward: forwardInput, strafe: strafeInput };
   }
 
   applyCameraRotation();

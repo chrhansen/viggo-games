@@ -74,15 +74,15 @@ describe("mobile child-safety constraints", () => {
 });
 
 describe("mobile game selector", () => {
-  it("presents Chicken Hop first as the only ready mission", () => {
+  it("presents Chicken Hop and Hunter Guy as playable native missions", () => {
     expect(gamePreviews[0]).toMatchObject({
       id: "chicken-hop",
       level: "01",
       title: "Chicken Hop",
       status: "ready",
     });
-    expect(gamePreviews.filter((game) => game.status === "ready")).toHaveLength(1);
-    expect(gamePreviews.slice(1).every((game) => game.status === "locked")).toBe(true);
+    expect(gamePreviews.filter((game) => game.status === "ready").map(game => game.route)).toEqual(["/chicken-hop", "/hunter-guy"]);
+    expect(gamePreviews.slice(2).every((game) => game.status === "locked")).toBe(true);
   });
 
   it("keeps selector ids and level numbers unique", () => {

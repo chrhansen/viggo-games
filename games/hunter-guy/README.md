@@ -1,13 +1,13 @@
-# Hunter Guy (Browser Prototype)
+# Hunter Guy — browser and native
 
-First-person browser game with a detailed procedural forest.
+First-person forest game with a shared engine and Three.js scene for the browser and native iOS/Android app.
 Player in forest.
 Tools on belt.
 Targets: foxes, deer, bears.
 
 Source of truth: this folder inside `chrhansen/viggo-games`.
 
-## Stack
+## Browser stack
 
 - Vanilla HTML/CSS/JS
 - `three.js` installed through the root npm workspace and bundled by Vite
@@ -35,7 +35,7 @@ If behavior looks stale, hard refresh (`Cmd+Shift+R`).
 - Deploy workflow: `.github/workflows/pages.yml`
 - Trigger: push to `main` in `chrhansen/viggo-games`
 
-## Controls
+## Browser controls
 
 - Desktop
   - Click `Start Hunt` (or canvas) to lock cursor
@@ -86,14 +86,15 @@ If behavior looks stale, hard refresh (`Cmd+Shift+R`).
   - UI styling (HUD, crosshair, overlay, belt, touch controls)
   - top-positioned weapon belt
   - dismissible controls helper card
+- `core/`
+  - Platform-neutral seeded gameplay: movement, collisions, animals, patrols, tools, score and pause
+  - See [shared engine documentation](core/README.md)
+- `scene.js`
+  - Shared camera, lights, terrain, forest, raycast hit detection and visual synchronization
 - `game.js`
-  - Scene/camera/lights/terrain/trees
-  - Raycast hit handling and score updates
-  - Dense tree population with a small spawn clearing
-  - Main animation loop
-  - controls card auto-hide timing
+  - Browser WebGL, texture loading, DOM HUD, controls and audio adapter
 - `collisions.js`
-  - Player movement collision, sliding, and tree/animal/hunter body bounds
+  - Compatibility export for the shared collision module
 - `player-controls.js`
   - Desktop pointer-lock look + keyboard movement
   - Touch D-pad movement + drag-to-look
@@ -103,14 +104,11 @@ If behavior looks stale, hard refresh (`Cmd+Shift+R`).
 - `forest.js`
   - Instanced pine and broadleaf trees, grass, rocks, fallen logs, and a static sky
 - `nature-materials.js`
-  - Seeded procedural bark, foliage, ground, and fur textures; grass wind shader
+  - Platform-supplied shared texture loading and grass wind shader
 - `animal-models.js`
   - Rounded fox, deer, and bear anatomy, facial details, antlers, paws, and animated legs
 - `wildlife.js`
-  - Animal spawn counts
-  - Animal roaming behavior
-  - Damage/HP logic (`applyDamage`)
-  - Scare logic (`squirt`)
+  - Shared animal renderer driven exclusively by core state
 - `weapon-effects.js`
   - Rifle sparks + tracer
   - Bow arrow projectile
@@ -122,31 +120,31 @@ If behavior looks stale, hard refresh (`Cmd+Shift+R`).
 
 ## Visual Detail
 
-- Textures are generated locally at startup; no texture downloads. The root build bundles the game.
+- Textures are bundled PNG assets generated from the original seeded Canvas artwork in `texture-art.js`. With the root dev server running, regenerate using `node scripts/bake-hunter-textures.mjs`; generate native sounds from the browser synthesis with `node scripts/bake-hunter-audio.mjs`.
 - Trees, foliage, grass, rocks, and logs use shared instanced geometry.
 - Pine and broadleaf canopies, tapered trunks, textured ground, and a worn trail add depth. Grass sways; canopies and clouds stay static. Animals have alternating leg movement, subtle body/head motion, and fox tail sway.
 - Fur bump maps, eyes, muzzles, ears, branched antlers, hooves, claws, and lower-resolution rounded bodies distinguish the animals.
-- Warm sunlight, atmospheric haze, and a 1024px shadow map follow the player.
-- Rendering uses 18,000 grass blades, 14 pine / 12 broadleaf foliage cards per tree, and a maximum 1.25 pixel ratio. Foliage casts no shadows.
+- Warm sunlight and atmospheric haze follow the player. Browser rendering includes a 1024px shadow map; native disables shadow maps to reduce phone GPU cost.
+- Rendering uses 18,000 grass blades and 14 pine / 12 broadleaf foliage cards per tree. Browser and native rendering cap pixel ratio at 1.25. Native scales its GL surface while keeping the HUD at full resolution, and stops redrawing a paused scene. Foliage casts no shadows.
 - The player collides with tree trunks, living animals, and hunters, sliding around them. Grass, rocks, logs, and foliage remain decorative.
 - Collision uses a static tree grid, moving body circles, and movement substeps to prevent crossing trunks during slow frames. Tagged animals stop blocking movement.
 
 ## Current Defaults
 
-- Tree density: `TREE_COUNT = 540` (`game.js`)
-- Spawn clearing: `PLAYER_CLEARING_RADIUS = 14` (`game.js`)
-- Knife reach: `weaponStats.knife.range = 5` (`game.js`)
-- Human patrol pace: `HUNTER_SPEED_SCALE = 0.4` (`game.js`), 40% of the original speed
-- Wildlife pace: `ANIMAL_SPEED_SCALE = 0.5` (`wildlife.js`)
-- Wildlife move/idle windows: `moveMin/moveMax` + `idleMin/idleMax` per species (`wildlife.js`)
+- Tree density: `TREE_COUNT = 540` (`scene.js`)
+- Spawn clearing: `PLAYER_CLEARING_RADIUS = 14` (`scene.js`)
+- Knife reach: `weaponStats.knife.range = 5` (`core/engine.js`)
+- Human patrol pace: `0.4` (`core/engine.js`), 40% of the original speed
+- Wildlife pace: `ANIMAL_SPEED_SCALE = 0.5` (`core/wildlife.js`)
+- Wildlife move/idle windows: `moveMin/moveMax` + `idleMin/idleMax` per species (`core/wildlife.js`)
 
 ## Tuning Knobs (fast edits)
 
-- Look up/down range: `LOOK_RANGE_RADIANS` in `game.js`
+- Look up/down range: `LOOK_RANGE` in `core/world.js`
 - Turn speed: `turnSpeed` in `player-controls.js`
-- Animal counts and speed scale: constants in `wildlife.js`
-- Bear/deer/fox HP and behavior: spawn options in `wildlife.js`
-- Weapon cooldown/range: `weaponStats` in `game.js`
+- Animal counts and speed scale: constants in `core/wildlife.js`
+- Bear/deer/fox HP and behavior: spawn options in `core/wildlife.js`
+- Weapon cooldown/range: `weaponStats` in `core/engine.js`
 
 ## Notes For Next Agent
 
@@ -159,3 +157,14 @@ If behavior looks stale, hard refresh (`Cmd+Shift+R`).
 From the repository root, run `npm test -- src/test/hunter-collisions.test.ts` for movement regressions. The full gate is `npm run lint`, `npm run typecheck`, `npm test`, and `npm run build`.
 
 Also open the game to check rendering, grass sway, animal gait, slow human patrols, and movement against trunks and live animals. Use a browser with pointer-lock support for desktop play; embedded previews may reject mouse capture.
+
+## Native phones
+
+The Expo app in `../../mobile/` imports this package directly. Hunter Guy is playable
+from its game selector on iOS and Android, in portrait and landscape. Native controls
+use simultaneous touch tracking: left joystick moves, dragging the scene aims, and
+the right button uses the selected tool. Native uses touch aiming; the optional
+browser device-orientation enhancement remains browser-only. App backgrounding and
+leaving the screen pause the hunt. Tool audio honors the phone's silent mode.
+
+TestFlight and Expo update delivery are documented in [the mobile README](../../mobile/README.md).

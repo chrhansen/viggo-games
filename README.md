@@ -13,14 +13,14 @@ Self-contained source repository for the website, all five games, and the native
 | `games/gunny/` | Gunny source, starfield, combat, and hull warnings |
 | `games/torpedo/` | Torpedo source, submarine combat, interior rooms, and artwork |
 | `src/` | React website, game cards, descriptive landing pages, and iframe player |
-| `mobile/` | Native Expo shell and Chicken Hop native rendering/controls |
+| `mobile/` | Native Expo shell, Chicken Hop and Hunter Guy rendering/controls |
 | `public/` | Website static files, including `CNAME`; no copied game builds |
 | `scripts/` | Build and deployment validation |
 | `.github/workflows/` | Website deployment and mobile checks |
 | `docs/seo.md` | Search metadata, canonical URLs, and indexing rules |
 | `dist/` | Generated website and all five games; ignored by Git |
 
-Each game's README describes its controls, architecture, and maintenance. Native platform adapters stay under `mobile/`; shared gameplay rules live under `games/chicken-hop/core/`.
+Each game's README describes its controls, architecture, and maintenance. Native platform adapters stay under `mobile/`; shared gameplay rules live under each ported game’s `core/` directory.
 
 ## Install and develop
 
@@ -59,7 +59,7 @@ The build also prepares and validates descriptive route pages, canonical tags, `
 
 ## Native app
 
-The native app uses React Native rather than a WebView. It consumes the local shared Chicken Hop core and keeps a separate dependency lockfile to isolate Expo/React Native versions:
+The native app uses React Native rather than a WebView. It consumes the local shared Chicken Hop core and Hunter Guy engine/scene and keeps a separate dependency lockfile to isolate Expo/React Native versions:
 
 ```sh
 cd mobile
@@ -68,12 +68,13 @@ npm run ios
 # or: npm run android
 ```
 
-The entire repository must be checked out; the core dependency resolves to `../games/chicken-hop/core/` within it. See [mobile/README.md](mobile/README.md) for platform requirements, native checks, and child-directed product constraints.
+The entire repository must be checked out; local game dependencies resolve to `../games/chicken-hop/core/` and `../games/hunter-guy/` within it. See [mobile/README.md](mobile/README.md) for platform requirements, native checks, and child-directed product constraints.
 
 ## What to edit
 
 - Game logic, controls, artwork, tuning, and documentation: `games/<slug>/`.
 - Shared Chicken Hop rules: `games/chicken-hop/core/`; retain browser/native parity coverage.
+- Shared Hunter Guy rules and 3D scene: `games/hunter-guy/core/` and `games/hunter-guy/scene.js`.
 - Native rendering and phone lifecycle: `mobile/src/`.
 - Website layout, navigation, and embedded-player behavior: `src/`.
 - Game registry and SEO copy: `src/data/games.json`; artwork mapping: `src/data/games.ts`.
