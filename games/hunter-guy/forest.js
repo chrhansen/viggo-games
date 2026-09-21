@@ -109,29 +109,7 @@ export function createForest(scene, terrainHeight, treeCount, clearingRadius) {
 }
 
 export function createSky(scene) {
-  const canvas = document.createElement("canvas");
-  canvas.width = 1024;
-  canvas.height = 512;
-  const ctx = canvas.getContext("2d");
-  const gradient = ctx.createLinearGradient(0, 0, 0, 512);
-  gradient.addColorStop(0, "#4c85b4");
-  gradient.addColorStop(0.48, "#b9ccca");
-  gradient.addColorStop(1, "#b9ccca");
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, 1024, 512);
-  const random = seededRandom(91);
-  for (let cloud = 0; cloud < 18; cloud++) {
-    const x = 80 + random() * 860, y = 65 + random() * 135;
-    for (let puff = 0; puff < 5; puff++) {
-      const glow = ctx.createRadialGradient(x + puff * 13, y, 1, x + puff * 13, y, 34);
-      glow.addColorStop(0, "rgba(249,245,230,0.22)");
-      glow.addColorStop(1, "rgba(249,245,230,0)");
-      ctx.fillStyle = glow;
-      ctx.fillRect(x + puff * 13 - 34, y - 34, 68, 68);
-    }
-  }
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
+  const texture = natureTexture("sky");
   scene.add(new THREE.Mesh(
     new THREE.SphereGeometry(500, 16, 12),
     new THREE.MeshBasicMaterial({ map: texture, side: THREE.BackSide, depthWrite: false })

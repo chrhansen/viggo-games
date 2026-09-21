@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { disposeObject } from "./dispose.js";
 
 const Y_AXIS = new THREE.Vector3(0, 1, 0);
 
@@ -212,6 +213,7 @@ export function createWeaponEffects(scene, camera) {
       fx.life -= delta;
       if (fx.life <= 0) {
         scene.remove(fx.object);
+        disposeObject(fx.object);
         active.splice(i, 1);
         continue;
       }

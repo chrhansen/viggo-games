@@ -10,5 +10,14 @@
   },
   "dependencies": {
     "three": "0.160.0"
+  },
+  "exports": {
+    "./scene": "./scene.js",
+    "./core": "./core/engine.js",
+    "./textures": "./nature-materials.js",
+    "./assets/*": "./assets/*"
+  },
+  "devDependencies": {
+    "@types/three": "^0.160.0"
   }
 }
