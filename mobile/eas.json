@@ -33,7 +33,11 @@
   },
   "submit": {
     "testflight": {
-      "ios": {}
+      "ios": {
+        "ascAppId": "6814593296",
+        "appleTeamId": "DVPJZW992F",
+        "groups": ["Team (Expo)"]
+      }
     }
   }
 }
