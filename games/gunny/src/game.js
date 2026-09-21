@@ -1,6 +1,9 @@
 import * as THREE from "three";
 import { MISSION_KILLS } from "./config.js";
-import { createPlanet, createPlayerShip, createStars } from "./entities.js";
+import { createPlayerShip, createStars } from "./entities.js";
+import { createPlanet, SUN_DIRECTION } from "./planets.js";
+import { disposeExplosion } from "./explosions.js";
+import { createSpaceReflections } from "./vehicle-materials.js";
 import { runtimeMethods } from "./mission-runtime.js";
 import { HullWarning } from "./hull-warning.js";
 
@@ -14,6 +17,7 @@ export class GunnyGame {
     this.enemySpawnTimer = 0;
     this.satelliteSpawnTimer = 0;
     this.waveIntensity = 1;
+    this.backdropTime = 0;
     this.hullWarning = new HullWarning();
 
     this.setupRenderer();
@@ -40,7 +44,10 @@ export class GunnyGame {
 
   setupScene() {
     this.scene = new THREE.Scene();
-    this.scene.fog = new THREE.FogExp2(0x07131d, 0.0012);
+    this.scene.background = new THREE.Color(0x020408);
+    this.spaceReflections = createSpaceReflections(this.renderer);
+    this.scene.environment = this.spaceReflections.texture;
+    this.scene.environmentIntensity = 0.85;
 
     this.camera = new THREE.PerspectiveCamera(
       60,
@@ -51,7 +58,7 @@ export class GunnyGame {
 
     const hemi = new THREE.HemisphereLight(0x90d4ff, 0x09131d, 1.8);
     const sun = new THREE.DirectionalLight(0xfff2cc, 1.65);
-    sun.position.set(-90, 60, -120);
+    sun.position.copy(SUN_DIRECTION).multiplyScalar(150);
     const rim = new THREE.PointLight(0x6ec5ff, 28, 300, 2);
     rim.position.set(-120, -50, -320);
     const cockpitFill = new THREE.PointLight(0x7fcfff, 10, 90, 2);
@@ -69,6 +76,8 @@ export class GunnyGame {
 
     this.scene.add(hemi, sun, rim, cockpitFill, forwardFill, forwardFill.target);
     this.forwardFill = forwardFill;
+    this.blastLight = new THREE.PointLight(0xffa15c, 0, 65, 2);
+    this.scene.add(this.blastLight);
 
     this.player = {
       mesh: createPlayerShip(),
@@ -150,6 +159,7 @@ export class GunnyGame {
     this.enemySpawnTimer = 1.1;
     this.satelliteSpawnTimer = 1.35;
     this.waveIntensity = 1;
+    this.backdropTime = 0;
 
     this.state = {
       health: 100,
@@ -175,7 +185,8 @@ export class GunnyGame {
     this.enemyShots.forEach(({ mesh }) => this.scene.remove(mesh));
     this.enemies.forEach(({ mesh }) => this.scene.remove(mesh));
     this.satellites.forEach(({ mesh }) => this.scene.remove(mesh));
-    this.explosions.forEach(({ mesh }) => this.scene.remove(mesh));
+    this.explosions.forEach(({ mesh }) => disposeExplosion(mesh));
+    this.blastLight.intensity = 0;
 
     this.player.shots = [];
     this.enemyShots = [];
@@ -268,6 +279,7 @@ export class GunnyGame {
     if (this.started && !this.finished) {
       this.update(delta);
     } else {
+      this.updateExplosions(delta);
       this.updateBackdrop(delta);
       this.updateCamera(delta);
     }
