@@ -93,7 +93,7 @@ test("hull warning covers 10% threshold, stops at mission end and silences on bl
     started: true, finished: false,
     state: { health: 10, score: 0, kills: 0, distance: 0 },
     dom: {
-      healthValue: { classList: { toggle: (_, value) => { critical = value; } } },
+      healthValue: { closest: () => ({ classList: { toggle: (_, value) => { critical = value; } } }) },
       scoreValue: {}, killsValue: {}, distanceValue: {},
     },
     hullWarning: { update: (value) => { audible = value; } },

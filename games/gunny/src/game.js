@@ -19,6 +19,7 @@ export class GunnyGame {
     this.waveIntensity = 1;
     this.backdropTime = 0;
     this.hullWarning = new HullWarning();
+    this.missionCardTimer = null;
 
     this.setupRenderer();
     this.setupScene();
@@ -202,9 +203,15 @@ export class GunnyGame {
     this.resetMission();
     this.started = true;
     this.clock.start();
+    clearTimeout(this.missionCardTimer);
+    if (window.matchMedia("(max-width: 760px), (pointer: coarse)").matches) {
+      this.missionCardTimer = setTimeout(this.dismissMissionCard, 5000);
+    }
   };
 
   dismissMissionCard = () => {
+    clearTimeout(this.missionCardTimer);
+    this.missionCardTimer = null;
     this.dom.missionCard?.classList.add("hud__block--hidden");
   };
 
@@ -302,10 +309,11 @@ export class GunnyGame {
   }
 
   updateHud() {
-    const critical = this.started && !this.finished && this.state.health > 0 && this.state.health <= 10;
-    this.dom.healthValue.classList.toggle("stat__value--critical", critical);
+    const health = Math.max(0, Math.round(this.state.health));
+    const critical = this.started && !this.finished && this.state.health > 0 && health <= 10;
+    this.dom.healthValue.closest(".stat").classList.toggle("stat--critical", critical);
     this.hullWarning.update(critical && !document.hidden && document.hasFocus());
-    this.dom.healthValue.textContent = `${Math.max(0, Math.round(this.state.health))}%`;
+    this.dom.healthValue.textContent = `${health}%`;
     this.dom.scoreValue.textContent = this.state.score.toString();
     this.dom.killsValue.textContent = `${this.state.kills} / ${MISSION_KILLS}`;
     this.dom.distanceValue.textContent = `${Math.round(this.state.distance)} km`;
