@@ -91,4 +91,4 @@ From the repository root, `npm run build` compiles every game into `dist/`, incl
 - `src/collisions.ts` owns movement constraints; `mountains.ts` owns peak geometry and bounds; `tree-detail.ts` owns bark and pine detail; `route.ts` owns the shared route and surface sampling.
 - Regression tests: run `npm test -- src/test/burb-collisions.test.ts` from the umbrella repository. Run Burb's own build to typecheck its source.
 
-All touch controls block text selection and iOS long-press callouts.
+The entire game, including HUD text, help, tilt status, and touch controls, blocks text selection and iOS long-press callouts.
