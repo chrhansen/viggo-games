@@ -7,7 +7,7 @@ Targets: foxes, deer, bears.
 
 Source of truth: this folder inside `chrhansen/viggo-games`.
 
-## Stack
+## Browser stack
 
 - Vanilla HTML/CSS/JS
 - `three.js` installed through the root npm workspace and bundled by Vite
@@ -35,7 +35,7 @@ If behavior looks stale, hard refresh (`Cmd+Shift+R`).
 - Deploy workflow: `.github/workflows/pages.yml`
 - Trigger: push to `main` in `chrhansen/viggo-games`
 
-## Controls
+## Browser controls
 
 - Desktop
   - Click `Start Hunt` (or canvas) to lock cursor
@@ -125,7 +125,7 @@ If behavior looks stale, hard refresh (`Cmd+Shift+R`).
 - Pine and broadleaf canopies, tapered trunks, textured ground, and a worn trail add depth. Grass sways; canopies and clouds stay static. Animals have alternating leg movement, subtle body/head motion, and fox tail sway.
 - Fur bump maps, eyes, muzzles, ears, branched antlers, hooves, claws, and lower-resolution rounded bodies distinguish the animals.
 - Warm sunlight and atmospheric haze follow the player. Browser rendering includes a 1024px shadow map; native disables shadow maps to reduce phone GPU cost.
-- Rendering uses 18,000 grass blades, 14 pine / 12 broadleaf foliage cards per tree, and a maximum 1.25 pixel ratio. Foliage casts no shadows.
+- Rendering uses 18,000 grass blades and 14 pine / 12 broadleaf foliage cards per tree. Browser rendering caps pixel ratio at 1.25; native rendering uses the Expo GL drawing-buffer dimensions. Foliage casts no shadows.
 - The player collides with tree trunks, living animals, and hunters, sliding around them. Grass, rocks, logs, and foliage remain decorative.
 - Collision uses a static tree grid, moving body circles, and movement substeps to prevent crossing trunks during slow frames. Tagged animals stop blocking movement.
 
@@ -167,4 +167,4 @@ the right button uses the selected tool. Native uses touch aiming; the optional
 browser device-orientation enhancement remains browser-only. App backgrounding and
 leaving the screen pause the hunt. Tool audio honors the phone's silent mode.
 
-TestFlight and Expo update delivery are documented in `../../mobile/README.md`.
+TestFlight and Expo update delivery are documented in [the mobile README](../../mobile/README.md).

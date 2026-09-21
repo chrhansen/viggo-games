@@ -68,7 +68,7 @@ npm run ios
 # or: npm run android
 ```
 
-The entire repository must be checked out; the core dependency resolves to `../games/chicken-hop/core/` within it. See [mobile/README.md](mobile/README.md) for platform requirements, native checks, and child-directed product constraints.
+The entire repository must be checked out; local game dependencies resolve to `../games/chicken-hop/core/` and `../games/hunter-guy/` within it. See [mobile/README.md](mobile/README.md) for platform requirements, native checks, and child-directed product constraints.
 
 ## What to edit
 
