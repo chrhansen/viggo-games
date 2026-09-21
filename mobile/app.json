@@ -18,7 +18,8 @@
       "buildNumber": "1",
       "icon": "./assets/app-icon.png",
       "infoPlist": {
-        "CFBundleName": "Viggo Games"
+        "CFBundleName": "Viggo Games",
+        "ITSAppUsesNonExemptEncryption": false
       },
       "supportsTablet": false
     },
@@ -34,7 +35,8 @@
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.SYSTEM_ALERT_WINDOW",
         "android.permission.VIBRATE",
-        "android.permission.WRITE_EXTERNAL_STORAGE"
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.RECORD_AUDIO"
       ],
       "predictiveBackGestureEnabled": false
     },
@@ -49,10 +51,33 @@
           "resizeMode": "contain"
         }
       ],
-      "expo-image"
+      "expo-image",
+      "expo-asset",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": false,
+          "recordAudioAndroid": false,
+          "enableBackgroundPlayback": false,
+          "enableBackgroundRecording": false
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "22c65695-4f9a-4351-ba3d-f517b6fa1b2e"
+      }
+    },
+    "owner": "viggo-games",
+    "runtimeVersion": {
+      "policy": "fingerprint"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/22c65695-4f9a-4351-ba3d-f517b6fa1b2e"
     }
   }
 }

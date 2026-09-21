@@ -13,6 +13,7 @@ export interface GamePreview {
   color: string;
   image: number;
   status: "ready" | "locked";
+  route?: "/chicken-hop" | "/hunter-guy";
 }
 
 export const gamePreviews: readonly GamePreview[] = [
@@ -25,6 +26,7 @@ export const gamePreviews: readonly GamePreview[] = [
     color: "#FF4B4B",
     image: chickenHopImage,
     status: "ready",
+    route: "/chicken-hop",
   },
   {
     id: "hunter-guy",
@@ -34,7 +36,8 @@ export const gamePreviews: readonly GamePreview[] = [
     genre: "Forest adventure",
     color: "#22C55E",
     image: hunterGuyImage,
-    status: "locked",
+    status: "ready",
+    route: "/hunter-guy",
   },
   {
     id: "burb",

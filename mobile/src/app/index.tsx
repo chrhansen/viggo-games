@@ -119,12 +119,12 @@ export default function GameSelectorScreen() {
                 key={mission.id}
                 mission={mission}
                 onPress={
-                  mission.status === "ready" ? () => router.push("./chicken-hop") : undefined
+                  mission.route ? () => router.push(mission.route!) : undefined
                 }
               />
             ))}
 
-            <Text style={styles.footer}>1 GAME READY · MORE MISSIONS IN DEVELOPMENT</Text>
+            <Text style={styles.footer}>2 GAMES READY · MORE MISSIONS IN DEVELOPMENT</Text>
           </View>
         </View>
       </ScrollView>
