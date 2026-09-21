@@ -1,179 +1,158 @@
 import * as THREE from 'three';
+import { surfaceTexture } from './surfaceTextures.js';
+
+let submarineTemplate;
+const torpedoTemplates = new Map();
+
+function addMesh(group, geometry, material, position = [0, 0, 0]) {
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.position.set(...position);
+  group.add(mesh);
+  return mesh;
+}
+
+function turnedHull(profile, material) {
+  const geometry = new THREE.LatheGeometry(profile.map(([x, radius]) => new THREE.Vector2(radius, x)), 40);
+  geometry.rotateZ(-Math.PI / 2);
+  return new THREE.Mesh(geometry, material);
+}
+
+function ring(group, x, radius, thickness, material) {
+  const mesh = addMesh(group, new THREE.TorusGeometry(radius, thickness, 6, 40), material, [x, 0, 0]);
+  mesh.rotation.y = Math.PI / 2;
+  return mesh;
+}
+
+function finGeometry(length, span, thickness) {
+  const shape = new THREE.Shape();
+  shape.moveTo(-length / 2, 0);
+  shape.lineTo(length / 2, 0);
+  shape.lineTo(length * 0.12, span);
+  shape.lineTo(-length * 0.45, span * 0.94);
+  shape.closePath();
+  const geometry = new THREE.ExtrudeGeometry(shape, { depth: thickness, bevelEnabled: false });
+  geometry.translate(0, 0, -thickness / 2);
+  return geometry;
+}
+
+function propeller(radius, material) {
+  const group = new THREE.Group();
+  const hub = addMesh(group, new THREE.SphereGeometry(radius * 0.23, 12, 8), material);
+  hub.scale.x = 1.8;
+  const bladeGeometry = finGeometry(radius * 0.46, radius, radius * 0.07);
+  for (let i = 0; i < 7; i += 1) {
+    const blade = addMesh(group, bladeGeometry, material);
+    blade.rotation.set(i * Math.PI * 2 / 7, 0.38, -0.2);
+  }
+  group.name = 'propeller';
+  return group;
+}
+
+function buildSubmarine() {
+  const group = new THREE.Group();
+  const steel = new THREE.MeshStandardMaterial({
+    color: '#526166', map: surfaceTexture('steel'), bumpMap: surfaceTexture('steel'),
+    bumpScale: 0.025, roughness: 0.72, metalness: 0.48
+  });
+  const dark = new THREE.MeshStandardMaterial({ color: '#17262b', roughness: 0.83, metalness: 0.25 });
+  const trim = new THREE.MeshStandardMaterial({ color: '#697778', roughness: 0.54, metalness: 0.65 });
+  const bronze = new THREE.MeshStandardMaterial({ color: '#85754e', roughness: 0.48, metalness: 0.72 });
+
+  group.add(turnedHull([
+    [-4.9, 0], [-4.7, 0.15], [-4.3, 0.28], [-3.8, 0.48], [-3.1, 0.64],
+    [-2.4, 0.7], [2.9, 0.7], [3.65, 0.67], [4.25, 0.54], [4.7, 0.3], [4.9, 0]
+  ], steel));
+  const sonar = addMesh(group, new THREE.SphereGeometry(1, 28, 16), dark, [4.05, 0, 0]);
+  sonar.scale.set(0.86, 0.57, 0.57);
+
+  const deck = addMesh(group, new THREE.CapsuleGeometry(0.24, 4.7, 8, 16), steel, [-0.3, 0.61, 0]);
+  deck.rotation.z = Math.PI / 2;
+  deck.scale.x = 0.42;
+
+  const sailShape = new THREE.Shape();
+  sailShape.moveTo(-1.6, 0.55);
+  sailShape.lineTo(-1.4, 1.45);
+  sailShape.quadraticCurveTo(-1.3, 1.67, -0.95, 1.67);
+  sailShape.lineTo(-0.05, 1.67);
+  sailShape.quadraticCurveTo(0.38, 1.6, 0.48, 0.6);
+  sailShape.closePath();
+  const sailGeometry = new THREE.ExtrudeGeometry(sailShape, {
+    depth: 0.38, bevelEnabled: true, bevelSegments: 3, steps: 1, bevelSize: 0.09, bevelThickness: 0.09
+  });
+  sailGeometry.translate(0, 0, -0.19);
+  addMesh(group, sailGeometry, steel);
+
+  for (const [x, z, height] of [[-1.05, -0.08, 0.78], [-0.65, 0.08, 0.58], [-0.22, 0, 0.42]]) {
+    addMesh(group, new THREE.CylinderGeometry(0.027, 0.045, height, 10), trim, [x, 1.62 + height / 2, z]);
+    addMesh(group, new THREE.BoxGeometry(0.13, 0.07, 0.075), dark, [x + 0.035, 1.62 + height, z]);
+  }
+
+  for (const x of [-2.8, -1.9, 1.1, 2.1, 3.1]) {
+    const hatch = addMesh(group, new THREE.CylinderGeometry(0.17, 0.18, 0.035, 20), dark, [x, 0.72, 0]);
+    addMesh(group, new THREE.BoxGeometry(0.16, 0.025, 0.025), trim, [x, hatch.position.y + 0.03, 0]);
+  }
+  for (const x of [-2.3, -1.1, 0.1, 1.3, 2.5]) ring(group, x, 0.701, 0.004, dark);
+
+  const ventGeometry = new THREE.BoxGeometry(0.075, 0.14, 0.018);
+  for (const side of [-1, 1]) {
+    for (let i = 0; i < 9; i += 1) {
+      addMesh(group, ventGeometry, dark, [-2.6 + i * 0.15, 0.22, side * 0.665]);
+    }
+    for (const y of [-0.19, 0.19]) {
+      const door = addMesh(group, new THREE.SphereGeometry(1, 14, 10), dark, [4.22, y, side * 0.405]);
+      door.scale.set(0.28, 0.09, 0.04);
+      door.rotation.y = side * 0.48;
+    }
+    const bowPlane = addMesh(group, finGeometry(0.95, 0.8, 0.06), steel, [2.5, 0, side * 0.55]);
+    bowPlane.rotation.x = side * Math.PI / 2;
+  }
+  const sternFin = finGeometry(1.05, 0.68, 0.07);
+  for (let i = 0; i < 4; i += 1) {
+    const fin = addMesh(group, sternFin, steel, [-3.95, 0, 0]);
+    fin.rotation.x = i * Math.PI / 2;
+  }
+  const screw = propeller(0.51, bronze);
+  screw.position.x = -4.85;
+  group.add(screw);
+  return group;
+}
 
 export function createEnemySubmarineMesh() {
-  const group = new THREE.Group();
-  const hullMaterial = new THREE.MeshStandardMaterial({
-    color: '#1b2930',
-    roughness: 0.58,
-    metalness: 0.58
-  });
-  const wetSteelMaterial = new THREE.MeshStandardMaterial({
-    color: '#41545b',
-    roughness: 0.46,
-    metalness: 0.68
-  });
-  const panelMaterial = new THREE.MeshStandardMaterial({ color: '#121c22', roughness: 0.72, metalness: 0.45 });
-  const blackMaterial = new THREE.MeshStandardMaterial({ color: '#070d10', roughness: 0.74, metalness: 0.38 });
-  const warningMaterial = new THREE.MeshStandardMaterial({
-    color: '#8d1f1c',
-    emissive: '#ff2f2a',
-    emissiveIntensity: 0.28,
-    roughness: 0.42,
-    metalness: 0.24
-  });
-
-  const hull = new THREE.Mesh(new THREE.CapsuleGeometry(0.68, 7.2, 14, 28), hullMaterial);
-  hull.rotation.z = Math.PI / 2;
-  hull.scale.set(1, 0.82, 1);
-  group.add(hull);
-
-  const bow = new THREE.Mesh(new THREE.SphereGeometry(0.7, 28, 16), hullMaterial);
-  bow.position.x = 4.26;
-  bow.scale.set(1.18, 0.72, 0.72);
-  group.add(bow);
-
-  const bowCap = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.56, 0.24, 22), panelMaterial);
-  bowCap.position.x = 4.88;
-  bowCap.rotation.z = Math.PI / 2;
-  group.add(bowCap);
-
-  const stern = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.68, 1.1, 24), hullMaterial);
-  stern.position.x = -4.2;
-  stern.rotation.z = Math.PI / 2;
-  group.add(stern);
-
-  const propeller = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.04, 8, 24), wetSteelMaterial);
-  propeller.position.x = -4.85;
-  propeller.rotation.y = Math.PI / 2;
-  group.add(propeller);
-  group.userData.propeller = propeller;
-
-  for (const bladeRotation of [0, Math.PI / 2, Math.PI, Math.PI * 1.5]) {
-    const blade = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.42, 0.08), wetSteelMaterial);
-    blade.position.x = -4.9;
-    blade.rotation.x = bladeRotation;
-    group.add(blade);
-  }
-
-  const keel = new THREE.Mesh(new THREE.BoxGeometry(7.2, 0.11, 0.2), blackMaterial);
-  keel.position.set(-0.2, -0.58, 0);
-  group.add(keel);
-
-  const deck = new THREE.Mesh(new THREE.BoxGeometry(4.9, 0.08, 0.42), panelMaterial);
-  deck.position.set(-0.25, 0.58, 0);
-  group.add(deck);
-
-  const tower = new THREE.Mesh(new THREE.BoxGeometry(1.45, 0.98, 0.56), hullMaterial);
-  tower.position.set(-0.55, 0.96, 0);
-  group.add(tower);
-
-  const towerCap = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.16, 0.5), wetSteelMaterial);
-  towerCap.position.set(-0.55, 1.52, 0);
-  group.add(towerCap);
-
-  for (const [x, z, height] of [[-0.92, -0.08, 0.9], [-0.54, 0.08, 0.75], [-0.22, 0, 0.62]]) {
-    const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.05, height, 10), blackMaterial);
-    mast.position.set(x, 1.94, z);
-    group.add(mast);
-  }
-
-  const conningLight = new THREE.Mesh(new THREE.SphereGeometry(0.08, 10, 8), warningMaterial);
-  conningLight.position.set(0.12, 1.35, 0.32);
-  group.add(conningLight);
-
-  const tubeOffsets = [
-    [0.17, 0.24],
-    [0.17, -0.24],
-    [-0.17, 0.24],
-    [-0.17, -0.24]
-  ];
-  for (const [y, z] of tubeOffsets) {
-    const tube = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.1, 14), blackMaterial);
-    tube.position.set(5.02, y, z);
-    tube.rotation.z = Math.PI / 2;
-    group.add(tube);
-  }
-
-  const planes = [
-    { x: 2.25, y: 0, z: 0.68, scale: [0.9, 0.06, 0.3] },
-    { x: 2.25, y: 0, z: -0.68, scale: [0.9, 0.06, 0.3] },
-    { x: -4.08, y: 0.58, z: 0, scale: [0.74, 0.34, 0.07] },
-    { x: -4.08, y: -0.58, z: 0, scale: [0.74, 0.34, 0.07] },
-    { x: -4.25, y: 0, z: 0.58, scale: [0.78, 0.07, 0.28] },
-    { x: -4.25, y: 0, z: -0.58, scale: [0.78, 0.07, 0.28] }
-  ];
-
-  for (const plane of planes) {
-    const fin = new THREE.Mesh(new THREE.BoxGeometry(...plane.scale), wetSteelMaterial);
-    fin.position.set(plane.x, plane.y, plane.z);
-    group.add(fin);
-  }
-
-  for (const x of [-3.2, -2.1, -1.0, 0.1, 1.2, 2.3, 3.35]) {
-    const seam = new THREE.Mesh(new THREE.TorusGeometry(0.69, 0.008, 6, 40), blackMaterial);
-    seam.position.x = x;
-    seam.rotation.y = Math.PI / 2;
-    group.add(seam);
-  }
-
-  for (const z of [-0.63, 0.63]) {
-    const rail = new THREE.Mesh(new THREE.BoxGeometry(6.2, 0.035, 0.05), wetSteelMaterial);
-    rail.position.set(-0.2, 0.06, z);
-    group.add(rail);
-  }
-
-  for (const x of [-2.65, -1.85, -1.05, -0.25, 0.55, 1.35]) {
-    const hatch = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.035, 0.46), panelMaterial);
-    hatch.position.set(x, 0.64, 0);
-    group.add(hatch);
-  }
-
+  submarineTemplate ??= buildSubmarine();
+  const group = submarineTemplate.clone(true);
+  group.userData.propeller = group.getObjectByName('propeller');
   return group;
 }
 
 export function createTorpedoMesh(color, glow) {
-  const group = new THREE.Group();
-  const material = new THREE.MeshStandardMaterial({
-    color,
-    emissive: glow,
-    emissiveIntensity: 0.5,
-    roughness: 0.32,
-    metalness: 0.35
-  });
-  const darkMaterial = new THREE.MeshStandardMaterial({ color: '#182026', roughness: 0.5, metalness: 0.55 });
-  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.2, 1.8, 18), material);
-  body.rotation.z = Math.PI / 2;
-  group.add(body);
-
-  const tip = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.42, 14), material);
-  tip.position.x = 1.12;
-  tip.rotation.z = -Math.PI / 2;
-  group.add(tip);
-
-  const tail = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.16, 0.24, 18), darkMaterial);
-  tail.position.x = -1.0;
-  tail.rotation.z = Math.PI / 2;
-  group.add(tail);
-
-  const finPositions = [
-    { y: 0.22, z: 0, rotation: 0 },
-    { y: -0.22, z: 0, rotation: 0 },
-    { y: 0, z: 0.22, rotation: Math.PI / 2 },
-    { y: 0, z: -0.22, rotation: Math.PI / 2 }
-  ];
-
-  for (const position of finPositions) {
-    const fin = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.05, 0.18), darkMaterial);
-    fin.position.x = -0.88;
-    fin.position.y = position.y;
-    fin.position.z = position.z;
-    fin.rotation.x = position.rotation;
-    group.add(fin);
+  const key = `${color}:${glow}`;
+  if (!torpedoTemplates.has(key)) {
+    const group = new THREE.Group();
+    const steel = new THREE.MeshStandardMaterial({
+      color: '#a0aaa8', map: surfaceTexture('steel'), bumpMap: surfaceTexture('steel'),
+      bumpScale: 0.008, roughness: 0.46, metalness: 0.7
+    });
+    const dark = new THREE.MeshStandardMaterial({ color: '#26363b', roughness: 0.6, metalness: 0.5 });
+    const marking = new THREE.MeshStandardMaterial({ color, emissive: glow, emissiveIntensity: 0.12, roughness: 0.62 });
+    group.add(turnedHull([
+      [-1.18, 0], [-1.05, 0.09], [-0.8, 0.16], [0.7, 0.18], [0.95, 0.16], [1.12, 0.1], [1.19, 0]
+    ], steel));
+    const nose = addMesh(group, new THREE.SphereGeometry(1, 20, 12), dark, [0.94, 0, 0]);
+    nose.scale.set(0.26, 0.151, 0.151);
+    ring(group, 0.65, 0.18, 0.027, marking);
+    ring(group, -0.58, 0.168, 0.016, marking);
+    const fins = finGeometry(0.4, 0.3, 0.025);
+    for (let i = 0; i < 4; i += 1) {
+      const fin = addMesh(group, fins, dark, [-0.85, 0, 0]);
+      fin.rotation.x = i * Math.PI / 2;
+    }
+    const screw = propeller(0.16, steel);
+    screw.position.x = -1.2;
+    group.add(screw);
+    torpedoTemplates.set(key, group);
   }
-
-  const bubbleTrail = new THREE.PointLight(glow, 0.8, 7);
-  bubbleTrail.position.x = -1.16;
-  group.add(bubbleTrail);
+  const group = torpedoTemplates.get(key).clone(true);
+  group.userData.propeller = group.getObjectByName('propeller');
   return group;
 }
 
