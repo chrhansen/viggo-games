@@ -58,7 +58,7 @@ Phone motion controls need a secure browser context. On iOS Safari, that means H
 - `Needs HTTPS`: the page is not running in a secure context
 - `Unavailable` or `Denied`: the browser cannot provide orientation events, or permission was denied
 
-All on-screen buttons and their text are non-selectable so touch controls do not accidentally highlight text while playing.
+The entire game, including HUD text, instructions, room views, and controls, blocks text selection and iOS long-press callouts while playing.
 
 ## Core Technologies
 
