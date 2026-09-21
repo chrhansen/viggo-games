@@ -126,7 +126,11 @@ Fingerprint runtime versions prevent incompatible updates reaching older binarie
 Production has its own channel; do not publish there until device testing is approved.
 
 EAS manages build numbers remotely. The TestFlight submit profile links App Store
-Connect app `6814593296`, Apple team `DVPJZW992F` (Christian Hansen), and internal
-group `Team (Expo)`. The existing App Store Connect upload key is assigned to this
+Connect app `6814593296` and Apple team `DVPJZW992F` (Christian Hansen). Internal
+group `Team (Expo)` automatically receives all builds through App Store Connect.
+Leave `groups` out of the submit profile: explicitly assigning this automatic
+internal group makes Fastlane report an error after the upload succeeds. Verify
+the build and tester status in App Store Connect before retrying an upload.
+The existing App Store Connect upload key is assigned to this
 app in the Viggo Games Expo organization's encrypted credential store; no private
 key belongs in this repository. Subsequent submissions can use `--non-interactive`.

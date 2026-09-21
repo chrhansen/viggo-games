@@ -35,8 +35,7 @@
     "testflight": {
       "ios": {
         "ascAppId": "6814593296",
-        "appleTeamId": "DVPJZW992F",
-        "groups": ["Team (Expo)"]
+        "appleTeamId": "DVPJZW992F"
       }
     }
   }
