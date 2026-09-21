@@ -215,6 +215,17 @@ kbd {
   display: none;
 }
 
+.credits {
+  color: var(--hud-soft);
+  font-size: 0.66rem;
+  line-height: 1.5;
+}
+
+.credits a {
+  color: inherit;
+  text-underline-offset: 0.15em;
+}
+
 .hud__dismiss {
   position: absolute;
   top: 0.45rem;

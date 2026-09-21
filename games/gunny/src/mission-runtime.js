@@ -1,9 +1,11 @@
 import * as THREE from "three";
 import { MISSION_KILLS } from "./config.js";
-import { advanceStars, BLAST_LIFETIME, BLAST_RADIUS, raiderBlastDamage } from "./flight-effects.js";
+import { advanceStars, BLAST_LIFETIME, raiderBlastDamage } from "./flight-effects.js";
+import { updatePlanets } from "./planet-motion.js";
+import { updateCraftAppearance } from "./spacecraft.js";
+import { createExplosion, updateExplosion, disposeExplosion, EXPLOSION_LIFETIME, IMPACT_LIFETIME } from "./explosions.js";
 import {
   createEnemyShip,
-  createExplosion,
   createProjectile,
   createSatellite,
 } from "./entities.js";
@@ -57,16 +59,9 @@ export const runtimeMethods = {
     this.player.mesh.rotation.x = this.player.velocity.y * 0.015;
     this.player.mesh.rotation.y = -this.player.velocity.x * 0.006;
 
-    const pulse = 1 + Math.sin(performance.now() * 0.015) * 0.14;
-    this.player.mesh.userData.engineGlow.scale.setScalar(pulse * 1.2);
-
     this.player.cooldown = Math.max(0, this.player.cooldown - delta);
     this.player.damageFlash = Math.max(0, this.player.damageFlash - delta * 2.8);
-    this.player.mesh.traverse((node) => {
-      if (node.isMesh && node.material?.emissive) {
-        node.material.emissiveIntensity = 1 + this.player.damageFlash * 2.4;
-      }
-    });
+    updateCraftAppearance(this.player.mesh, performance.now() * 0.001, this.player.damageFlash);
 
     if ((this.actions.has("fire") || this.pointerFire) && this.player.cooldown === 0) {
       this.firePlayerShot();
@@ -113,13 +108,8 @@ export const runtimeMethods = {
     this.nearStars.position.z = playerZ;
     this.lastStarPlayerZ = playerZ;
 
-    this.earth.position.z = playerZ - 430;
-    this.earth.rotation.y += delta * 0.03;
-    if (this.earth.userData.clouds) {
-      this.earth.userData.clouds.rotation.y += delta * 0.05;
-    }
-    this.moon.position.z = playerZ - 350;
-    this.moon.rotation.y += delta * 0.02;
+    this.backdropTime = (this.backdropTime ?? 0) + delta;
+    updatePlanets(this.earth, this.moon, this.backdropTime, playerZ, this.camera?.aspect);
   },
 
   spawnWaves(delta) {
@@ -177,17 +167,17 @@ export const runtimeMethods = {
       mesh,
       radius: 3.8 * scale,
       spin: new THREE.Vector3(
-        (Math.random() - 0.5) * 0.8,
-        (Math.random() - 0.5) * 0.8,
-        (Math.random() - 0.5) * 0.8
+        (Math.random() - 0.5) * 0.18,
+        (Math.random() - 0.5) * 0.18,
+        (Math.random() - 0.5) * 0.18
       ),
     });
   },
 
   firePlayerShot() {
     const mesh = createProjectile(0x7af6ff, 0.3);
-    mesh.position.copy(this.player.mesh.position);
-    mesh.position.z -= 3.8;
+    mesh.position.fromArray(this.player.mesh.userData.muzzle);
+    this.player.mesh.localToWorld(mesh.position);
     mesh.position.x += this.player.velocity.x * 0.016;
     this.scene.add(mesh);
 
@@ -201,11 +191,12 @@ export const runtimeMethods = {
 
   fireEnemyShot(enemy) {
     const mesh = createProjectile(0xff925d, 0.38);
-    mesh.position.copy(enemy.mesh.position);
+    mesh.position.fromArray(enemy.mesh.userData.muzzle);
+    enemy.mesh.localToWorld(mesh.position);
     this.scene.add(mesh);
 
     const velocity = new THREE.Vector3()
-      .subVectors(this.player.mesh.position, enemy.mesh.position)
+      .subVectors(this.player.mesh.position, mesh.position)
       .normalize()
       .multiplyScalar(54);
 
@@ -220,6 +211,7 @@ export const runtimeMethods = {
     for (let index = this.enemies.length - 1; index >= 0; index -= 1) {
       const enemy = this.enemies[index];
       const age = performance.now() * 0.001 + enemy.phase;
+      updateCraftAppearance(enemy.mesh, age);
 
       enemy.mesh.position.x +=
         (Math.sin(age * 1.8) * enemy.driftX - enemy.mesh.position.x * 0.08) * delta;
@@ -327,30 +319,31 @@ export const runtimeMethods = {
   },
 
   updateExplosions(delta) {
+    if (this.blastLight) this.blastLight.intensity = 0;
     for (let index = this.explosions.length - 1; index >= 0; index -= 1) {
       const explosion = this.explosions[index];
+      explosion.age += delta;
       explosion.life -= delta;
       if (explosion.raiderBlast) {
-        const age = BLAST_LIFETIME - explosion.life;
-        explosion.mesh.scale.setScalar((3.8 + (BLAST_RADIUS - 3.8) * Math.min(1, age / BLAST_LIFETIME)) / 1.2);
         const damage = raiderBlastDamage(
-          explosion.mesh.position.distanceTo(this.player.mesh.position), age
+          explosion.mesh.position.distanceTo(this.player.mesh.position), explosion.age
         );
         if (!explosion.damagedPlayer && damage > 0) {
           this.damagePlayer(damage);
           explosion.damagedPlayer = true;
         }
-      } else {
-        explosion.mesh.scale.addScalar(delta * explosion.growth);
       }
-      explosion.mesh.material.opacity = Math.max(0, explosion.life * 1.4);
-      explosion.mesh.rotation.x += delta * 2;
-      explosion.mesh.rotation.y += delta * 1.4;
+      updateExplosion(explosion.mesh, explosion.age);
+      if (this.blastLight && explosion.large) {
+        const intensity = 1800 * Math.exp(-explosion.age * 16);
+        if (intensity > this.blastLight.intensity) {
+          this.blastLight.intensity = intensity;
+          this.blastLight.position.copy(explosion.mesh.position);
+        }
+      }
 
       if (explosion.life <= 0) {
-        this.scene.remove(explosion.mesh);
-        explosion.mesh.geometry.dispose();
-        explosion.mesh.material.dispose();
+        disposeExplosion(explosion.mesh);
         this.explosions.splice(index, 1);
       }
     }
@@ -362,14 +355,16 @@ export const runtimeMethods = {
   },
 
   spawnExplosion(position, color, scale, raiderBlast = false) {
-    const mesh = createExplosion(color);
+    const large = scale >= 3;
+    const mesh = createExplosion(color, large);
     mesh.position.copy(position);
     mesh.scale.setScalar(scale);
     this.scene.add(mesh);
     this.explosions.push({
       mesh,
-      life: raiderBlast ? BLAST_LIFETIME : 0.55,
-      growth: scale * 2.4,
+      age: 0,
+      life: large ? EXPLOSION_LIFETIME : IMPACT_LIFETIME,
+      large,
       raiderBlast,
       damagedPlayer: false,
     });
@@ -381,7 +376,10 @@ export const runtimeMethods = {
       return;
     }
 
-    if (this.state.kills >= MISSION_KILLS && !this.explosions.some((explosion) => explosion.raiderBlast)) {
+    const activeBlast = this.explosions.some((explosion) =>
+      explosion.raiderBlast && explosion.age < BLAST_LIFETIME
+    );
+    if (this.state.kills >= MISSION_KILLS && !activeBlast) {
       this.finishMission(true);
     }
   },

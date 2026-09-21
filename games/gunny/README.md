@@ -21,12 +21,13 @@ You pilot one ship through open space while the camera follows from behind. Enem
 
 ### Combat + damage
 
-- Player shots travel forward from the ship nose.
+- Player shots travel forward from the ship nose; raider shots also originate at their forward muzzle.
 - Raiders take `2` hits each.
 - Raider collisions damage the hull.
 - Satellite collisions damage the hull.
 - Raider shots damage the hull.
 - Destroyed raiders release a short expanding blast. Each blast can damage your hull once, with less damage near its edge. Steer away before reaching it; the final kill's blast must clear before victory.
+- Explosions use turbulent glowing particles, spark trails, and tumbling fragments that cool and fade. A brief flash lights nearby ships. Small weapon impacts use shorter bursts; visual debris lasts longer than the unchanged 0.7-second damage window.
 - Hull and score update live in the HUD.
 - At 10% hull or less, the percentage pulses red and a short beep repeats once per second during play. Audio starts through the launch gesture and stays silent while the game is unfocused; reduced-motion users see steady red.
 
@@ -35,17 +36,20 @@ You pilot one ship through open space while the camera follows from behind. Enem
 - Ship flies continuously forward.
 - Camera trails behind and gently follows steering.
 - A fixed pool of nearby stars recycles behind the camera to ahead of the ship, indefinitely. Perspective makes nearby stars move faster; distant stars stay in a separate background layer.
-- Earth stays nearby with cloud layer, atmosphere glow, and night-light detail.
-- Moon stays in view with crater texture.
+- Earth has mapped continents, ocean reflections, polar ice, cloud shadows, night-side city lights, and a thin sunlit atmosphere. Its tilted surface turns once every 30 minutes; the separate cloud layer drifts slightly faster.
+- The cratered Moon orbits Earth once every four minutes and keeps the same face toward Earth. Orbit distances and time scales are compressed for gameplay; this is not an astronomical simulation. The pair stays camera-relative during flight and reframes for portrait screens.
 
 ## Features
 
 - Third-person 3D browser flight.
-- Earth, moon, stars, fog, cinematic lighting.
+- Earth, orbiting moon, soft stars, sunlit shading, and engine glow against dark space.
 - Forward fill lighting keeps raiders and satellites readable in-flight.
-- Detailed player ship, raider ships, and satellites.
+- Ivory interceptor with a contoured fuselage, swept wings, framed glass cockpit, vented equipment panels, and recessed twin engines. Raiders use red armor and a distinct forward-swept wing shape.
+- Satellites have exposed blue solar cells in open frames, gold thermal blankets, radiator panels, a curved dish and feed supports, camera optics, and antennas. They tumble slowly through space.
+- Metal and glass reflect a generated Sun/Earth lighting environment. Engine flicker affects exhaust only; damage flashes are isolated to the player.
+- Static model parts are batched by material and shared between spawns to keep draw calls and allocations low.
 - Compact dismissible mission card leaves more screen space for play.
-- Procedural textures for planets and solar panels.
+- Locally bundled Earth and Moon imagery; procedural solar panels and glow textures.
 - HUD for hull, score, kills, and distance.
 - Start screen and restart flow.
 - Keyboard, mouse, and touch controls.
@@ -70,7 +74,7 @@ npm run dev
 
 Open `http://localhost:8080/games/gunny/`. A standalone server is available with `npm run dev --workspace gunny -- --host 127.0.0.1 --port 4175`.
 
-`npm test --workspace gunny` runs the lightweight starfield, blast, and hull-warning checks. The root `npm test` includes them too. `npm run build` at the root bundles all five games, including `dist/games/gunny/`. Do not copy or commit generated bundles.
+`npm test --workspace gunny` runs the starfield, blast, orbit, spacecraft, effect-cleanup, and hull-warning checks. The root `npm test` includes them too. `npm run build` at the root bundles all five games, including `dist/games/gunny/` and the planet images. Do not copy or commit generated bundles.
 
 ## Tech
 
@@ -78,7 +82,8 @@ Open `http://localhost:8080/games/gunny/`. A standalone server is available with
 - Three.js
 - Plain JS modules
 - CSS HUD + overlays
-- Procedural canvas textures, no external art assets
+- Local planet maps from [Solar System Scope](https://www.solarsystemscope.com/textures/) under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); see [asset credits](assets/README.md)
+- Procedural data textures and GPU particle shaders; no new dependencies
 
 ## Project Shape
 
@@ -86,10 +91,15 @@ Open `http://localhost:8080/games/gunny/`. A standalone server is available with
 - `src/mission-runtime.js`: gameplay loop, spawning, combat, damage
 - `src/flight-effects.js`: nearby star recycling and raider blast damage
 - `src/hull-warning.js`: low-hull warning sound
-- `src/entities.js`: ship, raider, satellite, planet builders
-- `src/procedural-textures.js`: Earth, moon, solar panel texture generation
+- `src/entities.js`: star/projectile builders and craft exports
+- `src/spacecraft.js`, `src/satellite.js`: fighter, raider, and satellite models
+- `src/vehicle-geometry.js`, `src/vehicle-materials.js`: model geometry, batching, surface materials, and reflections
+- `src/planets.js`: Earth, cloud, atmosphere, and Moon shaders
+- `src/planet-motion.js`: rotation, lunar orbit, and screen framing
+- `src/explosions.js`: fire particles, sparks, debris, and GPU cleanup
+- `src/procedural-textures.js`, `src/glow-texture.js`: solar cells, thermal foil, hull panels, and glow textures
 - `src/style.css`: HUD and menu styling
 
 ## Current Scope
 
-Prototype slice. Low-hull warning sound only; no levels, no save system, no multiplayer, no asset pipeline yet.
+Prototype slice. Low-hull warning sound only; no levels, no save system, no multiplayer.

@@ -70,7 +70,7 @@ test("raider blast damages once, decorative explosions never damage, expiry clea
 test("final raider blast resolves before mission success; lethal blast loses", () => {
   let result;
   const game = {
-    state: { health: 10, kills: 12 }, explosions: [{ raiderBlast: true }],
+    state: { health: 10, kills: 12 }, explosions: [{ raiderBlast: true, age: 0 }],
     finishMission: (won) => { result = won; },
   };
   runtimeMethods.checkMissionState.call(game);
