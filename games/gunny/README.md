@@ -29,14 +29,14 @@ You pilot one ship through open space while the camera follows from behind. Enem
 - Destroyed raiders release a short expanding blast. Each blast can damage your hull once, with less damage near its edge. Steer away before reaching it; the final kill's blast must clear before victory.
 - Explosions use turbulent glowing particles, spark trails, and tumbling fragments that cool and fade. A brief flash lights nearby ships. Small weapon impacts use shorter bursts; visual debris lasts longer than the unchanged 0.7-second damage window.
 - Hull and score update live in the HUD.
-- At 10% hull or less, the percentage pulses red and a short beep repeats once per second during play. Audio starts through the launch gesture and stays silent while the game is unfocused; reduced-motion users see steady red.
+- At a displayed 10% hull or less, the entire Hull readout pulses red and a short beep repeats once per second during play. Audio starts through the launch gesture and stays silent while the game is unfocused; reduced-motion users see a steady red highlight.
 
 ### World motion
 
 - Ship flies continuously forward.
 - Camera trails behind and gently follows steering.
 - A fixed pool of nearby stars recycles behind the camera to ahead of the ship, indefinitely. Perspective makes nearby stars move faster; distant stars stay in a separate background layer.
-- Earth has mapped continents, ocean reflections, polar ice, cloud shadows, night-side city lights, and a thin sunlit atmosphere. Its tilted surface turns once every 30 minutes; the separate cloud layer drifts slightly faster.
+- Earth has mapped continents, ocean reflections, polar ice, cloud shadows, night-side city lights, and a thin sunlit atmosphere. Its tilted surface turns once every 30 minutes. Clouds and their shadows turn with the surface and are blended in the same opaque shader, avoiding closely overlapping cloud geometry on mobile GPUs.
 - The cratered Moon orbits Earth once every four minutes and keeps the same face toward Earth. Orbit distances and time scales are compressed for gameplay; this is not an astronomical simulation. The pair stays camera-relative during flight and reframes for portrait screens.
 
 ## Features
@@ -48,7 +48,7 @@ You pilot one ship through open space while the camera follows from behind. Enem
 - Satellites have exposed blue solar cells in open frames, gold thermal blankets, radiator panels, a curved dish and feed supports, camera optics, and antennas. They tumble slowly through space.
 - Metal and glass reflect a generated Sun/Earth lighting environment. Engine flicker affects exhaust only; damage flashes are isolated to the player.
 - Static model parts are batched by material and shared between spawns to keep draw calls and allocations low.
-- Compact dismissible mission card leaves more screen space for play.
+- Compact dismissible mission card leaves more screen space for play. On touch devices and narrow screens it automatically closes five seconds after launch; the × button still closes it immediately.
 - Locally bundled Earth and Moon imagery; procedural solar panels and glow textures.
 - HUD for hull, score, kills, and distance.
 - Start screen and restart flow.
@@ -74,7 +74,7 @@ npm run dev
 
 Open `http://localhost:8080/games/gunny/`. A standalone server is available with `npm run dev --workspace gunny -- --host 127.0.0.1 --port 4175`.
 
-`npm test --workspace gunny` runs the starfield, blast, orbit, spacecraft, effect-cleanup, and hull-warning checks. The root `npm test` includes them too. `npm run build` at the root bundles all five games, including `dist/games/gunny/` and the planet images. Do not copy or commit generated bundles.
+`npm test --workspace gunny` runs the starfield, blast, orbit, spacecraft, effect-cleanup, and mobile help/hull-warning checks. The root `npm test` includes them too. `npm run build` at the root bundles all five games, including `dist/games/gunny/` and the planet images. Do not copy or commit generated bundles.
 
 ## Tech
 
