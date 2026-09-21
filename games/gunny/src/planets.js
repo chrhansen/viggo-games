@@ -73,19 +73,18 @@ export function createPlanet(radius, kind) {
     night: { value: loadMap("night", new URL("../assets/earth-night.jpg", import.meta.url).href, true) },
     ocean: { value: loadMap("ocean", new URL("../assets/earth-ocean.jpg", import.meta.url).href) },
     clouds: { value: cloudsMap },
-    cloudOffset: { value: 0 },
   }, `
     uniform sampler2D surface;
     uniform sampler2D night;
     uniform sampler2D ocean;
     uniform sampler2D clouds;
-    uniform float cloudOffset;
     void main() {
       vec3 normal = normalize(vNormal);
       vec3 view = normalize(cameraPosition - vPosition);
       float sunlight = dot(normal, sunDirection);
       float daylight = smoothstep(-0.12, 0.22, sunlight);
-      float cloudShadow = texture2D(clouds, vUv + vec2(cloudOffset + 0.0015, 0.001)).r;
+      float cloudDensity = texture2D(clouds, vUv).r;
+      float cloudShadow = texture2D(clouds, vUv + vec2(0.0015, 0.001)).r;
       vec3 land = texture2D(surface, vUv).rgb;
       vec3 color = land * (0.012 + max(sunlight, 0.0) * 1.75) * (1.0 - cloudShadow * 0.23);
       color += texture2D(night, vUv).rgb * (1.0 - daylight) * 1.2;
@@ -93,21 +92,13 @@ export function createPlanet(radius, kind) {
       color += vec3(0.95, 0.85, 0.65) * glint * texture2D(ocean, vUv).r * daylight * 0.55;
       float rim = pow(1.0 - max(dot(normal, view), 0.0), 3.0);
       color += vec3(0.06, 0.25, 0.65) * rim * daylight * 0.5;
+      vec3 cloudColor = vec3(0.035, 0.045, 0.065) + vec3(max(sunlight, 0.0) * 1.8);
+      color = mix(color, cloudColor, cloudDensity * 0.92);
       gl_FragColor = vec4(color, 1.0);
       #include <tonemapping_fragment>
       #include <colorspace_fragment>
     }
   `));
-  const clouds = sphere(radius * 1.006, material({ map: { value: cloudsMap } }, `
-    uniform sampler2D map;
-    void main() {
-      float density = texture2D(map, vUv).r;
-      float light = max(dot(normalize(vNormal), sunDirection), 0.0);
-      gl_FragColor = vec4(vec3(0.035, 0.045, 0.065) + vec3(light * 1.8), density * 0.92);
-      #include <tonemapping_fragment>
-      #include <colorspace_fragment>
-    }
-  `, { transparent: true, depthWrite: false }));
   const atmosphere = sphere(radius * 1.025, material({}, `
     void main() {
       vec3 normal = normalize(vNormal);
@@ -120,8 +111,7 @@ export function createPlanet(radius, kind) {
     }
   `, { transparent: true, depthWrite: false, side: THREE.BackSide, blending: THREE.AdditiveBlending }));
   planet.rotation.z = THREE.MathUtils.degToRad(-23.4);
-  planet.add(body, clouds, atmosphere);
+  planet.add(body, atmosphere);
   planet.userData.body = body;
-  planet.userData.clouds = clouds;
   return planet;
 }

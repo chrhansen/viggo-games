@@ -1,5 +1,4 @@
 export const EARTH_DAY_SECONDS = 1800;
-export const CLOUD_DAY_SECONDS = 1680;
 export const MOON_ORBIT_SECONDS = 240;
 export const MOON_ORBIT_RADIUS = 132;
 export const MOON_ORBIT_INCLINATION = Math.PI * 0.34;
@@ -20,11 +19,6 @@ export function updatePlanets(earth, moon, time, playerZ, aspect = 16 / 9) {
   earth.position.set(-150 * framing, -52, playerZ - 430 / framing);
   if (earth.userData.body) {
     earth.userData.body.rotation.y = 2.5 + time * TAU / EARTH_DAY_SECONDS;
-  }
-  if (earth.userData.clouds) {
-    earth.userData.clouds.rotation.y = 2.5 + time * TAU / CLOUD_DAY_SECONDS;
-    earth.userData.body.material.uniforms.cloudOffset.value =
-      (earth.userData.body.rotation.y - earth.userData.clouds.rotation.y) / TAU;
   }
   const orbit = moonOrbitPosition(time);
   moon.position.copy(earth.position).add(orbit);
