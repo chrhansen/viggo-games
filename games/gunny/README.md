@@ -83,7 +83,7 @@ Open `http://localhost:8080/games/gunny/`. A standalone server is available with
 - Plain JS modules
 - CSS HUD + overlays
 - Local planet maps from [Solar System Scope](https://www.solarsystemscope.com/textures/) under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); see [asset credits](assets/README.md)
-- Procedural canvas/data textures and GPU particle shaders; no new dependencies
+- Procedural data textures and GPU particle shaders; no new dependencies
 
 ## Project Shape
 
