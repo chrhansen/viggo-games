@@ -67,6 +67,7 @@ export class BossLoop {
       this.combat.player.position.z - 118
     );
     mesh.scale.set(2.7, 2.35, 2.35);
+    mesh.quaternion.copy(quaternionFacing(new THREE.Vector3(0, 0, 1)));
     this.combat.world.add(mesh);
 
     const maxHealth = Math.floor(randomBetween(5, 10)) + this.bossesDefeated;
@@ -75,41 +76,30 @@ export class BossLoop {
       health: maxHealth,
       maxHealth,
       speed: 2.3 + this.bossesDefeated * 0.16,
-      shootTimer: 1.2,
-      visualYaw: this.bossesDefeated % 2 === 0 ? 0.34 : -0.34,
-      phase: randomBetween(0, Math.PI * 2)
+      shootTimer: 1.2
     };
     this.regularKills = 0;
   }
 
   updateBoss(delta) {
+    this.boss.mesh.position.z += this.boss.speed * delta;
     const toPlayer = this.combat.player.position.clone().sub(this.boss.mesh.position);
     const distance = toPlayer.length();
-    const direction = toPlayer.normalize();
-    const visualDirection = direction.clone().applyAxisAngle(yawAxis, this.boss.visualYaw);
-    this.boss.mesh.position.addScaledVector(direction, this.boss.speed * delta);
-    this.boss.mesh.position.x += Math.sin(performance.now() * 0.0012 + this.boss.phase) * delta * 1.5;
-    this.boss.mesh.quaternion.copy(quaternionFacing(visualDirection));
+    const firingDirection = toPlayer.normalize();
     this.boss.mesh.userData.propeller.rotation.x += delta * 7.2;
     this.boss.shootTimer -= delta;
 
     if (this.boss.shootTimer <= 0 && distance < 130) {
-      this.fireBossSalvo(direction);
+      this.fireBossSalvo(firingDirection);
       this.boss.shootTimer = randomBetween(1.8, 3.0);
     }
 
     if (distance < 6.4) {
       this.combat.damagePlayer(24);
-      this.boss.mesh.position.addScaledVector(direction, -10);
     }
 
     if (this.boss.mesh.position.z > this.combat.player.position.z + 34) {
       this.boss.mesh.position.z = this.combat.player.position.z - 104;
-      this.boss.mesh.position.x = clamp(
-        this.combat.player.position.x + randomBetween(-14, 14),
-        -PLAYER_BOUNDS.x + 8,
-        PLAYER_BOUNDS.x - 8
-      );
     }
   }
 
