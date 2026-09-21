@@ -8,7 +8,8 @@ Self-contained source repository for the website, all five games, and the native
 | --- | --- |
 | `games/chicken-hop/` | Chicken Hop browser renderer, controls, audio, styles, and entrypoint |
 | `games/chicken-hop/core/` | Platform-neutral Chicken Hop rules shared by browser and native |
-| `games/hunter-guy/` | Hunter Guy source, procedural forest, animals, controls, and audio |
+| `games/hunter-guy/` | Shared Hunter Guy engine/Three.js scene/assets and browser adapters |
+| `games/hunter-guy/core/` | Platform-neutral Hunter Guy gameplay shared by browser and native |
 | `games/burb/` | Burb source, scenery, bike controls, and collisions |
 | `games/gunny/` | Gunny source, starfield, combat, and hull warnings |
 | `games/torpedo/` | Torpedo source, submarine combat, interior rooms, and artwork |
@@ -21,6 +22,22 @@ Self-contained source repository for the website, all five games, and the native
 | `dist/` | Generated website and all five games; ignored by Git |
 
 Each game's README describes its controls, architecture, and maintenance. Native platform adapters stay under `mobile/`; shared gameplay rules live under each ported game’s `core/` directory.
+
+## Game availability
+
+| Game | Browser | React Native app |
+| --- | --- | --- |
+| [Chicken Hop](games/chicken-hop/README.md) | Playable | Playable on iOS/Android; shared rules, separate renderers |
+| [Hunter Guy](games/hunter-guy/README.md) | Playable | Playable on iOS/Android; shared rules, Three.js scene, models and assets |
+| [Burb](games/burb/README.md) | Playable | Locked preview; not ported |
+| [Gunny](games/gunny/README.md) | Playable | Locked preview; not ported |
+| [Torpedo](games/torpedo/README.md) | Playable | Locked preview; not ported |
+
+Chicken Hop and Hunter Guy are included in one **Viggo Games** iOS app. The first
+Hunter Guy TestFlight beta, **0.1.0 (6)**, was delivered on **2026-09-21**; the owner
+reported that the iPhone beta looked good and approved merging. This is an internal
+TestFlight beta, not a public App Store release. Android implementation and bundle
+checks are complete; Android device testing and store distribution remain pending.
 
 ## Install and develop
 
@@ -59,7 +76,7 @@ The build also prepares and validates descriptive route pages, canonical tags, `
 
 ## Native app
 
-The native app uses React Native rather than a WebView. It consumes the local shared Chicken Hop core and Hunter Guy engine/scene and keeps a separate dependency lockfile to isolate Expo/React Native versions:
+The native app uses Expo SDK 57, React Native and TypeScript, without a WebView. It consumes the local shared Chicken Hop core and Hunter Guy engine/scene and keeps a separate dependency lockfile to isolate Expo/React Native versions:
 
 ```sh
 cd mobile
@@ -69,6 +86,10 @@ npm run ios
 ```
 
 The entire repository must be checked out; local game dependencies resolve to `../games/chicken-hop/core/` and `../games/hunter-guy/` within it. See [mobile/README.md](mobile/README.md) for platform requirements, native checks, and child-directed product constraints.
+
+For iPhone installation, accept the internal TestFlight invitation and install
+**Viggo Games**, then select Hunter Guy or Chicken Hop. See [beta delivery](mobile/README.md#expo-and-testflight-beta-delivery)
+for EAS Build, TestFlight submission and compatible JavaScript/asset updates.
 
 ## What to edit
 
@@ -101,5 +122,10 @@ Pushes to `main` trigger `.github/workflows/pages.yml`: install from the root lo
 - Pages preview: `https://chrhansen.github.io/viggo-games/`
 - Preserve `public/CNAME` and GitHub Pages' Actions configuration.
 - `.github/workflows/mobile.yml` validates shared gameplay and native bundles.
+
+Pushing to `main` deploys the website and runs mobile checks; it does not publish a
+new phone binary or Expo update. Mobile delivery is a separate, explicit EAS step
+under `@viggo-games/viggo-games`. TestFlight uses the `testflight` update channel;
+public App Store release remains a separate decision after beta testing.
 
 The website's Umami integration in `index.html` tracks pageviews and the `Game Start`/`Game Exit` events. The native app has no analytics.

@@ -17,8 +17,12 @@ current hunt; leaving the game starts a fresh session next time.
 
 `../scene.js` is also shared: Three.js terrain, forest, camera, animal animation,
 raycasting and tool effects. The browser supplies WebGL/DOM/WebAudio; native supplies
-Expo GL, downloaded bundled textures, React Native controls and Expo Audio. Android
+Expo GL, locally bundled textures, React Native controls and Expo Audio. Android
 surface recreation reuses the existing engine and pauses for explicit resume.
+
+This engine ships in the browser and the Viggo Games iOS TestFlight beta alongside
+Chicken Hop. See the [game README](../README.md) for platform status and the
+[mobile README](../../../mobile/README.md) for native development and beta delivery.
 
 Run the root gate. `src/test/hunter-engine.test.ts` covers gameplay rules;
 `hunter-scene.test.ts` covers portrait/landscape parity, real mesh hits and scene

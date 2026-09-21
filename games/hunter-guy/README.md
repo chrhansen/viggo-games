@@ -7,6 +7,12 @@ Targets: foxes, deer, bears.
 
 Source of truth: this folder inside `chrhansen/viggo-games`.
 
+Hunter Guy is included alongside Chicken Hop in the **Viggo Games iOS app**.
+Internal TestFlight beta **0.1.0 (6)** was delivered on **2026-09-21**; the owner
+reported that it looked good on iPhone and approved merging. Android uses the same
+native implementation and passes export checks, but device testing and Android
+distribution remain pending. This is not a public App Store release.
+
 ## Browser stack
 
 - Vanilla HTML/CSS/JS
@@ -34,6 +40,9 @@ If behavior looks stale, hard refresh (`Cmd+Shift+R`).
 - Hosting: GitHub Pages from the umbrella repo
 - Deploy workflow: `.github/workflows/pages.yml`
 - Trigger: push to `main` in `chrhansen/viggo-games`
+
+These steps deploy the browser version. iOS TestFlight builds and compatible Expo
+updates are published separately; see [mobile beta delivery](../../mobile/README.md#expo-and-testflight-beta-delivery).
 
 ## Browser controls
 
@@ -160,11 +169,16 @@ Also open the game to check rendering, grass sway, animal gait, slow human patro
 
 ## Native phones
 
-The Expo app in `../../mobile/` imports this package directly. Hunter Guy is playable
+The React Native/Expo app in `../../mobile/` imports this package directly. Hunter Guy is playable
 from its game selector on iOS and Android, in portrait and landscape. Native controls
 use simultaneous touch tracking: left joystick moves, dragging the scene aims, and
 the right button uses the selected tool. Native uses touch aiming; the optional
 browser device-orientation enhancement remains browser-only. App backgrounding and
 leaving the screen pause the hunt. Tool audio honors the phone's silent mode.
+
+The port shares the engine, Three.js scene, forest, animal models, raycasts, textures
+and weapon effects with the browser. Native adapters provide Expo GL, React Native
+HUD/touch controls, app lifecycle and Expo Audio. Change gameplay in `core/` and
+shared visuals in `scene.js` and its modules so fixes reach both platforms.
 
 TestFlight and Expo update delivery are documented in [the mobile README](../../mobile/README.md).

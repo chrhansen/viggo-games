@@ -4,6 +4,10 @@ Source of truth: this folder in `chrhansen/viggo-games`.
 
 Small browser cycling game prototype. First-person road riding, visible cockpit, stylized low-poly scenery, browser-only stack.
 
+Burb has not been ported to the React Native app. Its card in Viggo Games is a
+locked preview; phone/touch support here refers to the browser. See the
+[repository platform overview](../../README.md#game-availability).
+
 ## What we have
 
 - Vite + TypeScript + Three.js app

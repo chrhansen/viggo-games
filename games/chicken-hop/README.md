@@ -4,6 +4,11 @@ Browser and native game with one shared rules engine and separate platform rende
 
 Source of truth: `chrhansen/viggo-games`.
 
+Chicken Hop and Hunter Guy are the two playable games in the **Viggo Games** React
+Native/Expo app. Both are included in the iOS TestFlight beta **0.1.0 (6)** delivered
+on **2026-09-21**. Android implementations are present; Android device testing and
+distribution remain pending. See [native setup and beta delivery](../../mobile/README.md).
+
 ## Play in a browser
 
 From the repo root:
@@ -42,6 +47,7 @@ Touch devices show move, jump/fly, drop, pause, and restart controls.
 
 The browser and React Native app both call `games/chicken-hop/core/src/` within this repository.
 The core is pure TypeScript: no DOM, Canvas, React, or React Native imports.
+See the [shared core API](core/README.md) for engine boundaries and exported functions.
 
 Shared core owns:
 
@@ -105,3 +111,8 @@ The browser stores:
 - Homepage route: `https://viggo.games/chicken-hop/`
 - Workflow: `.github/workflows/pages.yml`
 - Trigger: push to `main`
+
+This workflow deploys the browser game. Native builds and Expo updates use the
+separate [mobile delivery workflow](../../mobile/README.md#expo-and-testflight-beta-delivery).
+Native personalization and scores currently last only for the game screen; the
+browser persistence above does not apply to the native app.

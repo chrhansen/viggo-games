@@ -2,6 +2,10 @@
 
 Browser 3D space shooter. Kid-friendly prototype. Third-person camera. Fly past Earth and the moon. Blast raiders. Dodge satellites.
 
+Gunny has not been ported to the React Native app. Its card in Viggo Games is a
+locked preview; phone/touch support here refers to the browser. See the
+[repository platform overview](../../README.md#game-availability).
+
 ## What The Game Is
 
 You pilot one ship through open space while the camera follows from behind. Enemy raiders spawn ahead and fire back. Satellites drift through the sector as moving obstacles. The mission ends when you destroy enough raiders or your hull reaches zero.

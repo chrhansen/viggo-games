@@ -2,12 +2,29 @@
 
 Native iOS and Android app built with React Native and Expo. It includes the native splash, game selector, and playable native Chicken Hop and Hunter Guy. It does not embed the website.
 
+Read this when developing either native game, checking browser/native ownership,
+or delivering an iPhone beta or Expo update.
+
+## Delivery status
+
+As of **2026-09-21**, **Viggo Games 0.1.0 (6)** is available to the internal
+`Team (Expo)` TestFlight group. It includes both Chicken Hop and Hunter Guy in one
+iOS app with bundle identifier `games.viggo`. The owner received the invitation,
+reported that the iPhone beta looked good, and approved merging the implementation.
+Install from the TestFlight invitation, then choose either game from the selector.
+There is no public App Store release yet.
+
+Both games also have Android implementations and passing Android export checks.
+An Android device/store build has not been delivered in this work. Burb, Gunny and
+Torpedo are locked preview cards in the native selector; their browser games work,
+but they have not been ported to React Native.
+
 ## Stack
 
 - Expo SDK 57
 - React Native and TypeScript
 - Expo Router
-- EAS development, preview, and production profiles
+- EAS development, development-simulator, preview, testflight, and production profiles
 - npm
 
 ## Run
@@ -19,7 +36,11 @@ npm run ios
 npm run android
 ```
 
-`npm run ios` needs Xcode. `npm run android` needs Android Studio, a JDK, and the Android SDK. EAS can build either platform after this project is linked to an Expo account.
+Use Node.js 22.12 or later and npm. Check out the whole repository: the mobile
+lockfile resolves local game packages from `../games/`. `npm run ios` needs Xcode.
+`npm run android` needs Android Studio, a JDK, and the Android SDK. The project is
+already linked to `@viggo-games/viggo-games` for EAS builds. Use the native commands
+above or a development build; Expo Go is not the validation target for this app.
 
 ## Gate
 
@@ -94,12 +115,13 @@ microphone permission or background audio is enabled. The root `hunter-engine`,
 `hunter-scene`, `hunter-collisions` and mobile selector tests cover shared rules and
 integration. Device testing is still required for touch feel and GPU performance.
 
-Native verification currently has an open rendering finding: the iOS 26.5 simulator
+Native verification has a simulator rendering finding: the iOS 26.5 simulator
 shows missing near-ground triangles. It persists with an unlit material, fog disabled,
 backface culling disabled, and the sky drawn first. Its OpenGL renderer runs in
-software; whether this also affects physical devices is not yet verified. Check the
-ground, simultaneous controls, rotation, and background/resume on the first TestFlight
-build before approving the beta. The browser scene renders correctly.
+software. The owner reported that the delivered iPhone beta looked good; that is a
+basic device check, not exhaustive GPU or lifecycle coverage. Continue checking the
+ground, simultaneous controls, rotation, and background/resume during beta testing.
+The browser scene renders correctly.
 
 ## Expo and TestFlight beta delivery
 
@@ -109,21 +131,29 @@ The `testflight` profile is an App Store distribution build on the dedicated
 beta for TestFlight; it does not submit a public App Store release for review.
 
 ```sh
+# From mobile/
 npm run build:testflight
-npm run submit:testflight -- --id <successful-build-id>
+npm run submit:testflight -- --id <successful-build-id> --non-interactive
 npm run update:testflight -- --message "Describe the tested change"
 ```
 
-The first build requires Apple Developer access to register `games.viggo`, create a
-distribution certificate/provisioning profile, and select or create its App Store
-Connect app. Submission may also require Apple login/2FA or an App Store Connect API
-key. Keep credentials in Apple/Expo's secure stores, never in this repository.
+Apple signing, provisioning, the App Store Connect app, and the existing upload API
+key are configured for this project. Reuse the saved credentials; the initial setup
+did not require a new Apple API key. Apple login/2FA may be needed when signing
+credentials expire or change. Keep credentials in Apple/Expo's secure stores,
+never in this repository.
 
 Install the new beta through TestFlight first. EAS Update can then deliver compatible
 JavaScript and asset updates when the app restarts. Adding native modules (including
 the initial Expo GL/audio/updates addition) requires another TestFlight build.
 Fingerprint runtime versions prevent incompatible updates reaching older binaries.
 Production has its own channel; do not publish there until device testing is approved.
+
+EAS Build produces the signed binary; EAS Submit uploads it to Apple for TestFlight
+processing and invitation-based installation. EAS Update sends compatible JavaScript
+and assets to an already installed build; it does not create a TestFlight invitation
+or install a new app. Pushing to GitHub `main` runs CI and deploys the website only.
+Public App Store submission is a separate step after beta testing.
 
 EAS manages build numbers remotely. The TestFlight submit profile links App Store
 Connect app `6814593296` and Apple team `DVPJZW992F` (Christian Hansen). Internal

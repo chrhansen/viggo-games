@@ -2,6 +2,10 @@
 
 Torpedo is a browser-based first-person submarine game prototype. It is a kid-friendly arcade game: you lead a submarine patrol under the ocean while enemy submarines approach from the front and fire torpedoes.
 
+Torpedo has not been ported to the React Native app. Its card in Viggo Games is a
+locked preview; phone/touch support here refers to the browser. See the
+[repository platform overview](../../README.md#game-availability).
+
 The player submarine has fictional windows, even though real military submarines do not. The front window is the main combat view, the side windows let you look port or starboard, and the periscope gives a tighter forward view.
 
 ## How The Game Works
