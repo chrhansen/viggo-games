@@ -83,13 +83,23 @@ Move with the left joystick, drag the scene to aim, choose a belt tool and tap U
 Tool. Fox/deer take one tag, bears take two; water scares animals without damage.
 Native supports simultaneous move/look/fire, portrait and landscape, explicit pause,
 and automatic background pause. Android surface recreation preserves the current
-hunt. Scores reset when leaving the game. Native shadows are disabled for phone
-performance. Optional browser motion aiming is not requested on native.
+hunt. Rotation recreates the graphics surface with the new aspect ratio and pauses
+without resetting the hunt. Scores reset when leaving the game. Native shadows are
+disabled and scene pixel ratio is capped at 1.25 for phone performance; the HUD keeps
+full resolution. Paused scenes do not redraw. Optional browser motion aiming is not
+requested on native.
 
 Expo Audio plays bundled versions of the browser's procedural tool sounds. No
 microphone permission or background audio is enabled. The root `hunter-engine`,
 `hunter-scene`, `hunter-collisions` and mobile selector tests cover shared rules and
 integration. Device testing is still required for touch feel and GPU performance.
+
+Native verification currently has an open rendering finding: the iOS 26.5 simulator
+shows missing near-ground triangles. It persists with an unlit material, fog disabled,
+backface culling disabled, and the sky drawn first. Its OpenGL renderer runs in
+software; whether this also affects physical devices is not yet verified. Check the
+ground, simultaneous controls, rotation, and background/resume on the first TestFlight
+build before approving the beta. The browser scene renders correctly.
 
 ## Expo and TestFlight beta delivery
 

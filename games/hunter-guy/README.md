@@ -125,7 +125,7 @@ If behavior looks stale, hard refresh (`Cmd+Shift+R`).
 - Pine and broadleaf canopies, tapered trunks, textured ground, and a worn trail add depth. Grass sways; canopies and clouds stay static. Animals have alternating leg movement, subtle body/head motion, and fox tail sway.
 - Fur bump maps, eyes, muzzles, ears, branched antlers, hooves, claws, and lower-resolution rounded bodies distinguish the animals.
 - Warm sunlight and atmospheric haze follow the player. Browser rendering includes a 1024px shadow map; native disables shadow maps to reduce phone GPU cost.
-- Rendering uses 18,000 grass blades and 14 pine / 12 broadleaf foliage cards per tree. Browser rendering caps pixel ratio at 1.25; native rendering uses the Expo GL drawing-buffer dimensions. Foliage casts no shadows.
+- Rendering uses 18,000 grass blades and 14 pine / 12 broadleaf foliage cards per tree. Browser and native rendering cap pixel ratio at 1.25. Native scales its GL surface while keeping the HUD at full resolution, and stops redrawing a paused scene. Foliage casts no shadows.
 - The player collides with tree trunks, living animals, and hunters, sliding around them. Grass, rocks, logs, and foliage remain decorative.
 - Collision uses a static tree grid, moving body circles, and movement substeps to prevent crossing trunks during slow frames. Tagged animals stop blocking movement.
 

@@ -101,7 +101,7 @@ export default function GameSelectorScreen() {
             </Text>
             <Text style={styles.kicker}>SELECT YOUR MISSION</Text>
             <Text style={styles.intro}>
-              The doors are open. Chicken Hop is ready for its first native run.
+              The doors are open. Chicken Hop and Hunter Guy are ready to play.
             </Text>
 
             <View style={styles.coinSlot}>
