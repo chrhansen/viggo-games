@@ -8,11 +8,15 @@ The player submarine has fictional windows, even though real military submarines
 
 You lead the point of a V-shaped formation. Three helper submarines travel off your port side and three travel off your starboard side, each one farther out and slightly farther back. You usually cannot see the helper submarines because they are behind and off to the sides, but you can see their torpedoes streak forward during combat.
 
-Enemy submarines spawn in front of the formation so they can be seen through the front view. They are elongated submarine models with conning towers, fins, propellers, hatches, rails, and torpedo tubes. They move toward you and shoot torpedoes. Your job is to steer across a wide combat window, line up off-center enemies, dodge incoming torpedoes, and fire back. Torpedoes travel nose-first with a bubble trail behind them.
+Enemy submarines spawn in front of the formation so they can be seen through the front view. They have curved, weathered steel hulls, streamlined conning towers, sonar bows, vents, hatches, torpedo doors, dive planes, and rotating propellers. They move toward you and shoot torpedoes. Your job is to steer across a wide combat window, line up off-center enemies, dodge incoming torpedoes, and fire back. Torpedoes have metal bodies, rounded seeker noses, tail fins, spinning propellers, and bubble trails. Small colored bands distinguish enemy (red), player (yellow), and helper (green) shots.
+
+The seabed has sand ripples, silt patches, eroded rocks, and swaying kelp. Terrain tiles join continuously and scenery stays planted on the seabed as you travel. Muted water haze and diffuse lighting provide visibility without visible light cones or surface shafts. Surface textures are generated locally and shared between models; no additional asset downloads are needed.
 
 The player submarine has a tougher hull with `160` hull points. If the hull gets badly damaged, the engine can be hit and the submarine slows down until repaired in the engine room.
 
-After enough regular enemies are defeated, a giant enemy submarine enters the patrol route. Giant submarines take a randomized number of hits to sink and fire three-torpedo salvos. When one is destroyed, a small enemy sub breaks loose and sinks toward the bottom. Sail over that sinking sub to collect bonus points, then regular enemies resume. Sink five giant submarines and collect their prizes to advance to level two.
+Enemy submarines hold a straight course at their original lane and depth, including when they pass you. Only their torpedoes aim toward your current position. Steering directly into their path can still cause a collision.
+
+After enough regular enemies are defeated, a giant enemy submarine enters the patrol route. Giant submarines also hold a straight course, take a randomized number of hits to sink, and fire three-torpedo salvos. If a giant passes you, it starts another approach in the same lane and at the same depth. When one is destroyed, a small enemy sub breaks loose and sinks toward the bottom. Sail over that sinking sub to collect bonus points, then regular enemies resume. Sink five giant submarines and collect their prizes to advance to level two.
 
 Press `V` or the on-screen `Rooms` button to leave first-person combat and enter the submarine plan view. This is a pause mode: enemies do not attack while you are walking around inside. From the plan view, you can enter rooms:
 

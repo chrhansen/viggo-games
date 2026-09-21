@@ -1,89 +1,85 @@
 import * as THREE from 'three';
+import { surfaceTexture } from './surfaceTextures.js';
 
 const randomBetween = (min, max) => min + Math.random() * (max - min);
+const FLOOR_SIZE = 320;
+
+function seafloorHeight(x, z) {
+  const phase = z * Math.PI * 2 / FLOOR_SIZE;
+  return -18 + Math.sin(x * 0.055 + Math.sin(phase * 2)) * 1.25
+    + Math.cos(phase * 3) * 0.65 + Math.sin(x * 0.14 + phase * 6) * 0.22;
+}
 
 export function createOceanEnvironment(world) {
-  const environment = {
-    floorChunks: [],
-    bubbles: [],
-    details: [],
-    lightShafts: []
-  };
-
+  const environment = { floorChunks: [], bubbles: [], details: [], elapsed: 0 };
   createSeafloor(world, environment);
   createBubbles(world, environment);
-  createLightShafts(world, environment);
   createOceanDetails(world, environment);
-
   return environment;
 }
 
 export function updateOceanEnvironment(environment, player, delta) {
+  environment.elapsed += delta;
   for (const floor of environment.floorChunks) {
-    if (floor.position.z > player.position.z + 210) {
-      floor.position.z -= 960;
-    }
+    // Keep the same three seamless tiles around the player, including after restart.
+    floor.position.z = Math.round(player.position.z / FLOOR_SIZE) * FLOOR_SIZE + floor.userData.offset;
   }
-
   for (const bubble of environment.bubbles) {
     bubble.position.y += bubble.userData.speed * delta;
     bubble.position.z += player.forwardSpeed * delta * 0.28;
-    bubble.position.x += Math.sin(performance.now() * 0.001 + bubble.userData.phase) * delta * 0.14;
-    if (bubble.position.y > 22 || bubble.position.z > player.position.z + 55) {
+    bubble.position.x += Math.sin(environment.elapsed + bubble.userData.phase) * delta * 0.14;
+    if (bubble.position.y > 22 || bubble.position.z > player.position.z + 55 || bubble.position.z < player.position.z - 260) {
       resetBubble(bubble, player.position.z);
     }
   }
-
   for (const detail of environment.details) {
-    if (detail.position.z > player.position.z + 80) {
+    if (detail.position.z > player.position.z + 80 || detail.position.z < player.position.z - 300) {
       resetDetail(detail, player.position.z);
     }
-  }
-
-  for (const shaft of environment.lightShafts) {
-    if (shaft.position.z > player.position.z + 90) {
-      shaft.position.z = player.position.z - randomBetween(160, 260);
-      shaft.position.x = randomBetween(-68, 68);
+    if (detail.userData.detailType === 'kelp') {
+      detail.rotation.z = Math.sin(environment.elapsed * 0.65 + detail.userData.phase) * 0.09;
+      detail.rotation.x = Math.cos(environment.elapsed * 0.45 + detail.userData.phase) * 0.05;
     }
   }
 }
 
 function createSeafloor(world, environment) {
-  const floorGeometry = new THREE.PlaneGeometry(320, 320, 24, 24);
-  const positions = floorGeometry.attributes.position;
+  const geometry = new THREE.PlaneGeometry(FLOOR_SIZE, FLOOR_SIZE, 96, 96);
+  geometry.rotateX(-Math.PI / 2);
+  const positions = geometry.attributes.position;
+  const colors = [];
+  const sand = new THREE.Color('#8c9580');
+  const silt = new THREE.Color('#556d63');
   for (let i = 0; i < positions.count; i += 1) {
     const x = positions.getX(i);
-    const y = positions.getY(i);
-    positions.setZ(i, Math.sin(x * 0.08) * 1.8 + Math.cos(y * 0.06) * 1.2);
+    const z = positions.getZ(i);
+    const height = seafloorHeight(x, z);
+    positions.setY(i, height);
+    const color = silt.clone().lerp(sand, THREE.MathUtils.clamp((height + 20) / 4, 0, 1));
+    colors.push(color.r, color.g, color.b);
   }
-  positions.needsUpdate = true;
-  floorGeometry.computeVertexNormals();
-
+  geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+  geometry.computeVertexNormals();
   const material = new THREE.MeshStandardMaterial({
-    color: '#17495a',
-    roughness: 0.92,
-    metalness: 0.05
+    map: surfaceTexture('sand'), bumpMap: surfaceTexture('sand'), bumpScale: 0.16,
+    vertexColors: true, roughness: 0.98, metalness: 0
   });
-
-  for (const z of [-320, 0, 320]) {
-    const floor = new THREE.Mesh(floorGeometry, material);
-    floor.rotation.x = -Math.PI / 2;
-    floor.position.set(0, -18, z);
+  for (const z of [-FLOOR_SIZE, 0, FLOOR_SIZE]) {
+    const floor = new THREE.Mesh(geometry, material);
+    floor.position.z = z;
+    floor.userData.offset = z;
     environment.floorChunks.push(floor);
     world.add(floor);
   }
 }
 
 function createBubbles(world, environment) {
-  const material = new THREE.MeshBasicMaterial({
-    color: '#b9f4ff',
-    transparent: true,
-    opacity: 0.38
-  });
-
+  const geometry = new THREE.SphereGeometry(1, 7, 6);
+  const material = new THREE.MeshBasicMaterial({ color: '#adc7c4', transparent: true, opacity: 0.2, depthWrite: false });
   for (let i = 0; i < 190; i += 1) {
-    const bubble = new THREE.Mesh(new THREE.SphereGeometry(randomBetween(0.035, 0.13), 8, 8), material);
-    bubble.userData.speed = randomBetween(0.8, 2.4);
+    const bubble = new THREE.Mesh(geometry, material);
+    bubble.scale.setScalar(randomBetween(0.025, 0.09));
+    bubble.userData.speed = randomBetween(0.35, 1.4);
     bubble.userData.phase = randomBetween(0, Math.PI * 2);
     resetBubble(bubble, 0);
     environment.bubbles.push(bubble);
@@ -91,54 +87,57 @@ function createBubbles(world, environment) {
   }
 }
 
-function createLightShafts(world, environment) {
-  const material = new THREE.MeshBasicMaterial({
-    color: '#8bd8e8',
-    transparent: true,
-    opacity: 0.12,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending
-  });
-
-  for (let i = 0; i < 11; i += 1) {
-    const shaft = new THREE.Mesh(new THREE.ConeGeometry(randomBetween(7, 15), 90, 18, 1, true), material);
-    shaft.position.set(randomBetween(-68, 68), 30, randomBetween(-220, 55));
-    shaft.rotation.z = randomBetween(-0.18, 0.18);
-    shaft.rotation.x = randomBetween(-0.08, 0.08);
-    environment.lightShafts.push(shaft);
-    world.add(shaft);
+function kelpGeometry() {
+  const geometry = new THREE.PlaneGeometry(0.48, 1, 3, 16);
+  const positions = geometry.attributes.position;
+  for (let i = 0; i < positions.count; i += 1) {
+    const height = positions.getY(i) + 0.5;
+    positions.setXYZ(i,
+      positions.getX(i) * Math.sin(Math.PI * height) + Math.sin(height * 7) * height * 0.24,
+      height, Math.sin(height * 10) * 0.12 * height);
   }
+  geometry.computeVertexNormals();
+  return geometry;
 }
 
 function createOceanDetails(world, environment) {
-  const rockMaterial = new THREE.MeshStandardMaterial({ color: '#315a5f', roughness: 0.85 });
-  const kelpMaterial = new THREE.MeshStandardMaterial({ color: '#2c7563', roughness: 0.72 });
-  const metalMaterial = new THREE.MeshStandardMaterial({ color: '#53666a', roughness: 0.66, metalness: 0.35 });
-
-  for (let i = 0; i < 58; i += 1) {
-    const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(randomBetween(0.4, 1.7), 0), rockMaterial);
-    rock.scale.set(randomBetween(0.8, 1.9), randomBetween(0.35, 0.95), randomBetween(0.7, 1.5));
+  const rockMaterial = new THREE.MeshStandardMaterial({
+    color: '#667970', map: surfaceTexture('steel'), bumpMap: surfaceTexture('steel'), bumpScale: 0.12, roughness: 0.97
+  });
+  const rockGeometry = new THREE.IcosahedronGeometry(1, 2);
+  const positions = rockGeometry.attributes.position;
+  for (let i = 0; i < positions.count; i += 1) {
+    const point = new THREE.Vector3().fromBufferAttribute(positions, i);
+    const erosion = 1 + Math.sin(point.x * 9 + point.y * 5) * Math.cos(point.z * 8) * 0.16;
+    point.multiplyScalar(erosion);
+    positions.setXYZ(i, point.x, point.y, point.z);
+  }
+  rockGeometry.computeVertexNormals();
+  for (let i = 0; i < 76; i += 1) {
+    const rock = new THREE.Mesh(rockGeometry, rockMaterial);
+    const size = randomBetween(0.3, 2.3);
+    rock.scale.set(size * randomBetween(1, 1.9), size * randomBetween(0.35, 0.7), size);
     rock.userData.detailType = 'rock';
     resetDetail(rock, 0);
     environment.details.push(rock);
     world.add(rock);
   }
-
+  const leafGeometry = kelpGeometry();
+  const kelpMaterial = new THREE.MeshStandardMaterial({ color: '#3e6042', roughness: 0.86, side: THREE.DoubleSide });
   for (let i = 0; i < 36; i += 1) {
-    const kelp = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.16, randomBetween(2.4, 5.2), 6), kelpMaterial);
+    const kelp = new THREE.Group();
+    for (let blade = 0; blade < 3; blade += 1) {
+      const leaf = new THREE.Mesh(leafGeometry, kelpMaterial);
+      leaf.scale.set(randomBetween(0.7, 1.5), randomBetween(1.8, 4.6), 1);
+      leaf.rotation.y = blade * Math.PI / 3;
+      leaf.position.x = (blade - 1) * 0.18;
+      kelp.add(leaf);
+    }
     kelp.userData.detailType = 'kelp';
+    kelp.userData.phase = Math.random() * Math.PI * 2;
     resetDetail(kelp, 0);
     environment.details.push(kelp);
     world.add(kelp);
-  }
-
-  for (let i = 0; i < 12; i += 1) {
-    const rib = new THREE.Mesh(new THREE.TorusGeometry(randomBetween(0.7, 1.2), 0.06, 8, 18, Math.PI), metalMaterial);
-    rib.userData.detailType = 'rib';
-    resetDetail(rib, 0);
-    rib.rotation.z = Math.PI / 2;
-    environment.details.push(rib);
-    world.add(rib);
   }
 }
 
@@ -147,15 +146,8 @@ function resetBubble(bubble, playerZ) {
 }
 
 function resetDetail(detail, playerZ) {
-  detail.position.set(randomBetween(-115, 115), -17.7, playerZ - randomBetween(65, 260));
-  if (detail.userData.detailType === 'kelp') {
-    detail.position.y = -15.6;
-    detail.rotation.set(randomBetween(-0.16, 0.16), 0, randomBetween(-0.14, 0.14));
-    return;
-  }
-  if (detail.userData.detailType === 'rib') {
-    detail.rotation.set(randomBetween(-0.2, 0.2), randomBetween(0, Math.PI), Math.PI / 2);
-    return;
-  }
-  detail.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+  const x = randomBetween(-100, 100);
+  const z = playerZ - randomBetween(25, 260);
+  detail.position.set(x, seafloorHeight(x, z) - 0.12, z);
+  detail.rotation.set(0, randomBetween(0, Math.PI * 2), 0);
 }

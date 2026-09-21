@@ -65,18 +65,18 @@ export class OceanCombat {
 
   setupScene() {
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color('#08364b');
-    this.scene.fog = new THREE.FogExp2('#0b4a63', 0.014);
+    this.scene.background = new THREE.Color('#163b46');
+    this.scene.fog = new THREE.FogExp2('#163b46', 0.012);
 
     this.world = new THREE.Group();
     this.scene.add(this.world);
 
-    const ambient = new THREE.HemisphereLight('#8edfff', '#062936', 2.2);
+    const ambient = new THREE.HemisphereLight('#b4d1cf', '#263d39', 2.0);
     this.scene.add(ambient);
 
-    const sunShaft = new THREE.DirectionalLight('#b4f3ff', 2.8);
-    sunShaft.position.set(-28, 46, -18);
-    this.scene.add(sunShaft);
+    const diffuseLight = new THREE.DirectionalLight('#c4d9d4', 2.3);
+    diffuseLight.position.set(-28, 46, -18);
+    this.scene.add(diffuseLight);
 
     this.environment = createOceanEnvironment(this.world);
     this.trailMaterial = new THREE.MeshBasicMaterial({ color: '#d5fbff', transparent: true, opacity: 0.58 });
@@ -224,18 +224,17 @@ export class OceanCombat {
 
     for (let i = this.enemies.length - 1; i >= 0; i -= 1) {
       const enemy = this.enemies[i];
+      enemy.mesh.position.z += enemy.speed * delta;
       const toPlayer = this.player.position.clone().sub(enemy.mesh.position);
       const distance = toPlayer.length();
-      const direction = toPlayer.normalize();
-      enemy.mesh.position.addScaledVector(direction, enemy.speed * delta);
-      enemy.mesh.quaternion.copy(quaternionFacing(direction));
+      const firingDirection = toPlayer.normalize();
       if (enemy.mesh.userData.propeller) {
         enemy.mesh.userData.propeller.rotation.x += delta * 4.8;
       }
       enemy.shootTimer -= delta;
 
       if (enemy.shootTimer <= 0 && distance < 88 && this.isEnemyInFront(enemy)) {
-        this.fireEnemyTorpedo(enemy.mesh.position, direction);
+        this.fireEnemyTorpedo(enemy.mesh.position, firingDirection);
         enemy.shootTimer = randomBetween(2.2, 3.8);
       }
 
@@ -263,6 +262,7 @@ export class OceanCombat {
       this.player.position.z - distance
     );
     mesh.scale.setScalar(randomBetween(0.86, 1.15));
+    mesh.quaternion.copy(quaternionFacing(new THREE.Vector3(0, 0, 1)));
     this.world.add(mesh);
 
     this.enemies.push({
@@ -330,6 +330,7 @@ export class OceanCombat {
       torpedo.mesh.position.addScaledVector(torpedo.velocity, delta);
       torpedo.life -= delta;
       torpedo.mesh.quaternion.copy(quaternionFacing(torpedo.velocity.clone().normalize()));
+      torpedo.mesh.userData.propeller.rotation.x += delta * 24;
       this.leaveTorpedoTrail(torpedo);
       if (this.shouldRemoveTorpedo(torpedo, owner)) {
         this.world.remove(torpedo.mesh);
