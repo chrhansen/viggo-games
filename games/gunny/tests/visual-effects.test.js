@@ -5,13 +5,24 @@ import { moonOrbitPosition, updatePlanets, MOON_ORBIT_SECONDS, MOON_ORBIT_RADIUS
 import { createExplosion, updateExplosion, disposeExplosion } from "../src/explosions.js";
 import { runtimeMethods } from "../src/mission-runtime.js";
 import { GunnyGame } from "../src/game.js";
+import { createPlanet } from "../src/planets.js";
+
+test("Earth renders clouds with its opaque surface, without an overlapping cloud shell", t => {
+  t.mock.method(THREE.TextureLoader.prototype, "load", () => new THREE.Texture());
+  const earth = createPlanet(58, "earth");
+  assert.equal(earth.children.length, 2);
+  assert.equal(earth.userData.clouds, undefined);
+  assert.equal(earth.userData.body.material.transparent, false);
+  assert.ok(earth.userData.body.material.uniforms.clouds.value.isTexture);
+  earth.traverse(part => {
+    part.geometry?.dispose();
+    part.material?.dispose();
+  });
+});
 
 function planets() {
   const earth = new THREE.Group();
-  earth.userData.body = new THREE.Mesh(new THREE.SphereGeometry(1), new THREE.ShaderMaterial({
-    uniforms: { cloudOffset: { value: 0 } },
-  }));
-  earth.userData.clouds = new THREE.Object3D();
+  earth.userData.body = new THREE.Object3D();
   return { earth, moon: new THREE.Object3D() };
 }
 
@@ -29,7 +40,7 @@ test("Moon completes a closed orbit, clears Earth, and keeps the same face towar
   }
 });
 
-test("Earth turns slowly, clouds drift slightly faster, and reset is deterministic", () => {
+test("Earth turns slowly and reset is deterministic", () => {
   const { earth, moon } = planets();
   updatePlanets(earth, moon, 0, 0);
   const start = earth.userData.body.rotation.y;
@@ -38,7 +49,6 @@ test("Earth turns slowly, clouds drift slightly faster, and reset is determinist
   const rotation = earth.userData.body.rotation.y - start;
   assert.ok(rotation < 0.03 * 60 / 5);
   assert.ok(Math.abs(rotation - 60 * Math.PI * 2 / EARTH_DAY_SECONDS) < 1e-10);
-  assert.ok(earth.userData.clouds.rotation.y > earth.userData.body.rotation.y);
   updatePlanets(earth, moon, 0, 0);
   assert.equal(earth.userData.body.rotation.y, start);
   assert.deepEqual(moon.position, initialMoon);

@@ -149,17 +149,24 @@ h2 {
   font-weight: 700;
 }
 
-.stat__value--critical {
+.stat--critical {
   color: #ff554f;
+  background: rgba(255, 55, 49, 0.16);
+  border-radius: 0.35rem;
+  box-shadow: 0 0 0 0.3rem rgba(255, 55, 49, 0.16);
   animation: hull-warning 1s ease-in-out infinite;
 }
 
+.stat--critical .stat__label {
+  color: inherit;
+}
+
 @keyframes hull-warning {
-  50% { color: #ffaaa4; opacity: 0.45; }
+  50% { color: #ffccc8; background: rgba(255, 55, 49, 0.38); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .stat__value--critical { animation: none; }
+  .stat--critical { animation: none; }
 }
 
 .controls {
@@ -371,6 +378,10 @@ button:focus-visible {
   .hud__block--stats {
     grid-template-columns: repeat(4, minmax(0, 1fr));
     margin-left: 0;
+  }
+
+  .hud__block--hidden + .hud__block--stats {
+    margin-left: 3.5rem;
   }
 }
 
