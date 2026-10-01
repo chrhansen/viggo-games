@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View, type GestureResponderEvent } from 'react-native';
-import { touchMoveVector, TOUCH_LOOK_SENSITIVITY } from 'hunter-guy/core';
+import { touchMoveVector, lookDelta } from 'hunter-guy/core';
 
 export function HunterLookPad({ onLook }: { onLook: (yaw: number, pitch: number) => void }) {
   const touch = useRef<{ id: string; x: number; y: number } | null>(null);
@@ -9,8 +9,8 @@ export function HunterLookPad({ onLook }: { onLook: (yaw: number, pitch: number)
     if (!previous) return;
     const current = event.nativeEvent.changedTouches.find((entry) => entry.identifier === previous.id);
     if (!current) return;
-    onLook(-(current.pageX - previous.x) * TOUCH_LOOK_SENSITIVITY,
-      (current.pageY - previous.y) * TOUCH_LOOK_SENSITIVITY);
+    const { yaw, pitch } = lookDelta(current.pageX - previous.x, current.pageY - previous.y);
+    onLook(yaw, pitch);
     touch.current = { id: previous.id, x: current.pageX, y: current.pageY };
   }
   function end(event: GestureResponderEvent) {

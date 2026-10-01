@@ -1,7 +1,6 @@
 import * as THREE from "three";
-import { touchMoveVector, TOUCH_LOOK_SENSITIVITY } from "./core/world.js";
+import { touchMoveVector, lookDelta } from "./core/world.js";
 
-const DESKTOP_LOOK_SENSITIVITY = 0.0024;
 const TOUCH_DPAD_THUMB_TRAVEL = 34;
 const DEVICE_FORWARD = new THREE.Vector3(0, 0, -1);
 const DEVICE_SCREEN_AXIS = new THREE.Vector3(0, 0, 1);
@@ -289,10 +288,8 @@ export function createPlayerControls({
     if (document.pointerLockElement !== renderer.domElement) {
       return;
     }
-    applyLookDelta(
-      -event.movementX * DESKTOP_LOOK_SENSITIVITY,
-      event.movementY * DESKTOP_LOOK_SENSITIVITY
-    );
+    const { yaw, pitch } = lookDelta(event.movementX, event.movementY, "mouse");
+    applyLookDelta(yaw, pitch);
   });
 
   document.addEventListener("keydown", (event) => {
@@ -434,7 +431,8 @@ export function createPlayerControls({
     const deltaY = event.clientY - touchLook.y;
     touchLook.x = event.clientX;
     touchLook.y = event.clientY;
-    applyLookDelta(-deltaX * TOUCH_LOOK_SENSITIVITY, deltaY * TOUCH_LOOK_SENSITIVITY);
+    const { yaw, pitch } = lookDelta(deltaX, deltaY);
+    applyLookDelta(yaw, pitch);
   });
 
   function endTouchLookPointer(event) {

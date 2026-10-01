@@ -4,6 +4,7 @@ export const weaponStats: Record<Weapon, { name: string; cooldown: number; range
 export function terrainHeight(x: number, z: number): number;
 export const LOOK_RANGE: number;
 export const TOUCH_LOOK_SENSITIVITY: number;
+export function lookDelta(deltaX: number, deltaY: number, input?: 'mouse' | 'touch'): { yaw: number; pitch: number };
 export function touchMoveVector(x: number, y: number): { x: number; y: number };
 export interface Animal {
   type: string; name: string; hp: number; alive: boolean; moving: boolean; scaredFor: number;

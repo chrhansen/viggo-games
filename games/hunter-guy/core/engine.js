@@ -1,7 +1,7 @@
 import { createWildlife } from "./wildlife.js";
 import { createCollisionWorld, movingBodyCircles } from "./collisions.js";
 import { WORLD_HALF, PLAYER_HEIGHT, LOOK_RANGE, seededRandom, terrainHeight, movementDelta } from "./world.js";
-export { terrainHeight, LOOK_RANGE, TOUCH_LOOK_SENSITIVITY, touchMoveVector } from "./world.js";
+export { terrainHeight, LOOK_RANGE, TOUCH_LOOK_SENSITIVITY, touchMoveVector, lookDelta } from "./world.js";
 export const weaponStats = {
   rifle: { name: "Rifle", cooldown: 0.24, range: 90 },
   bow: { name: "Bow", cooldown: 0.8, range: 70 },

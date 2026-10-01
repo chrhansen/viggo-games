@@ -1,7 +1,12 @@
 export const WORLD_HALF = 180;
 export const PLAYER_HEIGHT = 1.8;
 export const LOOK_RANGE = Math.PI / 12;
-export const TOUCH_LOOK_SENSITIVITY = 0.0042;
+export const TOUCH_LOOK_SENSITIVITY = 0.0021;
+const MOUSE_LOOK_SENSITIVITY = 0.0024;
+export function lookDelta(deltaX, deltaY, input = "touch") {
+  const sensitivity = input === "mouse" ? -MOUSE_LOOK_SENSITIVITY : TOUCH_LOOK_SENSITIVITY;
+  return { yaw: deltaX * sensitivity, pitch: deltaY * sensitivity };
+}
 export function seededRandom(seed = 73) {
   return () => {
     seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
