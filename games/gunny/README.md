@@ -3,7 +3,7 @@
 Browser 3D space shooter. Kid-friendly prototype. Third-person camera. Fly past Earth and the moon. Blast raiders. Dodge satellites.
 
 Gunny has not been ported to the React Native app. Its card in Viggo Games is a
-locked preview; phone/touch support here refers to the browser. See the
+detail preview marked **Coming to mobile**; phone/touch support here refers to the browser. See the
 [repository platform overview](../../README.md#game-availability).
 
 ## What The Game Is

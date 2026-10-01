@@ -5,9 +5,11 @@ Browser and native game with one shared rules engine and separate platform rende
 Source of truth: `chrhansen/viggo-games`.
 
 Chicken Hop and Hunter Guy are the two playable games in the **Viggo Games** React
-Native/Expo app. Both are included in the iOS TestFlight beta **0.1.0 (6)** delivered
-on **2026-09-21**. Android implementations are present; Android device testing and
-distribution remain pending. See [native setup and beta delivery](../../mobile/README.md).
+Native/Expo app. Both are included in the internal iOS TestFlight beta **0.1.0 (7)**,
+available as of **2026-10-01**. Native game cards open details before **Play now**;
+game exits require confirmation, and swipe-back is disabled. Android implementations
+are present; Android device testing and distribution remain pending. See
+[native setup and beta delivery](../../mobile/README.md).
 
 ## Play in a browser
 

@@ -29,15 +29,16 @@ Each game's README describes its controls, architecture, and maintenance. Native
 | --- | --- | --- |
 | [Chicken Hop](games/chicken-hop/README.md) | Playable | Playable on iOS/Android; shared rules, separate renderers |
 | [Hunter Guy](games/hunter-guy/README.md) | Playable | Playable on iOS/Android; shared rules, Three.js scene, models and assets |
-| [Burb](games/burb/README.md) | Playable | Locked preview; not ported |
-| [Gunny](games/gunny/README.md) | Playable | Locked preview; not ported |
-| [Torpedo](games/torpedo/README.md) | Playable | Locked preview; not ported |
+| [Burb](games/burb/README.md) | Playable | Detail preview; not ported |
+| [Gunny](games/gunny/README.md) | Playable | Detail preview; not ported |
+| [Torpedo](games/torpedo/README.md) | Playable | Detail preview; not ported |
 
-Chicken Hop and Hunter Guy are included in one **Viggo Games** iOS app. The first
-Hunter Guy TestFlight beta, **0.1.0 (6)**, was delivered on **2026-09-21**; the owner
-reported that the iPhone beta looked good and approved merging. This is an internal
-TestFlight beta, not a public App Store release. Android implementation and bundle
-checks are complete; Android device testing and store distribution remain pending.
+Chicken Hop and Hunter Guy are included in one **Viggo Games** iOS app. Internal
+TestFlight beta **0.1.0 (7)** is available as of **2026-10-01**, with corrected Hunter
+Guy panning, slower touch look, protected game exits, and game details before play.
+The owner checked the earlier build (6); device testing of build (7) remains pending.
+This is not a public App Store release. Android implementation and bundle checks
+are complete; Android device testing and store distribution remain pending.
 
 ## Install and develop
 
@@ -88,7 +89,8 @@ npm run ios
 The entire repository must be checked out; local game dependencies resolve to `../games/chicken-hop/core/` and `../games/hunter-guy/` within it. See [mobile/README.md](mobile/README.md) for platform requirements, native checks, and child-directed product constraints.
 
 For iPhone installation, accept the internal TestFlight invitation and install
-**Viggo Games**, then select Hunter Guy or Chicken Hop. See [beta delivery](mobile/README.md#expo-and-testflight-beta-delivery)
+**Viggo Games**, then select Hunter Guy or Chicken Hop and tap **Play now** on its
+detail page. See [beta delivery](mobile/README.md#expo-and-testflight-beta-delivery)
 for EAS Build, TestFlight submission and compatible JavaScript/asset updates.
 
 ## What to edit
@@ -98,8 +100,11 @@ for EAS Build, TestFlight submission and compatible JavaScript/asset updates.
 - Shared Hunter Guy rules and 3D scene: `games/hunter-guy/core/` and `games/hunter-guy/scene.js`.
 - Native rendering and phone lifecycle: `mobile/src/`.
 - Website layout, navigation, and embedded-player behavior: `src/`.
-- Game registry and SEO copy: `src/data/games.json`; artwork mapping: `src/data/games.ts`.
+- Shared website/mobile descriptions, how-to steps and tips, plus website routes and SEO copy: `src/data/games.json`; website artwork mapping: `src/data/games.ts`.
 - Website card art: optimized WebP files in `src/assets/`.
+- Website favicon: `public/favicon.ico`, resized from the iPhone VG artwork in
+  `mobile/assets/app-icon.png`. Regenerate with ImageMagick:
+  `magick mobile/assets/app-icon.png -define icon:auto-resize=64,48,32,16 public/favicon.ico`.
 
 Keep edits in this repository. There is no external authoring folder or source-sync step.
 

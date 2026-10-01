@@ -15,6 +15,12 @@ and `fire(hit)`. Time advances only while active and clamps long frames to 100ms
 backgrounding pauses without catching up on return. State remains in memory for the
 current hunt; leaving the game starts a fresh session next time.
 
+`lookDelta(deltaX, deltaY, input = "touch")` converts pixel movement to yaw/pitch
+for both platform controls. `lookDelta(deltaX, deltaY, "mouse")` uses 0.0024 radians
+per pixel, so moving right/up looks right/up. Touch look uses 0.0021 radians per pixel
+and makes the forest follow the finger on both axes. Keep direction and sensitivity
+changes here so browser touch and native touch stay aligned.
+
 `../scene.js` is also shared: Three.js terrain, forest, camera, animal animation,
 raycasting and tool effects. The browser supplies WebGL/DOM/WebAudio; native supplies
 Expo GL, locally bundled textures, React Native controls and Expo Audio. Android
@@ -27,3 +33,5 @@ Chicken Hop. See the [game README](../README.md) for platform status and the
 Run the root gate. `src/test/hunter-engine.test.ts` covers gameplay rules;
 `hunter-scene.test.ts` covers portrait/landscape parity, real mesh hits and scene
 recreation. `hunter-collisions.test.ts` covers collision boundaries and sliding.
+`hunter-look-controls.test.ts` covers actual browser input directions, touch speed,
+and browser/native look parity.

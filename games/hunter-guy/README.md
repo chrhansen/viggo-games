@@ -8,10 +8,11 @@ Targets: foxes, deer, bears.
 Source of truth: this folder inside `chrhansen/viggo-games`.
 
 Hunter Guy is included alongside Chicken Hop in the **Viggo Games iOS app**.
-Internal TestFlight beta **0.1.0 (6)** was delivered on **2026-09-21**; the owner
-reported that it looked good on iPhone and approved merging. Android uses the same
-native implementation and passes export checks, but device testing and Android
-distribution remain pending. This is not a public App Store release.
+Internal TestFlight beta **0.1.0 (7)** is available as of **2026-10-01**. The owner
+reported that the earlier build (6) looked good on iPhone; device testing of build
+(7) is still pending. Android uses the same native implementation and passes export
+checks, but device testing and Android distribution remain pending. This is not a
+public App Store release.
 
 ## Browser stack
 
@@ -49,6 +50,7 @@ updates are published separately; see [mobile beta delivery](../../mobile/README
 - Desktop
   - Click `Start Hunt` (or canvas) to lock cursor
   - Mouse: look around (pitch limited to +/-15 degrees)
+    - Moving right looks right; moving up looks up
   - `W` / `Up`: move forward
   - `S` / `Down`: move backward
   - `A` / `Left`: turn left
@@ -59,6 +61,8 @@ updates are published separately; see [mobile beta delivery](../../mobile/README
   - Tap `Start Hunt`
   - Left D-pad: move forward/back/strafe
   - Drag on the view: look around
+    - The forest follows the finger on both axes, matching the native app
+    - Touch pan speed is 0.0021 radians per pixel, half the previous speed
   - Turn phone/tablet: extra relative look input when motion access is allowed
   - `Use Tool`: use selected tool
   - Belt buttons: switch belt tool
@@ -150,6 +154,7 @@ updates are published separately; see [mobile beta delivery](../../mobile/README
 ## Tuning Knobs (fast edits)
 
 - Look up/down range: `LOOK_RANGE` in `core/world.js`
+- Mouse/touch look directions and sensitivity: shared `lookDelta` in `core/world.js`, used by browser and native controls
 - Turn speed: `turnSpeed` in `player-controls.js`
 - Animal counts and speed scale: constants in `core/wildlife.js`
 - Bear/deer/fox HP and behavior: spawn options in `core/wildlife.js`
@@ -158,23 +163,26 @@ updates are published separately; see [mobile beta delivery](../../mobile/README
 ## Notes For Next Agent
 
 - Keep controls kid-simple.
-- Desktop turning stays on horizontal plane only.
+- Keyboard turning stays on the horizontal plane.
 - Use the root npm install and build; generated files belong in `dist/`.
 
 ## Verification
 
-From the repository root, run `npm test -- src/test/hunter-collisions.test.ts` for movement regressions. The full gate is `npm run lint`, `npm run typecheck`, `npm test`, and `npm run build`.
+From the repository root, run `npm test -- src/test/hunter-collisions.test.ts src/test/hunter-look-controls.test.ts` for movement, mouse/touch directions, sensitivity and browser/native look parity. The full gate is `npm run lint`, `npm run typecheck`, `npm test`, and `npm run build`.
 
 Also open the game to check rendering, grass sway, animal gait, slow human patrols, and movement against trunks and live animals. Use a browser with pointer-lock support for desktop play; embedded previews may reject mouse capture.
 
 ## Native phones
 
 The React Native/Expo app in `../../mobile/` imports this package directly. Hunter Guy is playable
-from its game selector on iOS and Android, in portrait and landscape. Native controls
-use simultaneous touch tracking: left joystick moves, dragging the scene aims, and
+after selecting its detail page and tapping **Play now** on iOS and Android, in
+portrait and landscape. Native controls use simultaneous touch tracking: left joystick moves, dragging the scene aims, and
 the right button uses the selected tool. Native uses touch aiming; the optional
 browser device-orientation enhancement remains browser-only. App backgrounding and
-leaving the screen pause the hunt. Tool audio honors the phone's silent mode.
+leaving the screen pause the hunt. The forest follows the drag on both axes at
+0.0021 radians per pixel. Swipe-back is disabled; the back arrow and Android back
+button pause play and ask for confirmation before exiting. Tool audio honors the
+phone's silent mode.
 
 The port shares the engine, Three.js scene, forest, animal models, raycasts, textures
 and weapon effects with the browser. Native adapters provide Expo GL, React Native
