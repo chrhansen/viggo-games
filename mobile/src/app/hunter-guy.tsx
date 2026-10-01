@@ -1,5 +1,5 @@
 import { GLView, type ExpoWebGLRenderingContext } from 'expo-gl';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, PixelRatio, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,10 +8,10 @@ import type { Weapon } from 'hunter-guy/scene';
 import { HunterLookPad, HunterTouchControls } from '@/components/hunter-guy/hunter-touch-controls';
 import { createNativeHunterRenderer, loadHunterAssets, type NativeHunterRenderer } from '@/game/hunter-guy/renderer';
 import { useHunterAudio } from '@/game/hunter-guy/audio';
+import { useGameExit } from '@/hooks/use-game-exit';
 
 const weapons = Object.keys(weaponStats) as Weapon[];
 export default function HunterGuyScreen() {
-  const router = useRouter();
   const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
   const surfaceScale = Math.max(1, PixelRatio.get() / 1.25);
@@ -88,11 +88,17 @@ export default function HunterGuyScreen() {
       setError('This device could not open the forest. Return to the arcade and try again.');
     }
   }
-  function start() {
+  const start = useCallback(() => {
     if (!ready || AppState.currentState !== 'active') return;
     runtime.current?.game.engine.setActive(true);
     setStarted(true); setActive(true);
-  }
+  }, [ready]);
+  const pauseForExit = useCallback(() => {
+    const wasActive = runtime.current?.game.engine.state.active;
+    pause();
+    return () => { if (wasActive) start(); };
+  }, [pause, start]);
+  const requestExit = useGameExit('Hunter Guy', pauseForExit);
   return <View style={styles.screen}>
     {assets && <View pointerEvents="none" style={{ position: 'absolute', width: width / surfaceScale, height: height / surfaceScale, transformOrigin: 'top left', transform: [{ scale: surfaceScale }] }}>
       <GLView key={`${width}:${height}`} style={StyleSheet.absoluteFill} msaaSamples={0} onContextCreate={onContextCreate} />
@@ -103,7 +109,7 @@ export default function HunterGuyScreen() {
     }} />}
     <View pointerEvents="box-none" style={[styles.interface, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 12, paddingLeft: insets.left + 16, paddingRight: insets.right + 16 }]}>
       <View style={styles.top}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Back to arcade" onPress={() => { pause(); router.back(); }} style={styles.button}><Text style={styles.buttonText}>‹ ARCADE</Text></Pressable>
+        <Pressable accessibilityRole="button" accessibilityLabel="Exit Hunter Guy" onPress={requestExit} style={styles.button}><Text style={styles.buttonText}>‹ BACK</Text></Pressable>
         <View style={styles.score}><Text style={styles.scoreText}>{hud.score} TAGGED</Text></View>
         <Pressable accessibilityRole="button" disabled={!ready || !!error} onPress={active ? pause : start} style={styles.button}><Text style={styles.buttonText}>{active ? 'PAUSE' : 'RESUME'}</Text></Pressable>
       </View>

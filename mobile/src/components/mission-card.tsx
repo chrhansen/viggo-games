@@ -16,7 +16,7 @@ export function MissionCard({ animation, featured = false, mission, onPress }: M
     inputRange: [0, 1],
     outputRange: [24, 0],
   });
-  const statusLabel = mission.status === "ready" ? "Play now" : "Locked";
+  const statusLabel = mission.status === "ready" ? "View game" : "Coming soon";
   const disabled = !onPress;
 
   return (
@@ -27,7 +27,7 @@ export function MissionCard({ animation, featured = false, mission, onPress }: M
       }}
     >
       <Pressable
-        accessibilityLabel={`${mission.title}. ${mission.genre}. ${disabled ? "Coming soon" : "Play now"}.`}
+        accessibilityLabel={`${mission.title}. ${mission.genre}. View game details.`}
         accessibilityRole="button"
         accessibilityState={{ disabled }}
         disabled={disabled}

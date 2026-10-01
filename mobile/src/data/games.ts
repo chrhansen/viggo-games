@@ -3,6 +3,7 @@ import chickenHopImage from "../../assets/games/chicken-hop.webp";
 import gunnyImage from "../../assets/games/gunny.webp";
 import hunterGuyImage from "../../assets/games/hunter-guy.webp";
 import torpedoImage from "../../assets/games/torpedo.webp";
+import gameContent from "../../../src/data/games.json";
 
 export interface GamePreview {
   id: string;
@@ -70,3 +71,19 @@ export const gamePreviews: readonly GamePreview[] = [
     status: "locked",
   },
 ];
+
+const touchControls: Record<string, readonly string[]> = {
+  'chicken-hop': ['Hold left or right to move.', 'Tap Hop to jump; hold it in the air to fly.'],
+  'hunter-guy': ['Left joystick to move; drag the forest to look.', 'Choose a belt tool, aim, then tap Use Tool.'],
+};
+
+export const gameDetails = gamePreviews.map((preview) => {
+  const content = gameContent.find((game) => game.id === preview.id)!;
+  return {
+    ...preview,
+    description: content.description.replace('browser ', '').replace(' prototype', ''),
+    howToPlay: content.howToPlay,
+    tips: content.tips.filter((tip) => !tip.includes('Down or S')).map((tip) => tip.replace('D-pad', 'joystick')),
+    touchControls: touchControls[preview.id] ?? [],
+  };
+});

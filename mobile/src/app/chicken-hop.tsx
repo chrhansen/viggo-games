@@ -1,5 +1,4 @@
 import { StatusBar } from "expo-status-bar";
-import { useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   AppState,
@@ -16,6 +15,7 @@ import { ChickenHopHud } from "@/components/chicken-hop/chicken-hop-hud";
 import { ChickenHopOverlay } from "@/components/chicken-hop/chicken-hop-overlay";
 import { ChickenHopScene } from "@/components/chicken-hop/chicken-hop-scene";
 import { fonts } from "@/constants/theme";
+import { useGameExit } from "@/hooks/use-game-exit";
 import {
   defaultChickenProfile,
   normalizeChickenName,
@@ -34,7 +34,6 @@ import {
 const createEmptyInput = (): ChickenHopInput => ({ jump: false, left: false, right: false });
 
 export default function ChickenHopScreen() {
-  const router = useRouter();
   const insets = useSafeAreaInsets();
   const [engine] = useState(() => createChickenHopGame(390, 700, 0x56494747));
   const inputRef = useRef(createEmptyInput());
@@ -73,10 +72,19 @@ export default function ChickenHopScreen() {
     publishGame();
   }, [clearInput, engine, publishGame]);
 
-  const handleBack = useCallback(() => {
+  const pauseForExit = useCallback(() => {
+    const wasPlaying = engine.mode === 'playing';
     clearInput();
-    router.back();
-  }, [clearInput, router]);
+    if (wasPlaying) toggleChickenHopPause(engine);
+    publishGame();
+    return () => {
+      if (wasPlaying && AppState.currentState === 'active' && engine.mode === 'paused') {
+        toggleChickenHopPause(engine);
+        publishGame();
+      }
+    };
+  }, [clearInput, engine, publishGame]);
+  const handleBack = useGameExit('Chicken Hop', pauseForExit);
 
   const handleLayout = useCallback(
     ({ nativeEvent }: LayoutChangeEvent) => {
@@ -141,7 +149,7 @@ export default function ChickenHopScreen() {
         ]}
       >
         <Pressable
-          accessibilityLabel="Back to game selector"
+          accessibilityLabel="Exit Chicken Hop"
           accessibilityRole="button"
           hitSlop={8}
           onPress={handleBack}

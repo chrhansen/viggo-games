@@ -35,6 +35,8 @@ export default function RootLayout() {
         animation: "fade",
         contentStyle: { backgroundColor: colors.background },
         headerShown: false,
+        gestureEnabled: false,
+        fullScreenGestureEnabled: false,
       }}
     />
   );

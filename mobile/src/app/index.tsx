@@ -118,9 +118,7 @@ export default function GameSelectorScreen() {
                 featured={index === 0}
                 key={mission.id}
                 mission={mission}
-                onPress={
-                  mission.route ? () => router.push(mission.route!) : undefined
-                }
+                onPress={() => router.push({ pathname: '/game/[id]', params: { id: mission.id } })}
               />
             ))}
 
