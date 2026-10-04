@@ -119,20 +119,24 @@ describe('Hunter Guy browser look input', () => {
 });
 
 describe('Hunter Guy native look input', () => {
-  it.each([[-40, 'up'], [40, 'down']] as const)(
-    'vertical drag %s looks %s while browser touch keeps its direction', (dy) => {
+  it.each([[40, 0], [-40, 0], [0, 40], [0, -40], [40, 40], [-40, -40], [40, -40], [-40, 40]])(
+    'native drag (%s, %s) moves the projected scenery with the finger', (dx, dy) => {
       const native = createHunterGame();
       native.setActive(true);
       const camera = new PerspectiveCamera(70, 9 / 16, 0.1, 100);
-      const delta = nativeLookDelta(0, dy);
+      const delta = nativeLookDelta(dx, dy);
       native.look(delta.yaw, delta.pitch);
       camera.rotation.set(native.state.player.pitch, native.state.player.yaw, 0, 'YXZ');
-      expect(Math.sign(camera.getWorldDirection(new Vector3()).y)).toBe(-Math.sign(dy));
+      camera.updateMatrixWorld(true);
+      const landmark = new Vector3(0, 0, -10).project(camera);
+      if (dx) expect(Math.sign(landmark.x)).toBe(Math.sign(dx));
+      if (dy) expect(Math.sign(-landmark.y)).toBe(Math.sign(dy));
 
       const browser = controls(true);
       pointer(browser.canvas, 'pointerdown', 100, 100);
-      pointer(browser.canvas, 'pointermove', 100, 100 + dy);
-      expect(Math.sign(browser.camera.getWorldDirection(new Vector3()).y)).toBe(Math.sign(dy));
+      pointer(browser.canvas, 'pointermove', 100 + dx, 100 + dy);
+      expect(camera.rotation.y).toBeCloseTo(browser.camera.rotation.y);
+      expect(camera.rotation.x).toBeCloseTo(browser.camera.rotation.x);
     },
   );
 
@@ -141,7 +145,7 @@ describe('Hunter Guy native look input', () => {
       const native = nativeLookDelta(dx, dy);
       const browser = lookDelta(dx, dy);
       expect(native.yaw).toBe(browser.yaw);
-      expect(native.pitch).toBe(-browser.pitch);
+      expect(native.pitch).toBe(browser.pitch);
       expect(Math.abs(native.yaw)).toBeCloseTo(0.21);
       expect(Math.abs(native.pitch)).toBeCloseTo(0.21);
     }
@@ -153,7 +157,7 @@ describe('Hunter Guy native look input', () => {
     for (const dy of [-1000, 1000]) {
       const delta = nativeLookDelta(0, dy);
       native.look(native.state.player.yaw + delta.yaw, native.state.player.pitch + delta.pitch);
-      expect(native.state.player.pitch).toBe(-Math.sign(dy) * LOOK_RANGE);
+      expect(native.state.player.pitch).toBe(Math.sign(dy) * LOOK_RANGE);
       const reverse = nativeLookDelta(0, -Math.sign(dy) * 10);
       native.look(native.state.player.yaw + reverse.yaw, native.state.player.pitch + reverse.pitch);
       expect(Math.abs(native.state.player.pitch)).toBeLessThan(LOOK_RANGE);
