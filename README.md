@@ -34,9 +34,10 @@ Each game's README describes its controls, architecture, and maintenance. Native
 | [Torpedo](games/torpedo/README.md) | Playable | Detail preview; not ported |
 
 Chicken Hop and Hunter Guy are included in one **Viggo Games** iOS app. Internal
-TestFlight beta **0.1.0 (7)** is available as of **2026-10-01**, with corrected Hunter
-Guy panning, slower touch look, protected game exits, and game details before play.
-The owner checked the earlier build (6); device testing of build (7) remains pending.
+TestFlight beta **0.1.0 (10)** is available as of **2026-10-04**, with full game title
+images, a solid black arcade/detail background, and Hunter Guy scenery that follows
+the finger on both axes. Christian installed build (10) and reported that it looked
+good on iPhone; this is basic device acceptance, with broader beta testing ongoing.
 This is not a public App Store release. Android implementation and bundle checks
 are complete; Android device testing and store distribution remain pending.
 

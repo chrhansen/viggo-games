@@ -9,8 +9,8 @@ or delivering an iPhone beta or Expo update.
 
 As of **2026-10-04**, **Viggo Games 0.1.0 (10)** is available to the internal
 `Team (Expo)` TestFlight group. It includes both Chicken Hop and Hunter Guy in one
-iOS app with bundle identifier `games.viggo`. The owner received the invitation,
-reported that the earlier build (6) looked good, and approved merging the implementation.
+iOS app with bundle identifier `games.viggo`. Christian installed build (10),
+reported that it looked good on iPhone, and approved merging the changes to `main`.
 Install from the TestFlight invitation, choose a game, then tap **Play now** on its
 detail page.
 There is no public App Store release yet.
@@ -21,8 +21,9 @@ Gunny and Torpedo retain **Coming Soon** overlays. Browser controls remain uncha
 The owner reported no visible change after the build (9) Expo update, so this new
 installer delivers the changes through **TestFlight → Viggo Games → Update**.
 The full web and mobile gates passed for the source used in this build. The signed
-archive was checked for version (10) and the updated background bundle; physical-device
-touch testing is pending.
+archive was checked for version (10) and the updated background bundle. Christian's
+iPhone check provides basic device acceptance; broader GPU and lifecycle testing
+remains part of beta testing.
 
 EAS build ID: `4075d4f0-0bc1-44fe-9e38-2aa32dae94e6`, built from commit
 `e90c7b7dab54130757a6fdd4691ef871a0069741`. The signed installer was uploaded using
