@@ -81,6 +81,10 @@ Mobile CI runs this gate plus the root web/test gate for changes to the mobile a
 
 ## Game navigation
 
+The selector shows each full title image at its original aspect ratio. Only Burb,
+Gunny and Torpedo have a **Coming Soon** overlay; playable games have no text or
+shade over their artwork. Tap any image to open its detail page.
+
 Select a mission to open its detail page with artwork, instructions, touch controls
 and tips. Descriptions and gameplay instructions come from the website's shared
 `../src/data/games.json`; phone controls stay native. Only **Play now** opens a
@@ -140,8 +144,11 @@ forest, models, animation, raycasts, textures and weapon effects. Both use Three
 
 Move with the left joystick, drag the scene to aim, choose a belt tool and tap Use
 Tool. Fox/deer take one tag, bears take two; water scares animals without damage.
-The forest follows the finger on both axes; shared `lookDelta` sets touch look speed
-to 0.0021 radians per pixel, half the previous speed.
+Horizontal dragging moves the forest with the finger. Vertical dragging aims the
+native camera up when dragging up and down when dragging down. The native
+`nativeLookDelta` adapter reverses vertical input before shared `lookDelta`; browser
+touch direction stays unchanged. Touch look speed remains 0.0021 radians per pixel,
+half the original speed.
 Native supports simultaneous move/look/fire, portrait and landscape, explicit pause,
 and automatic background pause. Android surface recreation preserves the current
 hunt. Rotation recreates the graphics surface with the new aspect ratio and pauses
