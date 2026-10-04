@@ -115,7 +115,6 @@ export default function GameSelectorScreen() {
             {gamePreviews.map((mission, index) => (
               <MissionCard
                 animation={revealValues[index + 1]}
-                featured={index === 0}
                 key={mission.id}
                 mission={mission}
                 onPress={() => router.push({ pathname: '/game/[id]', params: { id: mission.id } })}

@@ -7,13 +7,51 @@ or delivering an iPhone beta or Expo update.
 
 ## Delivery status
 
-As of **2026-10-01**, **Viggo Games 0.1.0 (7)** is available to the internal
+As of **2026-10-04**, **Viggo Games 0.1.0 (10)** is available to the internal
 `Team (Expo)` TestFlight group. It includes both Chicken Hop and Hunter Guy in one
-iOS app with bundle identifier `games.viggo`. The owner received the invitation,
-reported that the earlier build (6) looked good, and approved merging the implementation.
+iOS app with bundle identifier `games.viggo`. Christian installed build (10),
+reported that it looked good on iPhone, and approved merging the changes to `main`.
 Install from the TestFlight invitation, choose a game, then tap **Play now** on its
 detail page.
 There is no public App Store release yet.
+
+Build **0.1.0 (10)** embeds the full game title images, solid black arcade/detail
+background and Hunter Guy scenery that follows the finger on both axes. Only Burb,
+Gunny and Torpedo retain **Coming Soon** overlays. Browser controls remain unchanged.
+The owner reported no visible change after the build (9) Expo update, so this new
+installer delivers the changes through **TestFlight → Viggo Games → Update**.
+The full web and mobile gates passed for the source used in this build. The signed
+archive was checked for version (10) and the updated background bundle. Christian's
+iPhone check provides basic device acceptance; broader GPU and lifecycle testing
+remains part of beta testing.
+
+EAS build ID: `4075d4f0-0bc1-44fe-9e38-2aa32dae94e6`, built from commit
+`e90c7b7dab54130757a6fdd4691ef871a0069741`. The signed installer was uploaded using
+Apple's `altool`, with delivery ID `e5be1ea4-5b3e-444f-8051-2d0dbea57fef`. Apple
+reports `VALID` and `IN_BETA_TESTING` for build (10).
+
+On **2026-10-04**, iOS Expo update
+`ec66dda1-f070-40ee-b9cb-30b6f5a5a3d0` was published to `testflight` for build (9).
+It replaces the decorative arcade/detail background with solid black and makes
+Hunter Guy scenery follow the finger horizontally, vertically and diagonally.
+Browser directions remain unchanged. The native fingerprint matches build (9):
+`c404e832f1b7cc4edea477b323923d99615c688d`. The update endpoint was verified to serve
+iOS update `01a107ea-d53f-796d-97f8-ba3a345ec4f2` for that runtime and channel.
+The full web and mobile gates passed. This update left the TestFlight build number
+at (9); build (10) now includes these changes in its installer.
+
+Build **0.1.0 (9)** shows full game title images without text or shade overlays;
+only Burb, Gunny and Torpedo retain **Coming Soon**. Hunter Guy's native vertical
+drag in the original installer aims up when dragging up and down when dragging
+down; the Expo update above replaces that behavior. Browser directions
+and horizontal touch input are unchanged. The full web and mobile gates passed,
+including Expo Doctor's 20 checks and both native exports. The updated selector
+also loaded in the iPhone simulator; physical-device touch testing is pending.
+
+EAS build ID: `cf4bac87-9e49-49ba-a92d-6253b55853bd`. The signed installer was
+uploaded directly using Apple's `altool`, with delivery ID
+`1b87f655-8af9-4263-bda7-a907f5375bac`. Apple reports `VALID` and
+`IN_BETA_TESTING`. Install through **TestFlight → Viggo Games → Update**.
 
 On **2026-10-01**, iOS Expo update
 `ba8ab6ba-8b41-45d0-a4c9-a02dd8cd3298` was published to `testflight` for build (6).
@@ -34,8 +72,8 @@ update for build (6). Device testing of build (7) is still pending.
 After build (7) was signed, the repository's Expo SDK 57 patch dependencies were
 refreshed to satisfy the current mobile dependency checks. Build (7) includes all
 the game and navigation fixes above, but predates those dependency updates. Their
-native fingerprint changes require the next TestFlight binary; they have not been
-published as an Expo update to build (7).
+native fingerprint changes are included in TestFlight build (9); they have not been
+published as an Expo update to build (7). Install build (9) to receive these changes.
 The refreshed dependency set passes Expo Doctor's 20 checks and both native exports.
 
 Both games also have Android implementations and passing Android export checks.
@@ -80,6 +118,13 @@ Mobile CI runs this gate plus the root web/test gate for changes to the mobile a
 `package.json` overrides only `xcode`'s deprecated `uuid` dependency. Remove that override once Expo's config plugins adopt an `xcode` release that no longer depends on `uuid@7`.
 
 ## Game navigation
+
+The arcade and game detail pages use a solid black background, without decorative
+glows, arcs or grid lines.
+
+The selector shows each full title image at its original aspect ratio. Only Burb,
+Gunny and Torpedo have a **Coming Soon** overlay; playable games have no text or
+shade over their artwork. Tap any image to open its detail page.
 
 Select a mission to open its detail page with artwork, instructions, touch controls
 and tips. Descriptions and gameplay instructions come from the website's shared
@@ -140,8 +185,11 @@ forest, models, animation, raycasts, textures and weapon effects. Both use Three
 
 Move with the left joystick, drag the scene to aim, choose a belt tool and tap Use
 Tool. Fox/deer take one tag, bears take two; water scares animals without damage.
-The forest follows the finger on both axes; shared `lookDelta` sets touch look speed
-to 0.0021 radians per pixel, half the previous speed.
+Dragging moves the forest with the finger on both axes, as if grabbing and moving
+the image. Native `nativeLookDelta` passes both axes directly to shared `lookDelta`;
+browser touch direction stays unchanged. Touch look speed remains 0.0021 radians
+per pixel, half the original speed. The look regression tests project a scene
+landmark onto the screen to verify horizontal, vertical and diagonal dragging.
 Native supports simultaneous move/look/fire, portrait and landscape, explicit pause,
 and automatic background pause. Android surface recreation preserves the current
 hunt. Rotation recreates the graphics surface with the new aspect ratio and pauses
@@ -202,7 +250,10 @@ new TestFlight build.
 EAS Build produces the signed binary; EAS Submit uploads it to Apple for TestFlight
 processing and invitation-based installation. EAS Update sends compatible JavaScript
 and assets to an already installed build; it does not create a TestFlight invitation
-or install a new app. Pushing to GitHub `main` runs CI and deploys the website only.
+or install a new app. It also leaves the TestFlight build number unchanged and does
+not create a new TestFlight version or its notification email. A visible TestFlight
+update requires a new signed installer. Pushing to GitHub `main` runs CI and deploys
+the website only.
 Public App Store submission is a separate step after beta testing.
 
 EAS manages build numbers remotely. The TestFlight submit profile links App Store

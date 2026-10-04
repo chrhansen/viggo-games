@@ -8,11 +8,11 @@ Targets: foxes, deer, bears.
 Source of truth: this folder inside `chrhansen/viggo-games`.
 
 Hunter Guy is included alongside Chicken Hop in the **Viggo Games iOS app**.
-Internal TestFlight beta **0.1.0 (7)** is available as of **2026-10-01**. The owner
-reported that the earlier build (6) looked good on iPhone; device testing of build
-(7) is still pending. Android uses the same native implementation and passes export
-checks, but device testing and Android distribution remain pending. This is not a
-public App Store release.
+Internal TestFlight beta **0.1.0 (10)** is available as of **2026-10-04**. Christian
+installed build (10) and reported that it looked good on iPhone. This is basic
+device acceptance; broader beta testing continues. Android uses the same native
+implementation and passes export checks, but Android device testing and
+distribution remain pending. This is not a public App Store release.
 
 ## Browser stack
 

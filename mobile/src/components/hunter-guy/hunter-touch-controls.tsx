@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View, type GestureResponderEvent } from 'react-native';
-import { touchMoveVector, lookDelta } from 'hunter-guy/core';
+import { touchMoveVector } from 'hunter-guy/core';
+import { nativeLookDelta } from '../../game/hunter-guy/look-input';
 
 export function HunterLookPad({ onLook }: { onLook: (yaw: number, pitch: number) => void }) {
   const touch = useRef<{ id: string; x: number; y: number } | null>(null);
@@ -9,7 +10,7 @@ export function HunterLookPad({ onLook }: { onLook: (yaw: number, pitch: number)
     if (!previous) return;
     const current = event.nativeEvent.changedTouches.find((entry) => entry.identifier === previous.id);
     if (!current) return;
-    const { yaw, pitch } = lookDelta(current.pageX - previous.x, current.pageY - previous.y);
+    const { yaw, pitch } = nativeLookDelta(current.pageX - previous.x, current.pageY - previous.y);
     onLook(yaw, pitch);
     touch.current = { id: previous.id, x: current.pageX, y: current.pageY };
   }
