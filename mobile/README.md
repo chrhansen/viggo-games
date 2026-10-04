@@ -7,13 +7,27 @@ or delivering an iPhone beta or Expo update.
 
 ## Delivery status
 
-As of **2026-10-04**, **Viggo Games 0.1.0 (9)** is available to the internal
+As of **2026-10-04**, **Viggo Games 0.1.0 (10)** is available to the internal
 `Team (Expo)` TestFlight group. It includes both Chicken Hop and Hunter Guy in one
 iOS app with bundle identifier `games.viggo`. The owner received the invitation,
 reported that the earlier build (6) looked good, and approved merging the implementation.
 Install from the TestFlight invitation, choose a game, then tap **Play now** on its
 detail page.
 There is no public App Store release yet.
+
+Build **0.1.0 (10)** embeds the full game title images, solid black arcade/detail
+background and Hunter Guy scenery that follows the finger on both axes. Only Burb,
+Gunny and Torpedo retain **Coming Soon** overlays. Browser controls remain unchanged.
+The owner reported no visible change after the build (9) Expo update, so this new
+installer delivers the changes through **TestFlight → Viggo Games → Update**.
+The full web and mobile gates passed for the source used in this build. The signed
+archive was checked for version (10) and the updated background bundle; physical-device
+touch testing is pending.
+
+EAS build ID: `4075d4f0-0bc1-44fe-9e38-2aa32dae94e6`, built from commit
+`e90c7b7dab54130757a6fdd4691ef871a0069741`. The signed installer was uploaded using
+Apple's `altool`, with delivery ID `e5be1ea4-5b3e-444f-8051-2d0dbea57fef`. Apple
+reports `VALID` and `IN_BETA_TESTING` for build (10).
 
 On **2026-10-04**, iOS Expo update
 `ec66dda1-f070-40ee-b9cb-30b6f5a5a3d0` was published to `testflight` for build (9).
@@ -22,8 +36,8 @@ Hunter Guy scenery follow the finger horizontally, vertically and diagonally.
 Browser directions remain unchanged. The native fingerprint matches build (9):
 `c404e832f1b7cc4edea477b323923d99615c688d`. The update endpoint was verified to serve
 iOS update `01a107ea-d53f-796d-97f8-ba3a345ec4f2` for that runtime and channel.
-The full web and mobile gates passed. Install build (9) first if needed, then open
-the app online to download the update, fully close it, and reopen it to apply.
+The full web and mobile gates passed. This update left the TestFlight build number
+at (9); build (10) now includes these changes in its installer.
 
 Build **0.1.0 (9)** shows full game title images without text or shade overlays;
 only Burb, Gunny and Torpedo retain **Coming Soon**. Hunter Guy's native vertical
@@ -235,7 +249,10 @@ new TestFlight build.
 EAS Build produces the signed binary; EAS Submit uploads it to Apple for TestFlight
 processing and invitation-based installation. EAS Update sends compatible JavaScript
 and assets to an already installed build; it does not create a TestFlight invitation
-or install a new app. Pushing to GitHub `main` runs CI and deploys the website only.
+or install a new app. It also leaves the TestFlight build number unchanged and does
+not create a new TestFlight version or its notification email. A visible TestFlight
+update requires a new signed installer. Pushing to GitHub `main` runs CI and deploys
+the website only.
 Public App Store submission is a separate step after beta testing.
 
 EAS manages build numbers remotely. The TestFlight submit profile links App Store
