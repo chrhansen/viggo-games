@@ -15,9 +15,20 @@ Install from the TestFlight invitation, choose a game, then tap **Play now** on 
 detail page.
 There is no public App Store release yet.
 
+On **2026-10-04**, iOS Expo update
+`ec66dda1-f070-40ee-b9cb-30b6f5a5a3d0` was published to `testflight` for build (9).
+It replaces the decorative arcade/detail background with solid black and makes
+Hunter Guy scenery follow the finger horizontally, vertically and diagonally.
+Browser directions remain unchanged. The native fingerprint matches build (9):
+`c404e832f1b7cc4edea477b323923d99615c688d`. The update endpoint was verified to serve
+iOS update `01a107ea-d53f-796d-97f8-ba3a345ec4f2` for that runtime and channel.
+The full web and mobile gates passed. Install build (9) first if needed, then open
+the app online to download the update, fully close it, and reopen it to apply.
+
 Build **0.1.0 (9)** shows full game title images without text or shade overlays;
 only Burb, Gunny and Torpedo retain **Coming Soon**. Hunter Guy's native vertical
-drag now aims up when dragging up and down when dragging down; browser directions
+drag in the original installer aims up when dragging up and down when dragging
+down; the Expo update above replaces that behavior. Browser directions
 and horizontal touch input are unchanged. The full web and mobile gates passed,
 including Expo Doctor's 20 checks and both native exports. The updated selector
 also loaded in the iPhone simulator; physical-device touch testing is pending.
