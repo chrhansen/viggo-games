@@ -93,6 +93,9 @@ Mobile CI runs this gate plus the root web/test gate for changes to the mobile a
 
 ## Game navigation
 
+The arcade and game detail pages use a solid black background, without decorative
+glows, arcs or grid lines.
+
 The selector shows each full title image at its original aspect ratio. Only Burb,
 Gunny and Torpedo have a **Coming Soon** overlay; playable games have no text or
 shade over their artwork. Tap any image to open its detail page.
@@ -156,11 +159,11 @@ forest, models, animation, raycasts, textures and weapon effects. Both use Three
 
 Move with the left joystick, drag the scene to aim, choose a belt tool and tap Use
 Tool. Fox/deer take one tag, bears take two; water scares animals without damage.
-Horizontal dragging moves the forest with the finger. Vertical dragging aims the
-native camera up when dragging up and down when dragging down. The native
-`nativeLookDelta` adapter reverses vertical input before shared `lookDelta`; browser
-touch direction stays unchanged. Touch look speed remains 0.0021 radians per pixel,
-half the original speed.
+Dragging moves the forest with the finger on both axes, as if grabbing and moving
+the image. Native `nativeLookDelta` passes both axes directly to shared `lookDelta`;
+browser touch direction stays unchanged. Touch look speed remains 0.0021 radians
+per pixel, half the original speed. The look regression tests project a scene
+landmark onto the screen to verify horizontal, vertical and diagonal dragging.
 Native supports simultaneous move/look/fire, portrait and landscape, explicit pause,
 and automatic background pause. Android surface recreation preserves the current
 hunt. Rotation recreates the graphics surface with the new aspect ratio and pauses
