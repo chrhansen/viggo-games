@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { PerspectiveCamera, Vector3 } from 'three';
 import { createPlayerControls } from '../../games/hunter-guy/player-controls.js';
 import { createHunterGame, lookDelta, LOOK_RANGE } from '../../games/hunter-guy/core/engine.js';
+import { nativeLookDelta } from '../../mobile/src/game/hunter-guy/look-input';
 
 const cleanup: (() => void)[] = [];
 
@@ -97,7 +98,7 @@ describe('Hunter Guy browser look input', () => {
     expect(camera.rotation.y).toBeCloseTo(0);
   });
 
-  it('keeps browser touch and native engine orientation equal through a drag timeline', () => {
+  it('keeps browser touch and shared engine orientation equal through a drag timeline', () => {
     const { camera, canvas } = controls(true);
     const native = createHunterGame();
     native.setActive(true);
@@ -113,6 +114,49 @@ describe('Hunter Guy browser look input', () => {
       expect(camera.rotation.y).toBeCloseTo(player.yaw);
       expect(camera.rotation.x).toBeCloseTo(player.pitch);
       expect(Math.abs(player.pitch)).toBeLessThanOrEqual(LOOK_RANGE);
+    }
+  });
+});
+
+describe('Hunter Guy native look input', () => {
+  it.each([[-40, 'up'], [40, 'down']] as const)(
+    'vertical drag %s looks %s while browser touch keeps its direction', (dy) => {
+      const native = createHunterGame();
+      native.setActive(true);
+      const camera = new PerspectiveCamera(70, 9 / 16, 0.1, 100);
+      const delta = nativeLookDelta(0, dy);
+      native.look(delta.yaw, delta.pitch);
+      camera.rotation.set(native.state.player.pitch, native.state.player.yaw, 0, 'YXZ');
+      expect(Math.sign(camera.getWorldDirection(new Vector3()).y)).toBe(-Math.sign(dy));
+
+      const browser = controls(true);
+      pointer(browser.canvas, 'pointerdown', 100, 100);
+      pointer(browser.canvas, 'pointermove', 100, 100 + dy);
+      expect(Math.sign(browser.camera.getWorldDirection(new Vector3()).y)).toBe(Math.sign(dy));
+    },
+  );
+
+  it('preserves horizontal dragging and touch speed on both axes', () => {
+    for (const [dx, dy] of [[100, 100], [-100, -100], [100, -100], [-100, 100]]) {
+      const native = nativeLookDelta(dx, dy);
+      const browser = lookDelta(dx, dy);
+      expect(native.yaw).toBe(browser.yaw);
+      expect(native.pitch).toBe(-browser.pitch);
+      expect(Math.abs(native.yaw)).toBeCloseTo(0.21);
+      expect(Math.abs(native.pitch)).toBeCloseTo(0.21);
+    }
+  });
+
+  it('clamps native vertical look and reverses immediately at either limit', () => {
+    const native = createHunterGame();
+    native.setActive(true);
+    for (const dy of [-1000, 1000]) {
+      const delta = nativeLookDelta(0, dy);
+      native.look(native.state.player.yaw + delta.yaw, native.state.player.pitch + delta.pitch);
+      expect(native.state.player.pitch).toBe(-Math.sign(dy) * LOOK_RANGE);
+      const reverse = nativeLookDelta(0, -Math.sign(dy) * 10);
+      native.look(native.state.player.yaw + reverse.yaw, native.state.player.pitch + reverse.pitch);
+      expect(Math.abs(native.state.player.pitch)).toBeLessThan(LOOK_RANGE);
     }
   });
 });
