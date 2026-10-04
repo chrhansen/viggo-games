@@ -7,13 +7,25 @@ or delivering an iPhone beta or Expo update.
 
 ## Delivery status
 
-As of **2026-10-01**, **Viggo Games 0.1.0 (7)** is available to the internal
+As of **2026-10-04**, **Viggo Games 0.1.0 (9)** is available to the internal
 `Team (Expo)` TestFlight group. It includes both Chicken Hop and Hunter Guy in one
 iOS app with bundle identifier `games.viggo`. The owner received the invitation,
 reported that the earlier build (6) looked good, and approved merging the implementation.
 Install from the TestFlight invitation, choose a game, then tap **Play now** on its
 detail page.
 There is no public App Store release yet.
+
+Build **0.1.0 (9)** shows full game title images without text or shade overlays;
+only Burb, Gunny and Torpedo retain **Coming Soon**. Hunter Guy's native vertical
+drag now aims up when dragging up and down when dragging down; browser directions
+and horizontal touch input are unchanged. The full web and mobile gates passed,
+including Expo Doctor's 20 checks and both native exports. The updated selector
+also loaded in the iPhone simulator; physical-device touch testing is pending.
+
+EAS build ID: `cf4bac87-9e49-49ba-a92d-6253b55853bd`. The signed installer was
+uploaded directly using Apple's `altool`, with delivery ID
+`1b87f655-8af9-4263-bda7-a907f5375bac`. Apple reports `VALID` and
+`IN_BETA_TESTING`. Install through **TestFlight → Viggo Games → Update**.
 
 On **2026-10-01**, iOS Expo update
 `ba8ab6ba-8b41-45d0-a4c9-a02dd8cd3298` was published to `testflight` for build (6).
@@ -34,8 +46,8 @@ update for build (6). Device testing of build (7) is still pending.
 After build (7) was signed, the repository's Expo SDK 57 patch dependencies were
 refreshed to satisfy the current mobile dependency checks. Build (7) includes all
 the game and navigation fixes above, but predates those dependency updates. Their
-native fingerprint changes require the next TestFlight binary; they have not been
-published as an Expo update to build (7).
+native fingerprint changes are included in TestFlight build (9); they have not been
+published as an Expo update to build (7). Install build (9) to receive these changes.
 The refreshed dependency set passes Expo Doctor's 20 checks and both native exports.
 
 Both games also have Android implementations and passing Android export checks.
