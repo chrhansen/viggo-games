@@ -7,6 +7,10 @@ collision response, surface grounding, field of view and pause/time handling.
 `collisions.ts` owns the spatial grid, movement substeps and obstacle sliding.
 Neither imports graphics, DOM, React, native or device APIs.
 
+`tilt-steering.ts` shares gravity projection, signed roll differences and the
+steering response curve. Browser and native use the same screen-axis roll math;
+native uses a 2° dead zone and full steering at 18° for small landscape twists.
+
 Use `createBurbGame({ position, heading, colliders, surfaceHeight })`,
 `emptyBurbInput()`, `setActive(active)` and `step(deltaSeconds, input)`.
 The shared scene supplies the start pose, scenery colliders and route surface
@@ -23,3 +27,5 @@ Run the root and mobile gates. `src/test/burb-engine.test.ts` verifies riding ru
 and browser/native input timelines; `burb-scene.test.ts` verifies the shared world,
 camera/cockpit parity and graphics recreation; `burb-collisions.test.ts` verifies
 collision boundaries and sliding.
+`burb-motion.test.ts` covers both landscape directions, pitch rejection,
+calibration, stale samples and transitions back to button steering.

@@ -54,6 +54,12 @@
       "expo-image",
       "expo-asset",
       [
+        "expo-sensors",
+        {
+          "motionPermission": "Allow Viggo Games to use phone motion for Burb's landscape tilt steering."
+        }
+      ],
+      [
         "expo-audio",
         {
           "microphonePermission": false,

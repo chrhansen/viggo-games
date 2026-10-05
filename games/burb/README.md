@@ -82,8 +82,12 @@ Tilt steering notes:
 - `Recenter tilt` resets neutral steering if the device angle changes
 - Over Tailscale Serve, use the HTTPS `*.ts.net` URL so motion access stays available on phone/tablet
 
-Native controls use Left, Right, Fast and Slow with simultaneous touches. Native
-does not request motion access. Pause or background the app to freeze the ride;
+Native uses Left/Right in portrait and phone motion in landscape. Hold the phone
+upright, twist slightly left/right around the axis through the screen, and use
+Center tilt to recenter. Native motion uses the shared tilt math with 2°/18°
+dead-zone/full-steer angles; browser sensitivity remains 4°/36°. Fast/Slow remain
+touch controls in both orientations. Native asks for motion permission in landscape
+and falls back to buttons if denied or unavailable. Pause or background to freeze the ride;
 rotation recreates graphics without resetting the bike and waits for Resume.
 
 ## Current behavior

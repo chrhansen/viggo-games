@@ -9,6 +9,7 @@ import { fonts } from '@/constants/theme';
 import { createBurbTouchInput } from '@/game/burb/touch-input';
 import { createNativeBurbRenderer, loadBurbAssets, type NativeBurbRenderer } from '@/game/burb/renderer';
 import { useGameExit } from '@/hooks/use-game-exit';
+import { useBurbMotion } from '@/hooks/use-burb-motion';
 
 export default function BurbScreen() {
   const insets = useSafeAreaInsets();
@@ -26,6 +27,8 @@ export default function BurbScreen() {
   const ready = readySurface === surfaceKey;
   const [running, setActive] = useState(false);
   const active = running && ready;
+  const landscape = width > height;
+  const motion = useBurbMotion(touch, landscape, active);
   const [started, setStarted] = useState(false);
   const [error, setError] = useState('');
   const [speed, setSpeed] = useState(43);
@@ -79,6 +82,7 @@ export default function BurbScreen() {
             frame.current = requestAnimationFrame(tick);
             return;
           }
+          motion.input.apply(Date.now());
           renderer.game.step(delta, touch.input);
           renderer.render();
           rendered = true;
@@ -122,7 +126,7 @@ export default function BurbScreen() {
         <Pressable accessibilityRole="button" accessibilityLabel={active ? 'Pause ride' : 'Resume ride'} disabled={!ready || !!error} onPress={active ? pause : start} style={styles.button}><Text style={styles.buttonText}>{active ? 'PAUSE' : 'RESUME'}</Text></Pressable>
       </View>
       <View style={styles.spacer} pointerEvents="none" />
-      {active && <BurbControls touch={touch} />}
+      {active && <BurbControls touch={touch} tilt={motion.enabled} recenter={motion.recenter} />}
     </View>
     {!active && <View style={styles.overlay} pointerEvents="box-none">
       <ScrollView style={styles.card} contentContainerStyle={styles.cardContent}>
@@ -130,7 +134,9 @@ export default function BurbScreen() {
         <Text style={styles.title}>Burb Ride</Text>
         <Text style={styles.description}>{error || (started ? 'Your ride is paused. The bike stays right where you left it.' : 'Mountain air. Winding asphalt. Your own pace.')}</Text>
         {!error && <>
-          <Text style={styles.instructions}>Hold Left or Right to steer.{ '\n' }Hold Fast or Slow to change speed.{ '\n' }Release the buttons to cruise.</Text>
+          <Text style={styles.instructions}>{motion.enabled ? 'Hold the phone upright in landscape. Twist slightly left or right to steer. Center tilt resets straight ahead.' : 'Hold Left or Right to steer. In landscape, tilt the upright phone left or right.'}{ '\n' }Hold Fast or Slow to change speed.{ '\n' }Release the speed buttons to cruise.</Text>
+          {landscape && motion.status === 'denied' && <Pressable accessibilityRole="button" onPress={motion.enable} style={styles.motionPermission}><Text style={styles.permissionText}>ENABLE MOTION FOR TILT</Text></Pressable>}
+          {landscape && motion.status === 'unavailable' && <Text style={styles.motionNote}>Motion is unavailable. Use the steering buttons.</Text>}
           <Pressable accessibilityRole="button" disabled={!ready} onPress={start} style={[styles.start, !ready && styles.loading]}><Text style={styles.startText}>{!ready ? 'OPENING THE ROAD…' : started ? 'CONTINUE RIDE' : 'START RIDE'}</Text></Pressable>
         </>}
       </ScrollView>
@@ -158,4 +164,7 @@ const styles = StyleSheet.create({
   start: { minHeight: 50, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFE07D', borderRadius: 10 },
   startText: { color: '#102B35', fontFamily: fonts.extraBold, fontSize: 13 },
   loading: { opacity: 0.6 },
+  motionPermission: { minHeight: 44, justifyContent: 'center', marginBottom: 12 },
+  permissionText: { fontFamily: fonts.bold, color: '#FFE07D', fontSize: 12 },
+  motionNote: { fontFamily: fonts.regular, color: '#BED4D8', fontSize: 12, marginBottom: 12 },
 });

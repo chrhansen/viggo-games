@@ -76,7 +76,7 @@ export const gamePreviews: readonly GamePreview[] = [
 const touchControls: Record<string, readonly string[]> = {
   'chicken-hop': ['Hold left or right to move.', 'Tap Hop to jump; hold it in the air to fly.'],
   'hunter-guy': ['Left joystick to move; drag the forest to look.', 'Choose a belt tool, aim, then tap Use Tool.'],
-  'burb': ['Hold Left or Right to steer.', 'Hold Fast or Slow to change speed; release to cruise.'],
+  'burb': ['Portrait: hold Left or Right to steer.', 'Landscape: hold the phone upright and twist slightly left or right to steer. Tap Center tilt to recenter.', 'Hold Fast or Slow to change speed; release to cruise.'],
 };
 
 export const gameDetails = gamePreviews.map((preview) => {

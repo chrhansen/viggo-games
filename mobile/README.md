@@ -243,9 +243,15 @@ The browser scene renders correctly.
 ## Burb
 
 Open Burb's details, tap **Play now**, then **Start ride**. Hold Left or Right to
-steer and Fast or Slow to change speed; release to cruise. Steering and speed
-buttons support simultaneous touches. Tilt remains a browser input option; native
-uses touch buttons and requests no motion permission.
+steer in portrait. In landscape, allow motion access, hold the phone upright with
+the screen facing you, and twist slightly clockwise to steer right or
+counterclockwise to steer left. Steering measures roll around the axis perpendicular
+to the screen; forward/backward pitch does not steer. A 2° dead zone avoids jitter;
+18° gives full steering. The neutral hold is centered at ride start/resume and
+after changing landscape direction. Tap **Center tilt** to center your current hold.
+Fast and Slow remain touch buttons in both orientations; release to cruise.
+If motion access is denied or sensors are unavailable, steering buttons remain
+available. The paused landscape card can open motion settings.
 
 - `../games/burb/core/`: one engine for speed, throttle, steering smoothing,
   heading, lean, collisions, surface grounding, field of view and pause/time rules.
@@ -255,10 +261,16 @@ uses touch buttons and requests no motion permission.
   adapters call the same `step(delta, input)` loop.
 - `src/game/burb/renderer.ts`: Expo GL renderer and locally bundled texture assets.
 - `src/game/burb/touch-input.ts` and `src/components/burb/`: touch collection.
+- `src/game/burb/motion-input.ts` and `src/hooks/use-burb-motion.ts`: native motion
+  subscription, permission handling, calibration and orientation-aware input mode.
 - `src/app/burb.tsx`: HUD, start/pause, confirmed exit and app lifecycle.
 
 Backgrounding, rotation and surface recreation pause the bike and clear held input.
 The ride survives graphics recreation; resuming continues from the same position.
+Sensors run only during an active landscape ride, at about 30 samples/second.
+Gravity is separated from hand acceleration; flat/invalid readings and samples
+older than 250ms clear tilt. Portrait, pause, background and exit stop sampling
+and clear tilt input. Game physics and steering smoothing remain in the shared engine.
 Paused scenes do not redraw. Native pixel ratio is capped at 1.25; HUD and controls
 retain full resolution. Metro and native TypeScript resolve shared scene imports
 against the app's Three.js 0.160.0 instance. Browser Burb retains its own version.

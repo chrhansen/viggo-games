@@ -1,6 +1,7 @@
 import './style.css';
 import { ACESFilmicToneMapping, Clock, MathUtils, SRGBColorSpace, WebGLRenderer } from 'three';
 import { emptyBurbInput } from '../core/engine';
+import { getGravityRollAngle, signedAngleDelta, mapTiltAngleToSteer } from '../core/tilt-steering';
 import { createBurbScene } from './scene';
 import { createBrowserBurbTexture } from './browser-textures';
 
@@ -20,9 +21,6 @@ type TiltSteeringState = {
   lastSampleAt: number;
 };
 
-const TILT_DEAD_ZONE = 4;
-const TILT_FULL_STEER = 36;
-const TILT_MIN_GRAVITY_PROJECTION = 5.5;
 const TILT_SAMPLE_TIMEOUT_MS = 220;
 
 const app = document.querySelector<HTMLDivElement>('#app');
@@ -342,7 +340,7 @@ function handleDeviceMotion(event: DeviceMotionEvent) {
     return;
   }
 
-  const tiltAngle = getTiltAngle(gravity);
+  const tiltAngle = getGravityRollAngle(gravity, getScreenAngle());
 
   if (tiltAngle === null) {
     return;
@@ -356,28 +354,8 @@ function handleDeviceMotion(event: DeviceMotionEvent) {
     syncTiltUi('Tilt steer on. Lean left or right to carve.');
   }
 
-  const tiltOffset = getSignedAngleDelta(tiltAngle, tiltSteering.neutralAngle);
+  const tiltOffset = signedAngleDelta(tiltAngle, tiltSteering.neutralAngle);
   tiltSteering.targetSteer = mapTiltAngleToSteer(tiltOffset);
-}
-
-function getTiltAngle(gravity: DeviceMotionEventAcceleration) {
-  if (
-    gravity.x === null ||
-    gravity.y === null
-  ) {
-    return null;
-  }
-
-  const screenAngle = MathUtils.degToRad(getScreenAngle());
-  const screenX = gravity.x * Math.cos(screenAngle) - gravity.y * Math.sin(screenAngle);
-  const screenY = gravity.x * Math.sin(screenAngle) + gravity.y * Math.cos(screenAngle);
-  const projectedGravity = Math.hypot(screenX, screenY);
-
-  if (projectedGravity < TILT_MIN_GRAVITY_PROJECTION) {
-    return null;
-  }
-
-  return MathUtils.radToDeg(Math.atan2(screenX, -screenY));
 }
 
 function getScreenAngle() {
@@ -389,22 +367,4 @@ function getScreenAngle() {
   return typeof legacyOrientation === 'number'
     ? MathUtils.euclideanModulo(legacyOrientation, 360)
     : 0;
-}
-
-function getSignedAngleDelta(angle: number, baseline: number) {
-  return MathUtils.euclideanModulo(angle - baseline + 180, 360) - 180;
-}
-
-function mapTiltAngleToSteer(tiltAngle: number) {
-  const clampedTilt = MathUtils.clamp(tiltAngle, -TILT_FULL_STEER, TILT_FULL_STEER);
-  const absTilt = Math.abs(clampedTilt);
-
-  if (absTilt <= TILT_DEAD_ZONE) {
-    return 0;
-  }
-
-  return (
-    ((absTilt - TILT_DEAD_ZONE) / (TILT_FULL_STEER - TILT_DEAD_ZONE)) *
-    Math.sign(clampedTilt)
-  );
 }

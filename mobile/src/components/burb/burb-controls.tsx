@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { StyleSheet, Text, View, type GestureResponderEvent } from 'react-native';
+import { Pressable, StyleSheet, Text, View, type GestureResponderEvent } from 'react-native';
 import { fonts } from '@/constants/theme';
 import type { BurbControl, BurbTouchInput } from '@/game/burb/touch-input';
 
@@ -19,12 +19,15 @@ function HoldButton({ control, label, touch, accent = false }: {
   </View>;
 }
 
-export function BurbControls({ touch }: { touch: BurbTouchInput }) {
+export function BurbControls({ touch, tilt = false, recenter }: { touch: BurbTouchInput; tilt?: boolean; recenter?: () => void }) {
   return <View pointerEvents="box-none" style={styles.row}>
-    <View style={styles.group}>
+    {tilt ? <Pressable accessibilityRole="button" accessibilityLabel="Center tilt steering" onPress={recenter} style={styles.center}>
+      <Text style={styles.label}>CENTER TILT</Text>
+      <Text style={styles.hint}>Tilt left / right to steer</Text>
+    </Pressable> : <View style={styles.group}>
       <HoldButton control="left" label="LEFT" touch={touch} />
       <HoldButton control="right" label="RIGHT" touch={touch} />
-    </View>
+    </View>}
     <View style={styles.group}>
       <HoldButton control="brake" label="SLOW" touch={touch} />
       <HoldButton control="accelerate" label="FAST" touch={touch} accent />
@@ -40,4 +43,6 @@ const styles = StyleSheet.create({
   pressed: { borderColor: '#FF7A99', transform: [{ scale: 0.95 }] },
   label: { fontFamily: fonts.extraBold, fontSize: 12, color: '#FFF5DD' },
   accentLabel: { color: '#102B35' },
+  center: { minHeight: 64, paddingHorizontal: 16, borderRadius: 15, backgroundColor: '#102B35EE', justifyContent: 'center', alignItems: 'center', gap: 6 },
+  hint: { fontFamily: fonts.regular, fontSize: 10, color: '#BED4D8' },
 });
