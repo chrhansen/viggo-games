@@ -30,12 +30,15 @@ Each game's README describes its controls, architecture, and maintenance. Native
 | --- | --- | --- |
 | [Chicken Hop](games/chicken-hop/README.md) | Playable | Playable on iOS/Android; shared rules, separate renderers |
 | [Hunter Guy](games/hunter-guy/README.md) | Playable | Playable on iOS/Android; shared rules, Three.js scene, models and assets |
-| [Burb](games/burb/README.md) | Playable | Playable in source on iOS/Android; shared engine and Three.js scene; beta delivery pending |
+| [Burb](games/burb/README.md) | Playable | Playable on iOS/Android; shared engine and Three.js scene; iOS beta update available |
 | [Gunny](games/gunny/README.md) | Playable | Detail preview; not ported |
 | [Torpedo](games/torpedo/README.md) | Playable | Detail preview; not ported |
 
-Chicken Hop and Hunter Guy are included in one **Viggo Games** iOS app. Internal
-TestFlight beta **0.1.0 (10)** is available as of **2026-10-04**, with full game title
+Chicken Hop, Hunter Guy and Burb are included in one **Viggo Games** iOS app. Burb
+was delivered on **2026-10-05** as an Expo update to the `testflight` channel for
+build (10); its iPhone graphics and touch acceptance remain pending. Open the app
+online to download the update, then fully close and reopen it to apply.
+Internal TestFlight beta **0.1.0 (10)** is available as of **2026-10-04**, with full game title
 images, a solid black arcade/detail background, and Hunter Guy scenery that follows
 the finger on both axes. Christian installed build (10) and reported that it looked
 good on iPhone; this is basic device acceptance, with broader beta testing ongoing.

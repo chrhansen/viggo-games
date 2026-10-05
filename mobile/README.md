@@ -7,9 +7,18 @@ or delivering an iPhone beta or Expo update.
 
 ## Delivery status
 
-Burb is playable in the current source, with shared browser/native rules and scene.
-It has not been delivered to TestFlight; build (10) below still includes only
-Chicken Hop and Hunter Guy. Simulator and device acceptance are pending.
+Burb was delivered on **2026-10-05** as iOS Expo update
+`01a10cd1-e2b5-7879-9911-e9c971734c61` to `testflight`, update group
+`2fdfbf9e-c0f4-45a3-abb0-a492fb41b1d2`, from commit
+`30967a272898401ba92b658749ee4b60e4089e4b`. Its native fingerprint matches the
+installed TestFlight build (10): `c404e832f1b7cc4edea477b323923d99615c688d`.
+The update endpoint serves this update for the installed iOS runtime. Its uploaded
+bundle and all seven Burb textures were downloaded and verified against their hashes.
+The update adds Burb's **Play now** route, shared browser/native engine and scene,
+and native touch controls. No replacement TestFlight installer is required.
+Open Viggo Games online, allow the update to download, then fully close and reopen
+the app to apply it. Burb's iPhone GPU, touch and lifecycle acceptance are pending;
+Simulator.app was unavailable, so Christian requested direct iPhone delivery.
 
 As of **2026-10-04**, **Viggo Games 0.1.0 (10)** is available to the internal
 `Team (Expo)` TestFlight group. It includes both Chicken Hop and Hunter Guy in one
@@ -19,9 +28,10 @@ Install from the TestFlight invitation, choose a game, then tap **Play now** on 
 detail page.
 There is no public App Store release yet.
 
-Build **0.1.0 (10)** embeds the full game title images, solid black arcade/detail
-background and Hunter Guy scenery that follows the finger on both axes. Only Burb,
-Gunny and Torpedo retain **Coming Soon** overlays. Browser controls remain unchanged.
+Build **0.1.0 (10)** embedded the full game title images, solid black arcade/detail
+background and Hunter Guy scenery that follows the finger on both axes. Its original
+selector marked Burb, Gunny and Torpedo **Coming Soon**. The Burb Expo update above
+removes that overlay from Burb. Browser controls remain unchanged.
 The owner reported no visible change after the build (9) Expo update, so this new
 installer delivers the changes through **TestFlight → Viggo Games → Update**.
 The full web and mobile gates passed for the source used in this build. The signed
@@ -244,8 +254,8 @@ After texture changes, run the root Vite server and
 `node scripts/bake-burb-textures.mjs --check`. Commit the generated source assets.
 The engine, scene and input regressions in `../src/test/burb-*.test.ts` cover speed,
 steering, collision recovery, pause, time clamping, portrait/landscape parity and
-graphics recreation. Continue native GPU and touch checks in the simulator and on
-iPhone before beta delivery.
+graphics recreation. Continue native GPU, simultaneous touch, rotation and
+background/resume checks on iPhone during beta testing.
 
 ## Expo and TestFlight beta delivery
 
