@@ -38,7 +38,8 @@ Chicken Hop, Hunter Guy and Burb are included in one **Viggo Games** iOS app.
 Internal TestFlight beta **0.1.0 (12)** is available as of **2026-10-05**, with
 Burb landscape roll steering, portrait buttons and **Center Tilt**. Install through
 **TestFlight → Viggo Games → Update**. The signed installer includes the native
-motion module and permission prompt; iPhone motion acceptance remains pending.
+motion module and permission prompt. Christian tested build (12) on his iPhone
+and reported that it looked great; broader beta testing remains ongoing.
 Christian reported that Burb in build (11) was a good first start. That installer
 embedded Burb after a compatible Expo update did not appear in the installed app.
 Internal TestFlight beta **0.1.0 (10)** is available as of **2026-10-04**, with full game title

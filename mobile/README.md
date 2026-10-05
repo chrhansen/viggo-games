@@ -17,7 +17,8 @@ require a new TestFlight installer. Apple's `altool` accepted the upload with no
 errors, delivery ID `53b39dde-1aaa-47eb-a957-367f58771460`. Apple reports `VALID`
 and `IN_BETA_TESTING`, available to the automatic internal `Team (Expo)` group.
 Install through **TestFlight → Viggo Games → Update**. The full web and mobile
-gates passed. Landscape tilt feel and permission interaction need an iPhone check.
+gates passed. Christian tested build (12) on his iPhone and reported that it looked
+great. Broader rotation, background/resume and GPU checks remain part of beta testing.
 
 Burb is embedded in signed **Viggo Games 0.1.0 (11)**, built on **2026-10-05**
 from commit `0425ed446fb6d23f4712734d6071217bd711c918`. EAS build ID:
