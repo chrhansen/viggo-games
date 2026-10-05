@@ -1,16 +1,15 @@
 import {
   BufferGeometry,
-  CanvasTexture,
   CatmullRomCurve3,
   Float32BufferAttribute,
   Group,
   Mesh,
   MeshStandardMaterial,
   PlaneGeometry,
-  RepeatWrapping,
-  SRGBColorSpace,
   Vector3,
 } from 'three';
+
+import { createBurbTexture, type BurbTextureFactory } from './textures';
 
 export const GROUND_LEVEL = 0;
 export const SHOULDER_SURFACE_LIFT = 0.006;
@@ -20,7 +19,7 @@ const ROAD_WIDTH = 14;
 const SHOULDER_WIDTH = ROAD_WIDTH + 6.5;
 const UP = new Vector3(0, 1, 0);
 
-export function createRoad(curvePath: CatmullRomCurve3, anisotropy: number) {
+export function createRoad(curvePath: CatmullRomCurve3, anisotropy: number, textures: BurbTextureFactory) {
   const group = new Group();
   const shoulderGeometry = createRoadGeometry(
     curvePath,
@@ -28,7 +27,7 @@ export function createRoad(curvePath: CatmullRomCurve3, anisotropy: number) {
     SHOULDER_WIDTH,
     SHOULDER_SURFACE_LIFT,
   );
-  const shoulderTexture = createShoulderTexture();
+  const shoulderTexture = createBurbTexture('shoulder', textures);
   shoulderTexture.anisotropy = anisotropy;
   const shoulder = new Mesh(
     shoulderGeometry,
@@ -40,7 +39,7 @@ export function createRoad(curvePath: CatmullRomCurve3, anisotropy: number) {
     }),
   );
   const roadGeometry = createRoadGeometry(curvePath, 520, ROAD_WIDTH, ROAD_SURFACE_LIFT);
-  const roadTexture = createRoadTexture();
+  const roadTexture = createBurbTexture('road', textures);
   roadTexture.anisotropy = anisotropy;
   const road = new Mesh(
     roadGeometry,
@@ -56,8 +55,8 @@ export function createRoad(curvePath: CatmullRomCurve3, anisotropy: number) {
   return group;
 }
 
-export function createGround(anisotropy: number) {
-  const groundTexture = createGrassTexture();
+export function createGround(anisotropy: number, textures: BurbTextureFactory) {
+  const groundTexture = createBurbTexture('grass', textures);
   groundTexture.anisotropy = anisotropy;
   groundTexture.repeat.set(80, 80);
 
@@ -123,153 +122,4 @@ function createRoadGeometry(
   geometry.setAttribute('normal', new Float32BufferAttribute(normals, 3));
   geometry.setAttribute('uv', new Float32BufferAttribute(uvs, 2));
   return geometry;
-}
-
-function createRoadTexture() {
-  const canvasTexture = document.createElement('canvas');
-  canvasTexture.width = 512;
-  canvasTexture.height = 2048;
-  const context = canvasTexture.getContext('2d');
-
-  if (!context) {
-    throw new Error('Canvas 2D context unavailable for road texture.');
-  }
-
-  context.fillStyle = '#171b20';
-  context.fillRect(0, 0, canvasTexture.width, canvasTexture.height);
-
-  const image = context.getImageData(0, 0, canvasTexture.width, canvasTexture.height);
-  for (let index = 0; index < image.data.length; index += 4) {
-    const grain = 18 + Math.random() * 20;
-    const warmShift = Math.random() * 3;
-    image.data[index] = grain + warmShift;
-    image.data[index + 1] = grain + warmShift;
-    image.data[index + 2] = grain + 6 + Math.random() * 10;
-    image.data[index + 3] = 255;
-  }
-  context.putImageData(image, 0, 0);
-
-  context.fillStyle = 'rgba(255, 255, 255, 1)';
-  context.fillRect(22, 0, 14, canvasTexture.height);
-  context.fillRect(canvasTexture.width - 36, 0, 14, canvasTexture.height);
-
-  context.fillStyle = '#ffd94d';
-  for (let y = 0; y < canvasTexture.height; y += 190) {
-    context.fillRect(canvasTexture.width * 0.5 - 14, y + 20, 28, 132);
-  }
-
-  context.fillStyle = 'rgba(255, 255, 255, 0.08)';
-  context.fillRect(50, 0, 26, canvasTexture.height);
-  context.fillRect(canvasTexture.width - 76, 0, 26, canvasTexture.height);
-
-  context.strokeStyle = 'rgba(255, 255, 255, 0.07)';
-  context.lineWidth = 6;
-  for (let crack = 0; crack < 28; crack += 1) {
-    const x = 70 + Math.random() * (canvasTexture.width - 140);
-    const y = Math.random() * canvasTexture.height;
-    context.beginPath();
-    context.moveTo(x, y);
-    context.lineTo(x + Math.random() * 30 - 15, y + 70);
-    context.stroke();
-  }
-
-  const texture = new CanvasTexture(canvasTexture);
-  texture.wrapS = RepeatWrapping;
-  texture.wrapT = RepeatWrapping;
-  texture.colorSpace = SRGBColorSpace;
-  return texture;
-}
-
-function createShoulderTexture() {
-  const canvasTexture = document.createElement('canvas');
-  canvasTexture.width = 512;
-  canvasTexture.height = 2048;
-  const context = canvasTexture.getContext('2d');
-
-  if (!context) {
-    throw new Error('Canvas 2D context unavailable for shoulder texture.');
-  }
-
-  context.fillStyle = '#a1957e';
-  context.fillRect(0, 0, canvasTexture.width, canvasTexture.height);
-
-  const image = context.getImageData(0, 0, canvasTexture.width, canvasTexture.height);
-  for (let index = 0; index < image.data.length; index += 4) {
-    const grain = 126 + Math.random() * 36;
-    image.data[index] = grain + Math.random() * 16;
-    image.data[index + 1] = grain - 14 + Math.random() * 12;
-    image.data[index + 2] = grain - 34 + Math.random() * 12;
-    image.data[index + 3] = 255;
-  }
-  context.putImageData(image, 0, 0);
-
-  context.fillStyle = 'rgba(255, 255, 255, 0.2)';
-  context.fillRect(84, 0, 14, canvasTexture.height);
-  context.fillRect(canvasTexture.width - 98, 0, 14, canvasTexture.height);
-
-  context.fillStyle = 'rgba(0, 0, 0, 0.08)';
-  for (let patch = 0; patch < 180; patch += 1) {
-    context.beginPath();
-    context.ellipse(
-      Math.random() * canvasTexture.width,
-      Math.random() * canvasTexture.height,
-      8 + Math.random() * 22,
-      5 + Math.random() * 14,
-      Math.random() * Math.PI,
-      0,
-      Math.PI * 2,
-    );
-    context.fill();
-  }
-
-  const texture = new CanvasTexture(canvasTexture);
-  texture.wrapS = RepeatWrapping;
-  texture.wrapT = RepeatWrapping;
-  texture.colorSpace = SRGBColorSpace;
-  return texture;
-}
-
-function createGrassTexture() {
-  const canvasTexture = document.createElement('canvas');
-  canvasTexture.width = 384;
-  canvasTexture.height = 384;
-  const context = canvasTexture.getContext('2d');
-
-  if (!context) {
-    throw new Error('Canvas 2D context unavailable for grass texture.');
-  }
-
-  context.fillStyle = '#6f9b49';
-  context.fillRect(0, 0, canvasTexture.width, canvasTexture.height);
-
-  const image = context.getImageData(0, 0, canvasTexture.width, canvasTexture.height);
-  for (let index = 0; index < image.data.length; index += 4) {
-    const green = 92 + Math.random() * 75;
-    image.data[index] = 42 + Math.random() * 28;
-    image.data[index + 1] = green;
-    image.data[index + 2] = 28 + Math.random() * 16;
-    image.data[index + 3] = 255;
-  }
-  context.putImageData(image, 0, 0);
-
-  for (let patch = 0; patch < 80; patch += 1) {
-    context.fillStyle = `rgba(82, 112, 44, ${0.08 + Math.random() * 0.12})`;
-    context.beginPath();
-    context.ellipse(
-      Math.random() * canvasTexture.width,
-      Math.random() * canvasTexture.height,
-      10 + Math.random() * 26,
-      6 + Math.random() * 16,
-      Math.random() * Math.PI,
-      0,
-      Math.PI * 2,
-    );
-    context.fill();
-  }
-
-  const texture = new CanvasTexture(canvasTexture);
-  texture.wrapS = RepeatWrapping;
-  texture.wrapT = RepeatWrapping;
-  texture.colorSpace = SRGBColorSpace;
-  return texture;
 }

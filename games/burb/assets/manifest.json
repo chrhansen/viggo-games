@@ -1,0 +1,44 @@
+{
+  "recipes": {
+    "games/burb/src/texture-art.ts": "33e38efae44dfdd029d29467481f064360cb66c9182efe788be5471a0b6ff0b9",
+    "games/burb/src/browser-textures.ts": "e8ca6c65a390547ef65b13aa9f1dc58c13a8d73571a00855d4998df12187020c",
+    "scripts/bake-burb-textures.mjs": "799916e5fd969039f991ee423c261612dee50f386ffca610e6931d2287fd1bc9"
+  },
+  "textures": {
+    "road": {
+      "sha256": "034b6c453f7f3cf9413f368cb2a533b35a6703bfdbdb56b31f46d90d9cb40593",
+      "width": 512,
+      "height": 2048
+    },
+    "shoulder": {
+      "sha256": "cf1f8d6c6b70238f3165fe0ee0fb33c377951388cfeb877626c94bc9cec8b8c0",
+      "width": 512,
+      "height": 2048
+    },
+    "grass": {
+      "sha256": "fad598b4d16eb48c8d222e811a172d95df03d6883011a104c331c910556984d8",
+      "width": 512,
+      "height": 512
+    },
+    "bark": {
+      "sha256": "756c72d464a1f6fb7dd468ffc6b452b4e1ca9f9fea9ce1d9a1c8f504b5ca35f3",
+      "width": 256,
+      "height": 256
+    },
+    "sky": {
+      "sha256": "0bdd782c4521af6d428879001aea567167ed55ee88f7f353ec4596b7d99c78f9",
+      "width": 1024,
+      "height": 512
+    },
+    "cloud": {
+      "sha256": "e394e2b7a8258d5cc8ba3e25f3d2619ce8a505476321acb28081edb6234c1f3b",
+      "width": 256,
+      "height": 128
+    },
+    "sign": {
+      "sha256": "5bfab91d9bc189681fea72297d6714a2b91dc192756b8cf5e16f6de7d0e3f9bc",
+      "width": 1024,
+      "height": 1024
+    }
+  }
+}

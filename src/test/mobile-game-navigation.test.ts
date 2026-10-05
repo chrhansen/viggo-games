@@ -68,7 +68,7 @@ describe('mobile game details', () => {
 
   it('offers touch instructions and playable routes only for supported native games', () => {
     const playable = gameDetails.filter(game => game.route);
-    expect(playable.map(game => game.id)).toEqual(['chicken-hop', 'hunter-guy']);
+    expect(playable.map(game => game.id)).toEqual(['chicken-hop', 'hunter-guy', 'burb']);
     expect(playable.every(game => game.touchControls.length > 0)).toBe(true);
     expect(gameDetails.filter(game => game.status === 'locked').every(game => !game.route)).toBe(true);
   });

@@ -1,27 +1,4 @@
-import { CanvasTexture, Color, ConeGeometry, Float32BufferAttribute, RepeatWrapping, SRGBColorSpace } from 'three';
-
-export function createBarkTexture() {
-  const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = 256;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) throw new Error('Canvas 2D context unavailable for bark.');
-  ctx.fillStyle = '#b2a394';
-  ctx.fillRect(0, 0, 256, 256);
-  for (let i = 0; i < 1700; i++) {
-    const x = (i * 47.3) % 256, y = (i * 31.7) % 256;
-    ctx.strokeStyle = i % 3 === 0 ? 'rgba(60,47,37,0.3)' : 'rgba(240,218,185,0.2)';
-    ctx.lineWidth = 1 + i % 3;
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(x + Math.sin(i) * 3, y + 8 + i % 35);
-    ctx.stroke();
-  }
-  const texture = new CanvasTexture(canvas);
-  texture.colorSpace = SRGBColorSpace;
-  texture.wrapS = texture.wrapT = RepeatWrapping;
-  texture.repeat.set(2, 2);
-  return texture;
-}
+import { Color, ConeGeometry, Float32BufferAttribute } from 'three';
 
 export function detailedPineGeometry(radius: number, height: number) {
   const geometry = new ConeGeometry(radius, height, 14, 4);

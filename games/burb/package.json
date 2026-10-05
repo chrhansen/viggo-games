@@ -3,6 +3,12 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "exports": {
+    "./core": "./core/engine.ts",
+    "./scene": "./src/scene.ts",
+    "./textures": "./src/textures.ts",
+    "./assets/*": "./assets/*"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

@@ -57,7 +57,7 @@ export function buildRoadSamples(curvePath: CatmullRomCurve3, sampleCount: numbe
   return samples;
 }
 
-export function getSurfaceHeight(worldPosition: Vector3, roadSamplePoints: RoadSample[]) {
+export function getSurfaceHeight(worldPosition: { x: number; z: number }, roadSamplePoints: RoadSample[]) {
   let nearestDistanceSquared = Number.POSITIVE_INFINITY;
   let nearestRoadHeight = 0;
 

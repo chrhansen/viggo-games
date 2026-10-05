@@ -1,37 +1,8 @@
 import './style.css';
-import { createRideCollisions } from './collisions';
-import { createRoute, buildRoadSamples, getSurfaceHeight } from './route';
-import {
-  ACESFilmicToneMapping,
-  Clock,
-  Color,
-  DirectionalLight,
-  Fog,
-  HemisphereLight,
-  MathUtils,
-  Matrix4,
-  PerspectiveCamera,
-  Scene,
-  SRGBColorSpace,
-  Vector3,
-  WebGLRenderer,
-} from 'three';
-import {
-  createGround,
-  createHandlebars,
-  createMountains,
-  createRoad,
-  createScenery,
-  createSky,
-  fitHandlebarRig,
-} from './sceneBuilders';
-
-type InputState = {
-  accelerate: boolean;
-  brake: boolean;
-  left: boolean;
-  right: boolean;
-};
+import { ACESFilmicToneMapping, Clock, MathUtils, SRGBColorSpace, WebGLRenderer } from 'three';
+import { emptyBurbInput } from '../core/engine';
+import { createBurbScene } from './scene';
+import { createBrowserBurbTexture } from './browser-textures';
 
 type SensorPermissionResult = 'granted' | 'denied';
 
@@ -46,19 +17,13 @@ type TiltSteeringState = {
   neutralAngle: number | null;
   currentAngle: number | null;
   targetSteer: number;
-  smoothSteer: number;
   lastSampleAt: number;
 };
 
-const EYE_HEIGHT = 1.45;
-const MAX_CAMERA_ROLL = 0.1;
-const TURN_RATE = 1.55;
 const TILT_DEAD_ZONE = 4;
 const TILT_FULL_STEER = 36;
 const TILT_MIN_GRAVITY_PROJECTION = 5.5;
 const TILT_SAMPLE_TIMEOUT_MS = 220;
-const UP = new Vector3(0, 1, 0);
-const lookMatrix = new Matrix4();
 
 const app = document.querySelector<HTMLDivElement>('#app');
 
@@ -121,51 +86,15 @@ renderer.outputColorSpace = SRGBColorSpace;
 renderer.toneMapping = ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.1;
 
-const scene = new Scene();
-scene.background = new Color('#87bfe8');
-scene.fog = new Fog('#87bfe8', 70, 380);
+const game = createBurbScene({
+  aspect: window.innerWidth / window.innerHeight,
+  textures: createBrowserBurbTexture,
+  anisotropy: renderer.capabilities.getMaxAnisotropy(),
+});
+game.engine.setActive(true);
+const input = emptyBurbInput();
 
-const camera = new PerspectiveCamera(
-  74,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  1200,
-);
-scene.add(camera);
-
-const hemi = new HemisphereLight('#d8efff', '#31541f', 1.8);
-scene.add(hemi);
-
-const sun = new DirectionalLight('#fff3d8', 2.2);
-sun.position.set(90, 120, 40);
-scene.add(sun);
-scene.add(createSky());
-
-const curve = createRoute();
-const startProgress = 0.02;
-const startPoint = curve.getPointAt(startProgress);
-const startTangent = curve.getTangentAt(startProgress).normalize();
-const roadSamples = buildRoadSamples(curve, 720);
-
-scene.add(createGround(renderer.capabilities.getMaxAnisotropy()));
-scene.add(createRoad(curve, renderer.capabilities.getMaxAnisotropy()));
-const scenery = createScenery(curve);
-const mountains = createMountains(curve);
-scene.add(scenery.group, mountains.group);
-const collisions = createRideCollisions([...scenery.colliders, ...mountains.colliders]);
-
-const handlebarRig = createHandlebars();
-fitHandlebarRig(handlebarRig, EYE_HEIGHT);
-camera.add(handlebarRig.group);
-
-const input: InputState = {
-  accelerate: false,
-  brake: false,
-  left: false,
-  right: false,
-};
-
-const keyMap: Record<string, keyof InputState> = {
+const keyMap: Record<string, Exclude<keyof typeof input, 'tilt'>> = {
   ArrowUp: 'accelerate',
   KeyW: 'accelerate',
   ArrowDown: 'brake',
@@ -190,7 +119,6 @@ const tiltSteering: TiltSteeringState = {
   neutralAngle: null,
   currentAngle: null,
   targetSteer: 0,
-  smoothSteer: 0,
   lastSampleAt: 0,
 };
 
@@ -242,84 +170,32 @@ if (showTiltUi) {
   }
 }
 
-const state = {
-  elapsed: 0,
-  speed: 12,
-  heading: Math.atan2(startTangent.x, startTangent.z),
-  roll: 0,
-  steer: 0,
-  position: startPoint.clone(),
-};
-
 const clock = new Clock();
 
 renderer.setAnimationLoop(() => {
-  const delta = Math.min(clock.getDelta(), 0.05);
-  state.elapsed += delta;
-
-  const touchSteerInput = Number(input.right) - Number(input.left);
+  const delta = clock.getDelta();
   if (tiltSteering.enabled && performance.now() - tiltSteering.lastSampleAt > TILT_SAMPLE_TIMEOUT_MS) {
     tiltSteering.targetSteer = 0;
   }
-
-  tiltSteering.smoothSteer = MathUtils.damp(
-    tiltSteering.smoothSteer,
-    tiltSteering.targetSteer,
-    9,
-    delta,
-  );
-
-  const steerInput = touchSteerInput !== 0 ? touchSteerInput : tiltSteering.smoothSteer;
-  const throttleInput = Number(input.accelerate) - Number(input.brake);
-  const targetSpeed = MathUtils.clamp(12 + throttleInput * 6.5, 5, 20);
-  state.steer = MathUtils.damp(state.steer, steerInput, 6.5, delta);
-  state.speed = MathUtils.damp(state.speed, targetSpeed, 3.6, delta);
-  state.heading = MathUtils.euclideanModulo(
-    state.heading - state.steer * TURN_RATE * delta,
-    Math.PI * 2,
-  );
-  state.roll = MathUtils.damp(
-    state.roll,
-    MathUtils.clamp(-state.steer * 0.08, -MAX_CAMERA_ROLL, MAX_CAMERA_ROLL),
-    7.2,
-    delta,
-  );
-
-  const bobPhase = state.elapsed * (state.speed * 1.18);
-  const bobLift = Math.sin(bobPhase) * 0.03;
-  const bobSide = Math.sin(bobPhase * 0.5) * 0.018;
-  const bikeForward = new Vector3(Math.sin(state.heading), 0, Math.cos(state.heading));
-  const renderRight = new Vector3().crossVectors(UP, bikeForward).normalize();
-  const movement = collisions.move(state.position, bikeForward.x * state.speed * delta, bikeForward.z * state.speed * delta);
-  if (movement.collided && delta > 0) state.speed = Math.min(state.speed, movement.distance / delta);
-  state.position.y = getSurfaceHeight(state.position, roadSamples);
-
-  camera.position
-    .copy(state.position)
-    .addScaledVector(renderRight, bobSide)
-    .addScaledVector(UP, EYE_HEIGHT + bobLift);
-
-  lookMatrix.lookAt(camera.position, camera.position.clone().add(bikeForward), UP);
-  camera.quaternion.setFromRotationMatrix(lookMatrix);
-  camera.rotateZ(-state.roll);
-
-  handlebarRig.group.rotation.set(0, 0, 0);
-  handlebarRig.steerPivot.rotation.set(0, -state.steer * 0.42, 0);
-  handlebarRig.group.position.x = handlebarRig.restPosition.x + bobSide * 0.35;
-  handlebarRig.group.position.y = handlebarRig.restPosition.y + bobLift * 0.22;
-  handlebarRig.group.position.z = handlebarRig.restPosition.z;
-
-  const targetFov = 74 + (state.speed - 12) * 0.75;
-  camera.fov = MathUtils.damp(camera.fov, targetFov, 3.2, delta);
-  camera.updateProjectionMatrix();
-
-  speedValue.textContent = `${Math.round(state.speed * 3.6)} km/h`;
-  renderer.render(scene, camera);
+  input.tilt = tiltSteering.targetSteer;
+  game.step(delta, input);
+  speedValue.textContent = `${Math.round(game.engine.state.speed * 3.6)} km/h`;
+  renderer.render(game.scene, game.camera);
 });
 
+function clearInput() {
+  Object.assign(input, emptyBurbInput());
+  tiltSteering.targetSteer = 0;
+  game.engine.state.tiltSteer = 0;
+}
+window.addEventListener('blur', clearInput);
+document.addEventListener('visibilitychange', () => {
+  clearInput();
+  game.engine.setActive(!document.hidden);
+  clock.getDelta();
+});
 window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
+  game.resize(window.innerWidth, window.innerHeight);
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 });
@@ -378,7 +254,7 @@ async function enableTiltSteering() {
 
     tiltSteering.permission = 'granted';
     tiltSteering.targetSteer = 0;
-    tiltSteering.smoothSteer = 0;
+    game.engine.state.tiltSteer = 0;
     tiltSteering.neutralAngle = null;
     tiltSteering.currentAngle = null;
     tiltSteering.lastSampleAt = 0;
@@ -394,7 +270,7 @@ async function enableTiltSteering() {
 function recenterTiltSteering() {
   tiltSteering.neutralAngle = tiltSteering.currentAngle;
   tiltSteering.targetSteer = 0;
-  tiltSteering.smoothSteer = 0;
+  game.engine.state.tiltSteer = 0;
 
   syncTiltUi(
     tiltSteering.neutralAngle === null
@@ -455,7 +331,7 @@ function handleTiltOrientationChange() {
   tiltSteering.neutralAngle = null;
   tiltSteering.currentAngle = null;
   tiltSteering.targetSteer = 0;
-  tiltSteering.smoothSteer = 0;
+  game.engine.state.tiltSteer = 0;
   syncTiltUi('Orientation changed. Hold phone upright to recenter tilt.');
 }
 

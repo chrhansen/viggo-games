@@ -6,10 +6,14 @@ on:
       - "mobile/**"
       - "games/chicken-hop/**"
       - "games/hunter-guy/**"
+      - "games/burb/**"
+      - "scripts/bake-burb-textures.mjs"
       - "package.json"
       - "package-lock.json"
       - "src/test/chicken-hop-*.test.ts"
       - "src/test/hunter-*.test.ts"
+      - "src/test/burb-*.test.ts"
+      - "src/test/mobile-*.test.ts"
       - ".github/workflows/mobile.yml"
   push:
     branches: [main]
@@ -17,10 +21,14 @@ on:
       - "mobile/**"
       - "games/chicken-hop/**"
       - "games/hunter-guy/**"
+      - "games/burb/**"
+      - "scripts/bake-burb-textures.mjs"
       - "package.json"
       - "package-lock.json"
       - "src/test/chicken-hop-*.test.ts"
       - "src/test/hunter-*.test.ts"
+      - "src/test/burb-*.test.ts"
+      - "src/test/mobile-*.test.ts"
       - ".github/workflows/mobile.yml"
   workflow_dispatch:
 

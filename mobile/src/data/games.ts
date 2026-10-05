@@ -14,7 +14,7 @@ export interface GamePreview {
   color: string;
   image: number;
   status: "ready" | "locked";
-  route?: "/chicken-hop" | "/hunter-guy";
+  route?: "/chicken-hop" | "/hunter-guy" | "/burb";
 }
 
 export const gamePreviews: readonly GamePreview[] = [
@@ -48,7 +48,8 @@ export const gamePreviews: readonly GamePreview[] = [
     genre: "Cycling game",
     color: "#FF7A99",
     image: burbImage,
-    status: "locked",
+    status: "ready",
+    route: "/burb",
   },
   {
     id: "gunny",
@@ -75,6 +76,7 @@ export const gamePreviews: readonly GamePreview[] = [
 const touchControls: Record<string, readonly string[]> = {
   'chicken-hop': ['Hold left or right to move.', 'Tap Hop to jump; hold it in the air to fly.'],
   'hunter-guy': ['Left joystick to move; drag the forest to look.', 'Choose a belt tool, aim, then tap Use Tool.'],
+  'burb': ['Hold Left or Right to steer.', 'Hold Fast or Slow to change speed; release to cruise.'],
 };
 
 export const gameDetails = gamePreviews.map((preview) => {
@@ -83,7 +85,9 @@ export const gameDetails = gamePreviews.map((preview) => {
     ...preview,
     description: content.description.replace('browser ', '').replace(' prototype', ''),
     howToPlay: content.howToPlay,
-    tips: content.tips.filter((tip) => !tip.includes('Down or S')).map((tip) => tip.replace('D-pad', 'joystick')),
+    tips: content.tips
+      .filter((tip) => !tip.includes('Down or S') && !(preview.id === 'burb' && tip.includes('enable tilt')))
+      .map((tip) => tip.replace('D-pad', 'joystick')),
     touchControls: touchControls[preview.id] ?? [],
   };
 });

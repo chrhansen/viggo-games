@@ -13,11 +13,10 @@ config.resolver.nodeModulesPaths = [
 // Shared scenes and the native renderer must use the same Three.js module instance.
 config.resolver.resolveRequest = (context, moduleName, platform) => {
   if (moduleName === "three" || moduleName.startsWith("three/")) {
-    return context.resolveRequest(
-      { ...context, originModulePath: path.join(projectRoot, "package.json") },
-      moduleName,
-      platform,
-    );
+    return {
+      type: "sourceFile",
+      filePath: require.resolve(moduleName, { paths: [projectRoot] }),
+    };
   }
   return context.resolveRequest(context, moduleName, platform);
 };

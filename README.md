@@ -10,11 +10,12 @@ Self-contained source repository for the website, all five games, and the native
 | `games/chicken-hop/core/` | Platform-neutral Chicken Hop rules shared by browser and native |
 | `games/hunter-guy/` | Shared Hunter Guy engine/Three.js scene/assets and browser adapters |
 | `games/hunter-guy/core/` | Platform-neutral Hunter Guy gameplay shared by browser and native |
-| `games/burb/` | Burb source, scenery, bike controls, and collisions |
+| `games/burb/` | Shared Burb engine, Three.js scene, texture recipes and browser controls |
+| `games/burb/core/` | Platform-neutral Burb movement, speed, steering and collisions |
 | `games/gunny/` | Gunny source, starfield, combat, and hull warnings |
 | `games/torpedo/` | Torpedo source, submarine combat, interior rooms, and artwork |
 | `src/` | React website, game cards, descriptive landing pages, and iframe player |
-| `mobile/` | Native Expo shell, Chicken Hop and Hunter Guy rendering/controls |
+| `mobile/` | Native Expo shell, Chicken Hop, Hunter Guy and Burb rendering/controls |
 | `public/` | Website static files, including `CNAME`; no copied game builds |
 | `scripts/` | Build and deployment validation |
 | `.github/workflows/` | Website deployment and mobile checks |
@@ -29,7 +30,7 @@ Each game's README describes its controls, architecture, and maintenance. Native
 | --- | --- | --- |
 | [Chicken Hop](games/chicken-hop/README.md) | Playable | Playable on iOS/Android; shared rules, separate renderers |
 | [Hunter Guy](games/hunter-guy/README.md) | Playable | Playable on iOS/Android; shared rules, Three.js scene, models and assets |
-| [Burb](games/burb/README.md) | Playable | Detail preview; not ported |
+| [Burb](games/burb/README.md) | Playable | Playable in source on iOS/Android; shared engine and Three.js scene; beta delivery pending |
 | [Gunny](games/gunny/README.md) | Playable | Detail preview; not ported |
 | [Torpedo](games/torpedo/README.md) | Playable | Detail preview; not ported |
 
@@ -78,7 +79,7 @@ The build also prepares and validates descriptive route pages, canonical tags, `
 
 ## Native app
 
-The native app uses Expo SDK 57, React Native and TypeScript, without a WebView. It consumes the local shared Chicken Hop core and Hunter Guy engine/scene and keeps a separate dependency lockfile to isolate Expo/React Native versions:
+The native app uses Expo SDK 57, React Native and TypeScript, without a WebView. It consumes the local shared Chicken Hop core, Hunter Guy engine/scene and Burb engine/scene and keeps a separate dependency lockfile to isolate Expo/React Native versions:
 
 ```sh
 cd mobile
@@ -87,7 +88,7 @@ npm run ios
 # or: npm run android
 ```
 
-The entire repository must be checked out; local game dependencies resolve to `../games/chicken-hop/core/` and `../games/hunter-guy/` within it. See [mobile/README.md](mobile/README.md) for platform requirements, native checks, and child-directed product constraints.
+The entire repository must be checked out; local game dependencies resolve to `../games/chicken-hop/core/`, `../games/hunter-guy/` and `../games/burb/` within it. See [mobile/README.md](mobile/README.md) for platform requirements, native checks, and child-directed product constraints.
 
 For iPhone installation, accept the internal TestFlight invitation and install
 **Viggo Games**, then select Hunter Guy or Chicken Hop and tap **Play now** on its
@@ -99,6 +100,7 @@ for EAS Build, TestFlight submission and compatible JavaScript/asset updates.
 - Game logic, controls, artwork, tuning, and documentation: `games/<slug>/`.
 - Shared Chicken Hop rules: `games/chicken-hop/core/`; retain browser/native parity coverage.
 - Shared Hunter Guy rules and 3D scene: `games/hunter-guy/core/` and `games/hunter-guy/scene.js`.
+- Shared Burb rules and 3D scene: `games/burb/core/` and `games/burb/src/scene.ts`; regenerate native textures after editing `games/burb/src/texture-art.ts`.
 - Native rendering and phone lifecycle: `mobile/src/`.
 - Website layout, navigation, and embedded-player behavior: `src/`.
 - Shared website/mobile descriptions, how-to steps and tips, plus website routes and SEO copy: `src/data/games.json`; website artwork mapping: `src/data/games.ts`.

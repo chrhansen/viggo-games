@@ -1,11 +1,15 @@
 # Viggo Games Mobile
 
-Native iOS and Android app built with React Native and Expo. It includes the native splash, game selector, game detail pages, and playable native Chicken Hop and Hunter Guy. It does not embed the website.
+Native iOS and Android app built with React Native and Expo. It includes the native splash, game selector, game detail pages, and playable native Chicken Hop, Hunter Guy and Burb. It does not embed the website.
 
-Read this when developing either native game, checking browser/native ownership,
+Read this when developing a native game, checking browser/native ownership,
 or delivering an iPhone beta or Expo update.
 
 ## Delivery status
+
+Burb is playable in the current source, with shared browser/native rules and scene.
+It has not been delivered to TestFlight; build (10) below still includes only
+Chicken Hop and Hunter Guy. Simulator and device acceptance are pending.
 
 As of **2026-10-04**, **Viggo Games 0.1.0 (10)** is available to the internal
 `Team (Expo)` TestFlight group. It includes both Chicken Hop and Hunter Guy in one
@@ -76,10 +80,9 @@ native fingerprint changes are included in TestFlight build (9); they have not b
 published as an Expo update to build (7). Install build (9) to receive these changes.
 The refreshed dependency set passes Expo Doctor's 20 checks and both native exports.
 
-Both games also have Android implementations and passing Android export checks.
-An Android device/store build has not been delivered in this work. Burb, Gunny and
-Torpedo have preview detail pages in the native selector; their browser games work,
-but they have not been ported to React Native.
+All three native games have Android implementations and passing Android export
+checks. An Android device/store build has not been delivered. Gunny and Torpedo
+have preview detail pages in the native selector; they have not been ported.
 
 ## Stack
 
@@ -122,7 +125,7 @@ Mobile CI runs this gate plus the root web/test gate for changes to the mobile a
 The arcade and game detail pages use a solid black background, without decorative
 glows, arcs or grid lines.
 
-The selector shows each full title image at its original aspect ratio. Only Burb,
+The selector shows each full title image at its original aspect ratio. Only
 Gunny and Torpedo have a **Coming Soon** overlay; playable games have no text or
 shade over their artwork. Tap any image to open its detail page.
 
@@ -211,6 +214,38 @@ software. The owner reported that the delivered iPhone beta looked good; that is
 basic device check, not exhaustive GPU or lifecycle coverage. Continue checking the
 ground, simultaneous controls, rotation, and background/resume during beta testing.
 The browser scene renders correctly.
+
+## Burb
+
+Open Burb's details, tap **Play now**, then **Start ride**. Hold Left or Right to
+steer and Fast or Slow to change speed; release to cruise. Steering and speed
+buttons support simultaneous touches. Tilt remains a browser input option; native
+uses touch buttons and requests no motion permission.
+
+- `../games/burb/core/`: one engine for speed, throttle, steering smoothing,
+  heading, lean, collisions, surface grounding, field of view and pause/time rules.
+  No Three.js, DOM, React Native or device APIs.
+- `../games/burb/src/scene.ts`: shared road, terrain, collision placement,
+  mountains, trees, sky, cockpit and camera animation. The browser and native
+  adapters call the same `step(delta, input)` loop.
+- `src/game/burb/renderer.ts`: Expo GL renderer and locally bundled texture assets.
+- `src/game/burb/touch-input.ts` and `src/components/burb/`: touch collection.
+- `src/app/burb.tsx`: HUD, start/pause, confirmed exit and app lifecycle.
+
+Backgrounding, rotation and surface recreation pause the bike and clear held input.
+The ride survives graphics recreation; resuming continues from the same position.
+Paused scenes do not redraw. Native pixel ratio is capped at 1.25; HUD and controls
+retain full resolution. Metro and native TypeScript resolve shared scene imports
+against the app's Three.js 0.160.0 instance. Browser Burb retains its own version.
+
+Native PNG textures are baked from the browser's deterministic canvas recipes.
+After texture changes, run the root Vite server and
+`node scripts/bake-burb-textures.mjs` from the repository root. Verify with
+`node scripts/bake-burb-textures.mjs --check`. Commit the generated source assets.
+The engine, scene and input regressions in `../src/test/burb-*.test.ts` cover speed,
+steering, collision recovery, pause, time clamping, portrait/landscape parity and
+graphics recreation. Continue native GPU and touch checks in the simulator and on
+iPhone before beta delivery.
 
 ## Expo and TestFlight beta delivery
 

@@ -1,6 +1,5 @@
 import {
   BoxGeometry,
-  CanvasTexture,
   CatmullRomCurve3,
   ConeGeometry,
   CylinderGeometry,
@@ -11,12 +10,12 @@ import {
   Mesh,
   MeshStandardMaterial,
   PlaneGeometry,
-  SRGBColorSpace,
   Vector3,
 } from 'three';
 import { GROUND_LEVEL } from './track';
-import { createBarkTexture, detailedPineGeometry } from './tree-detail';
-import type { Obstacle } from './collisions';
+import { detailedPineGeometry } from './tree-detail';
+import type { Obstacle } from '../core/collisions';
+import { createBurbTexture, type BurbTextureFactory } from './textures';
 
 const ROAD_WIDTH = 14;
 const ROAD_HALF_WIDTH = ROAD_WIDTH * 0.5;
@@ -27,10 +26,10 @@ const FOLIAGE_ROADSIDE_MARGIN = 2.5;
 const MAX_SHRUB_REACH = 3.5;
 const UP = new Vector3(0, 1, 0);
 
-export function createScenery(curvePath: CatmullRomCurve3) {
+export function createScenery(curvePath: CatmullRomCurve3, textures: BurbTextureFactory) {
   const group = new Group();
   const colliders: Obstacle[] = [];
-  const bark = createBarkTexture();
+  const bark = createBurbTexture('bark', textures);
   const roadSamplePoints = sampleRoadPoints(curvePath, FOLIAGE_ROAD_SAMPLE_COUNT);
   const trunkMaterial = new MeshStandardMaterial({
     color: '#6d4728',
@@ -178,7 +177,7 @@ export function createScenery(curvePath: CatmullRomCurve3) {
     }
   }
 
-  group.add(createSpeedSign(curvePath));
+  group.add(createSpeedSign(curvePath, textures));
 
   return { group, colliders };
 }
@@ -331,7 +330,7 @@ function getRoadDistanceSquared(position: Vector3, roadSamplePoints: Vector3[]) 
   return nearestDistanceSquared;
 }
 
-function createSpeedSign(curvePath: CatmullRomCurve3) {
+function createSpeedSign(curvePath: CatmullRomCurve3, textures: BurbTextureFactory) {
   const t = 0.08;
   const side = 1;
   const point = curvePath.getPointAt(t);
@@ -351,7 +350,7 @@ function createSpeedSign(curvePath: CatmullRomCurve3) {
     metalness: 0.08,
   });
   const faceMaterial = new MeshStandardMaterial({
-    map: createSpeedSignTexture(),
+    map: createBurbTexture('sign', textures),
     roughness: 0.9,
     metalness: 0.02,
     side: DoubleSide,
@@ -375,36 +374,6 @@ function createSpeedSign(curvePath: CatmullRomCurve3) {
   return group;
 }
 
-function createSpeedSignTexture() {
-  const canvasTexture = document.createElement('canvas');
-  canvasTexture.width = 1024;
-  canvasTexture.height = 640;
-  const context = canvasTexture.getContext('2d');
-
-  if (!context) {
-    throw new Error('Canvas 2D context unavailable for speed sign texture.');
-  }
-
-  context.fillStyle = '#f7f2d7';
-  context.fillRect(0, 0, canvasTexture.width, canvasTexture.height);
-
-  context.strokeStyle = '#232629';
-  context.lineWidth = 26;
-  context.strokeRect(34, 34, canvasTexture.width - 68, canvasTexture.height - 68);
-
-  context.fillStyle = '#232629';
-  context.font = 'bold 210px sans-serif';
-  context.textAlign = 'center';
-  context.textBaseline = 'middle';
-  context.fillText('67 mph', canvasTexture.width * 0.5, 255);
-
-  context.font = 'bold 94px sans-serif';
-  context.fillText('haha', canvasTexture.width * 0.5, 465);
-
-  const texture = new CanvasTexture(canvasTexture);
-  texture.colorSpace = SRGBColorSpace;
-  return texture;
-}
 function hash(value: number) {
   return MathUtils.euclideanModulo(Math.sin(value * 91.31) * 43758.5453123, 1);
 }
