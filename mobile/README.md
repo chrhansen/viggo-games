@@ -169,7 +169,7 @@ history returns to the arcade after confirmation.
 ## Product constraints
 
 - Phones only for the first release. iPad support is disabled; Android layouts target compact phone screens.
-- Child-directed app: no analytics, advertising, accounts, external links, or data collection. Production requests no runtime permissions; development clients may request local-network access to reach Metro.
+- Child-directed app: no analytics, advertising, accounts, external links, or data collection. Burb requests motion access for landscape steering; readings stay on the device and are not retained. Development clients may request local-network access to reach Metro.
 - No WebView. Games must be implemented with React Native and Expo-compatible native libraries.
 - Chicken Hop uses React Native views around the same platform-neutral TypeScript engine as the browser game. It does not reuse the browser Canvas renderer or a WebView.
 
