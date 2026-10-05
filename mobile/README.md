@@ -7,6 +7,18 @@ or delivering an iPhone beta or Expo update.
 
 ## Delivery status
 
+Burb's landscape motion steering is embedded in signed **Viggo Games 0.1.0 (12)**,
+built on **2026-10-05** from commit `89b1b9843c191da7d5e1ed090e8544ce3be22068`.
+EAS build ID: `1402e533-e880-4c6f-ae1f-9c5df315e544`. The archive was checked for
+build (12), the native motion module, its permission prompt, embedded tilt controls
+and all seven Burb textures with matching hashes. Its native runtime is
+`2d12d4f252db8585180dff1ba16c1e66bc2e25b8`; the added sensor module and permission
+require a new TestFlight installer. Apple's `altool` accepted the upload with no
+errors, delivery ID `53b39dde-1aaa-47eb-a957-367f58771460`. Apple reports `VALID`
+and `IN_BETA_TESTING`, available to the automatic internal `Team (Expo)` group.
+Install through **TestFlight → Viggo Games → Update**. The full web and mobile
+gates passed. Landscape tilt feel and permission interaction need an iPhone check.
+
 Burb is embedded in signed **Viggo Games 0.1.0 (11)**, built on **2026-10-05**
 from commit `0425ed446fb6d23f4712734d6071217bd711c918`. EAS build ID:
 `31286b3f-917c-40b1-bd1b-45567276f108`. The archive was checked for build number
@@ -16,8 +28,8 @@ canceled. The same signed installer was uploaded directly using Apple's `altool`
 with delivery ID `09c616c4-1a92-4395-8fef-f9b4bdde44be`. Apple reports `VALID`
 and `IN_BETA_TESTING` for build (11), available to the automatic internal
 `Team (Expo)` group. Install through **TestFlight → Viggo Games → Update**.
-This installer contains Burb from first launch. Native GPU, touch and lifecycle
-acceptance remain pending.
+This installer contains Burb from first launch. Christian reported a good first
+start; broader native GPU, touch and lifecycle acceptance remain pending.
 
 An iOS Expo update was published on **2026-10-05**:
 `01a10cd1-e2b5-7879-9911-e9c971734c61` to `testflight`, update group

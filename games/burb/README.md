@@ -5,9 +5,9 @@ Source of truth: this folder in `chrhansen/viggo-games`.
 First-person cycling game with a visible cockpit and stylized low-poly scenery.
 Browser and native iOS/Android use one rules engine and one Three.js scene.
 
-Burb is playable in the React Native app and TestFlight build (11). Open its
-details, tap **Play now**, then **Start ride**. Native landscape motion steering
-requires the next TestFlight installer. See the
+Burb is playable in the React Native app and TestFlight build (12), including
+landscape motion steering and portrait buttons. Open its details, tap **Play now**,
+then **Start ride**. See the
 [repository platform overview](../../README.md#game-availability).
 
 ## What we have

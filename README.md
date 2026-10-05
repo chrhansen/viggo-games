@@ -30,16 +30,17 @@ Each game's README describes its controls, architecture, and maintenance. Native
 | --- | --- | --- |
 | [Chicken Hop](games/chicken-hop/README.md) | Playable | Playable on iOS/Android; shared rules, separate renderers |
 | [Hunter Guy](games/hunter-guy/README.md) | Playable | Playable on iOS/Android; shared rules, Three.js scene, models and assets |
-| [Burb](games/burb/README.md) | Playable | Playable on iOS/Android; shared engine and Three.js scene; included in iOS TestFlight build (11) |
+| [Burb](games/burb/README.md) | Playable | Playable on iOS/Android; shared engine and Three.js scene; landscape tilt in iOS TestFlight build (12) |
 | [Gunny](games/gunny/README.md) | Playable | Detail preview; not ported |
 | [Torpedo](games/torpedo/README.md) | Playable | Detail preview; not ported |
 
 Chicken Hop, Hunter Guy and Burb are included in one **Viggo Games** iOS app.
-Internal TestFlight beta **0.1.0 (11)** is available as of **2026-10-05**, with
-Burb embedded in the installer. Install through **TestFlight → Viggo Games →
-Update**. Its iPhone graphics and touch acceptance remain pending. A compatible
-Expo update was published first, but Christian reported that Burb remained
-unavailable in the installed app, so build (11) delivers the game directly.
+Internal TestFlight beta **0.1.0 (12)** is available as of **2026-10-05**, with
+Burb landscape roll steering, portrait buttons and **Center Tilt**. Install through
+**TestFlight → Viggo Games → Update**. The signed installer includes the native
+motion module and permission prompt; iPhone motion acceptance remains pending.
+Christian reported that Burb in build (11) was a good first start. That installer
+embedded Burb after a compatible Expo update did not appear in the installed app.
 Internal TestFlight beta **0.1.0 (10)** is available as of **2026-10-04**, with full game title
 images, a solid black arcade/detail background, and Hunter Guy scenery that follows
 the finger on both axes. Christian installed build (10) and reported that it looked
