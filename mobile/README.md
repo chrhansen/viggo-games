@@ -7,7 +7,19 @@ or delivering an iPhone beta or Expo update.
 
 ## Delivery status
 
-Burb was delivered on **2026-10-05** as iOS Expo update
+Burb is embedded in signed **Viggo Games 0.1.0 (11)**, built on **2026-10-05**
+from commit `0425ed446fb6d23f4712734d6071217bd711c918`. EAS build ID:
+`31286b3f-917c-40b1-bd1b-45567276f108`. The archive was checked for build number
+(11), Burb's game screen and all seven texture assets, with matching hashes.
+Expo submission `17be83cb-15a6-46c7-9e55-ad57cda98cd9` remained queued and was
+canceled. The same signed installer was uploaded directly using Apple's `altool`,
+with delivery ID `09c616c4-1a92-4395-8fef-f9b4bdde44be`. Apple reports `VALID`
+and `IN_BETA_TESTING` for build (11), available to the automatic internal
+`Team (Expo)` group. Install through **TestFlight → Viggo Games → Update**.
+This installer contains Burb from first launch. Native GPU, touch and lifecycle
+acceptance remain pending.
+
+An iOS Expo update was published on **2026-10-05**:
 `01a10cd1-e2b5-7879-9911-e9c971734c61` to `testflight`, update group
 `2fdfbf9e-c0f4-45a3-abb0-a492fb41b1d2`, from commit
 `30967a272898401ba92b658749ee4b60e4089e4b`. Its native fingerprint matches the
@@ -15,10 +27,13 @@ installed TestFlight build (10): `c404e832f1b7cc4edea477b323923d99615c688d`.
 The update endpoint serves this update for the installed iOS runtime. Its uploaded
 bundle and all seven Burb textures were downloaded and verified against their hashes.
 The update adds Burb's **Play now** route, shared browser/native engine and scene,
-and native touch controls. No replacement TestFlight installer is required.
-Open Viggo Games online, allow the update to download, then fully close and reopen
-the app to apply it. Burb's iPhone GPU, touch and lifecycle acceptance are pending;
-Simulator.app was unavailable, so Christian requested direct iPhone delivery.
+and native touch controls. Christian reported Burb was still unavailable in the
+installed app. Expo insights recorded no installs at the time of investigation.
+The actual build (10) archive has updates enabled, the correct URL/channel, and a
+matching embedded runtime. Without device update logs, the cause of the missing
+download remains unconfirmed. Build (11) above delivers Burb in a replacement
+TestFlight installer. Simulator.app was unavailable, so Christian requested iPhone
+delivery.
 
 As of **2026-10-04**, **Viggo Games 0.1.0 (10)** is available to the internal
 `Team (Expo)` TestFlight group. It includes both Chicken Hop and Hunter Guy in one
