@@ -12,6 +12,7 @@ viggo.games is a React app with crawlable HTML generated during `npm run build`.
 ## Source of truth
 
 - `src/data/games.json`: game titles, canonical paths, descriptions, artwork metadata, controls, how-to steps, and tips
+- `src/data/about.json`: About copy and source link shared by React, the generated HTML fallback, and the native app
 - `src/lib/seo-config.js`: shared page metadata and JSON-LD used by both React and the static-page builder
 - `scripts/prepare-pages.mjs`: static HTML, sitemap, LLM context, direct-game canonicals, and build validation
 - `src/assets/viggo-games-social.jpg`: default 1200×630 social-sharing card

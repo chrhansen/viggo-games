@@ -49,9 +49,9 @@ export const createHomeSeo = (games) => ({
 });
 
 export const createAboutSeo = () => ({
-  title: "About viggo.games – Browser Games by Viggo",
+  title: "About viggo.games – Browser and Mobile Games by Viggo",
   description:
-    "Meet the young creator behind viggo.games, an open-source collection of free browser games made for fun, learning, and arcade nostalgia.",
+    "Meet the young creator behind viggo.games, an open-source collection of free browser and mobile games made for fun, learning, and arcade nostalgia.",
   path: "/about/",
   image: DEFAULT_SOCIAL_IMAGE,
   imageAlt: DEFAULT_SOCIAL_IMAGE_ALT,
@@ -65,7 +65,7 @@ export const createAboutSeo = () => ({
       url: absoluteUrl("/about/"),
       inLanguage: "en",
       description:
-        "viggo.games is a collection of browser games made by Viggo for fun, learning, and arcade nostalgia.",
+        "viggo.games is a collection of browser and mobile games made by Viggo for fun, learning, and arcade nostalgia.",
       isPartOf: websiteJsonLd(),
     },
   ],

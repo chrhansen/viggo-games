@@ -7,6 +7,11 @@ or delivering an iPhone beta or Expo update.
 
 ## Delivery status
 
+The updated About copy and tappable GitHub source link are present in source.
+Installed TestFlight build (15) still has the older About copy and selectable
+GitHub text. No new mobile build or Expo update has been published for these
+changes; pushing to `main` deploys the website only.
+
 Gunny and Burb's continuous rotation fix is embedded in signed **Viggo Games
 0.1.0 (15)**, available on **2026-10-06** from commit
 `bc6b4aaebf8e7400eae357f2fc1de7ac695c1411`.
@@ -211,9 +216,9 @@ playable game. Missions not yet ported show details with **Coming to mobile**.
 
 An **About Viggo.games** button appears below the full game list and on each game
 detail page. About shares the website's `../src/data/about.json` copy and Viggo
-portrait. The source address is selectable text on native, preserving the app's
-existing restriction on external links. Back returns to the previous page, or the
-arcade when opened directly.
+portrait. The shared copy describes both browser and mobile games. The GitHub
+source link opens the repository in the phone's browser. Back returns to the
+previous page, or the arcade when opened directly.
 
 Swipe-back navigation is disabled throughout the native stack, so horizontal drags
 remain game input. The top-left game arrow and Android back button show an exit
@@ -225,11 +230,11 @@ history returns to the arcade after confirmation.
 ## Product constraints
 
 - Phones only for the first release. iPad support is disabled; Android layouts target compact phone screens.
-- Child-directed app: no analytics, advertising, accounts, external links, or data collection. Burb requests motion access for landscape steering; readings stay on the device and are not retained. Development clients may request local-network access to reach Metro.
+- Child-directed app: no analytics, advertising, accounts, or data collection. About's GitHub source link opens the phone's browser. Burb requests motion access for landscape steering; readings stay on the device and are not retained. Development clients may request local-network access to reach Metro.
 - No WebView. Games must be implemented with React Native and Expo-compatible native libraries.
 - Chicken Hop uses React Native views around the same platform-neutral TypeScript engine as the browser game. It does not reuse the browser Canvas renderer or a WebView.
 
-Any future analytics, third-party SDK, account, communication, or external-link feature needs a child-privacy review before implementation.
+Any future analytics, third-party SDK, account, communication, or additional external-link feature needs a child-privacy review before implementation.
 
 ## Chicken Hop
 

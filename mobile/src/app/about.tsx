@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, fonts } from '@/constants/theme';
 import about from '../../../src/data/about.json';
@@ -22,7 +22,11 @@ export default function AboutScreen() {
         <Text style={styles.body}><Text style={styles.brand}>VIGGO.GAMES</Text> {about.intro}</Text>
         <Text style={styles.body}>{about.story}</Text>
         <Text style={styles.body}>{about.sourceIntro}</Text>
-        <Text selectable style={styles.source}>{about.sourceLabel}</Text>
+        <Pressable accessibilityRole="link" accessibilityLabel={about.sourceLabel}
+          onPress={() => Linking.openURL(about.sourceUrl)}
+          style={({ pressed }) => [styles.source, pressed && styles.pressed]}>
+          <Text style={styles.sourceText}>{about.sourceLabel}</Text>
+        </Pressable>
         <Text style={styles.footer}>{about.footer.toUpperCase()}</Text>
       </View>
     </ScrollView>
@@ -38,6 +42,8 @@ const styles = StyleSheet.create({
   portrait: { width: 128, height: 128, borderRadius: 16, borderWidth: 1, borderColor: colors.line },
   body: { color: colors.foreground, fontFamily: fonts.regular, fontSize: 17, lineHeight: 27, marginTop: 24 },
   brand: { color: colors.yellow, fontFamily: fonts.bold },
-  source: { color: colors.cyan, fontFamily: fonts.semiBold, fontSize: 14, lineHeight: 22, marginTop: 16, padding: 16, backgroundColor: colors.surface, borderRadius: 12 },
+  source: { minHeight: 48, justifyContent: 'center', marginTop: 16, padding: 16, backgroundColor: colors.surface, borderRadius: 12 },
+  sourceText: { color: colors.cyan, fontFamily: fonts.semiBold, fontSize: 14, lineHeight: 22, textDecorationLine: 'underline' },
+  pressed: { opacity: 0.7 },
   footer: { color: colors.muted, fontFamily: fonts.bold, fontSize: 10, letterSpacing: 2, marginTop: 48 },
 });
