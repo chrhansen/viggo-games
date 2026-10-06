@@ -3,6 +3,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { describe, expect, it } from "vitest";
 import About from "@/pages/About";
 import Index from "@/pages/Index";
+import about from "@/data/about.json";
 
 describe("about page", () => {
   it("navigates from the homepage footer link", async () => {
@@ -33,5 +34,8 @@ describe("about page", () => {
       "href",
       "https://github.com/chrhansen/viggo-games",
     );
+    expect(screen.getByText(about.story)).toBeInTheDocument();
+    expect(screen.getByText(about.sourceIntro)).toBeInTheDocument();
+    expect(screen.getByAltText(about.portraitAlt)).toBeInTheDocument();
   });
 });

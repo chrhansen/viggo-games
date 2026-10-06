@@ -3,13 +3,13 @@ import test from "node:test";
 import * as THREE from "three";
 import { moonOrbitPosition, updatePlanets, MOON_ORBIT_SECONDS, MOON_ORBIT_RADIUS, EARTH_DAY_SECONDS } from "../src/planet-motion.js";
 import { createExplosion, updateExplosion, disposeExplosion } from "../src/explosions.js";
-import { runtimeMethods } from "../src/mission-runtime.js";
-import { GunnyGame } from "../src/game.js";
+import { GunnyEngine } from "../core/engine.js";
+import { createGunnyScene } from "../src/scene.js";
 import { createPlanet } from "../src/planets.js";
 
 test("Earth renders clouds with its opaque surface, without an overlapping cloud shell", t => {
   t.mock.method(THREE.TextureLoader.prototype, "load", () => new THREE.Texture());
-  const earth = createPlanet(58, "earth");
+  const earth = createPlanet(58, "earth", () => new THREE.Texture());
   assert.equal(earth.children.length, 2);
   assert.equal(earth.userData.clouds, undefined);
   assert.equal(earth.userData.body.material.transparent, false);
@@ -90,46 +90,48 @@ test("explosion debris travels outward, cools, fades, and releases all GPU resou
 });
 
 test("lingering visual debris cannot damage the player after the original blast window", () => {
-  let damage = 0;
-  const game = { scene: new THREE.Scene(), explosions: [], player: { mesh: new THREE.Object3D() },
-    damagePlayer: (amount) => { damage += amount; } };
-  game.player.mesh.position.x = 100;
-  runtimeMethods.spawnExplosion.call(game, new THREE.Vector3(), 0xffb96e, 3.8, true);
-  runtimeMethods.updateExplosions.call(game, 0.71);
-  game.player.mesh.position.x = 0;
-  runtimeMethods.updateExplosions.call(game, 0.1);
-  assert.equal(damage, 0);
+  const game = new GunnyEngine();
+  game.player.position.x = 100;
+  game.spawnExplosion({ x: 0, y: 0, z: 0 }, 0xffb96e, 3.8, true);
+  game.updateExplosions(0.71);
+  game.player.position.x = 0;
+  game.updateExplosions(0.1);
+  assert.equal(game.state.health, 100);
   assert.equal(game.explosions.length, 1);
-  runtimeMethods.updateExplosions.call(game, 0.5);
+  game.updateExplosions(0.5);
   assert.equal(game.explosions.length, 0);
 });
 
 test("restarting mid-explosion releases fragments and resets the flash light", () => {
-  const mesh = createExplosion(0xffb96e);
-  let disposed = false;
-  mesh.userData.debris.addEventListener("dispose", () => { disposed = true; });
-  const game = { scene: new THREE.Scene(), player: { shots: [] }, enemies: [], enemyShots: [],
-    satellites: [], explosions: [{ mesh }], blastLight: { intensity: 100 } };
-  game.scene.add(mesh);
-  GunnyGame.prototype.clearDynamicObjects.call(game);
-  assert.equal(game.explosions.length, 0);
-  assert.equal(game.blastLight.intensity, 0);
-  assert.equal(disposed, true);
+  const engine = new GunnyEngine();
+  const game = createGunnyScene({ aspect: 1, engine, loadTexture: () => new THREE.Texture() });
+  engine.spawnExplosion({ x: 0, y: 0, z: 0 }, 0xffb96e, 3.8, true);
+  engine.spawnExplosion({ x: 0, y: 0, z: 0 }, 0xffffff, 1.4);
+  game.sync();
+  const bursts = game.scene.children.filter(child => child.userData.fire);
+  let disposed = 0;
+  bursts.forEach(burst => burst.traverse(part => {
+    for (const resource of [part.geometry, part.material, part.isInstancedMesh ? part : null]) {
+      resource?.addEventListener('dispose', () => disposed++);
+    }
+  }));
+  engine.reset(); game.resetCamera();
+  assert.equal(engine.explosions.length, 0);
+  assert.equal(game.scene.children.filter(child => child.userData.fire).length, 0);
+  assert.equal(game.scene.children.find(child => child.isPointLight && child.color.getHex() === 0xffa15c).intensity, 0);
+  assert.ok(disposed > 10);
+  game.dispose();
 });
 
 test("final kill wins when the damaging blast expires while decorative debris remains", () => {
-  let result;
-  const game = { scene: new THREE.Scene(), explosions: [], player: { mesh: new THREE.Object3D() },
-    state: { health: 100, kills: 12 }, damagePlayer: () => {}, finishMission: (won) => { result = won; } };
-  game.player.mesh.position.x = 100;
-  runtimeMethods.spawnExplosion.call(game, new THREE.Vector3(), 0xffb96e, 3.8, true);
-  runtimeMethods.updateExplosions.call(game, 0.69);
-  runtimeMethods.checkMissionState.call(game);
-  assert.equal(result, undefined);
-  runtimeMethods.updateExplosions.call(game, 0.02);
-  runtimeMethods.checkMissionState.call(game);
-  assert.equal(result, true);
+  const game = new GunnyEngine();
+  game.state.kills = 12;
+  game.player.position.x = 100;
+  game.spawnExplosion({ x: 0, y: 0, z: 0 }, 0xffb96e, 3.8, true);
+  game.updateExplosions(0.69); game.checkMissionState();
+  assert.equal(game.state.result, null);
+  game.updateExplosions(0.02); game.checkMissionState();
+  assert.equal(game.state.result, 'win');
   assert.equal(game.explosions.length, 1);
   assert.ok(game.explosions[0].life > 0);
-  disposeExplosion(game.explosions[0].mesh);
 });

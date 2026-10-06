@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
-export const EXPLOSION_LIFETIME = 1.25;
-export const IMPACT_LIFETIME = 0.42;
+import { EXPLOSION_LIFETIME, IMPACT_LIFETIME } from '../core/engine.js';
+export { EXPLOSION_LIFETIME, IMPACT_LIFETIME };
 
 const noise = `
   float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }

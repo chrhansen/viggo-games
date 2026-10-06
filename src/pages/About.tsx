@@ -5,6 +5,7 @@ import viggoImg from "@/assets/viggo-portrait.webp";
 import { Button } from "@/components/ui/button";
 import { withBasePath } from "@/lib/app-base";
 import { aboutSeo, usePageSeo } from "@/lib/seo";
+import about from "@/data/about.json";
 
 const About = () => {
   const navigate = useNavigate();
@@ -36,13 +37,13 @@ const About = () => {
         </Button>
 
         <h1 className="text-4xl md:text-5xl font-extrabold font-display tracking-tighter text-primary mb-6">
-          About viggo.games
+          {about.title}
         </h1>
 
         <div className="space-y-6 text-base leading-relaxed text-foreground/80 font-mono">
           <img
             src={viggoImg}
-            alt="Viggo, the creator of viggo.games"
+            alt={about.portraitAlt}
             width="256"
             height="256"
             decoding="async"
@@ -50,33 +51,30 @@ const About = () => {
           />
 
           <p>
-            <span className="text-primary font-bold">VIGGO.GAMES</span> is a collection of browser games
-            made by Viggo, built for fun, learning, and a bit of arcade nostalgia.
+            <span className="text-primary font-bold">VIGGO.GAMES</span> {about.intro}
           </p>
 
           <p>
-            All games on this site are designed and developed by Viggo with a little help from his dad
-            and Codex. Every mission is free to play in a modern browser, with no download required.
+            {about.story}
           </p>
 
           <p>
-            The site itself is open source. Check out the code, suggest improvements, or just poke
-            around:
+            {about.sourceIntro}
           </p>
 
           <a
-            href="https://github.com/chrhansen/viggo-games"
+            href={about.sourceUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-3 text-foreground hover:border-primary/50 hover:text-primary transition-colors"
           >
             <Github className="h-5 w-5" />
-            <span>github.com/chrhansen/viggo-games</span>
+            <span>{about.sourceLabel}</span>
           </a>
         </div>
 
         <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest mt-16">
-          Made with heart and pixels
+          {about.footer}
         </p>
       </motion.div>
     </main>

@@ -15,6 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ArcadeBackdrop } from "@/components/arcade-backdrop";
 import { MissionCard } from "@/components/mission-card";
+import { AboutLink } from "@/components/about-link";
 import { colors, fonts } from "@/constants/theme";
 import { gamePreviews } from "@/data/games";
 
@@ -101,7 +102,7 @@ export default function GameSelectorScreen() {
             </Text>
             <Text style={styles.kicker}>SELECT YOUR MISSION</Text>
             <Text style={styles.intro}>
-              The doors are open. Chicken Hop, Hunter Guy and Burb are ready to play.
+              The doors are open. Chicken Hop, Hunter Guy, Burb and Gunny are ready to play.
             </Text>
 
             <View style={styles.coinSlot}>
@@ -121,7 +122,8 @@ export default function GameSelectorScreen() {
               />
             ))}
 
-            <Text style={styles.footer}>2 GAMES READY · MORE MISSIONS IN DEVELOPMENT</Text>
+            <Text style={styles.footer}>{gamePreviews.filter(game => game.status === 'ready').length} GAMES READY · MORE MISSIONS IN DEVELOPMENT</Text>
+            <AboutLink />
           </View>
         </View>
       </ScrollView>

@@ -1,11 +1,25 @@
 # Viggo Games Mobile
 
-Native iOS and Android app built with React Native and Expo. It includes the native splash, game selector, game detail pages, and playable native Chicken Hop, Hunter Guy and Burb. It does not embed the website.
+Native iOS and Android app built with React Native and Expo. It includes the native splash, game selector, game detail pages, and playable native Chicken Hop, Hunter Guy, Burb and Gunny. It does not embed the website.
 
 Read this when developing a native game, checking browser/native ownership,
 or delivering an iPhone beta or Expo update.
 
 ## Delivery status
+
+Gunny and About are embedded in signed **Viggo Games 0.1.0 (13)**, built on
+**2026-10-06** from commit `7d010e5d33978f31472dbbf3df2becd9dadb795e`.
+EAS build ID: `52175aa7-940d-4607-92a4-ee72fc880812`. The archive was checked for
+build (13), Gunny's mission and shared engine, About's copy, all five planet maps,
+warning audio and Viggo's portrait with matching asset hashes. Its native runtime
+is `2d12d4f252db8585180dff1ba16c1e66bc2e25b8`, on the `testflight` channel.
+Apple accepted the direct `altool` upload with no errors, delivery ID
+`cfa89875-7fbb-470e-81b8-43cf7728c0ab`, and reports `VALID` and `IN_BETA_TESTING`.
+The automatic internal **Team (Expo)** group includes build (13); its testing
+notes are saved and verified. Install through **TestFlight → Viggo Games → Update**.
+The full web/mobile gates passed, including 183 tests, both native exports and
+Expo Doctor's 20 checks. Gunny's GPU, touch feel, rotation and background/resume
+still need physical iPhone acceptance.
 
 Burb's landscape motion steering is embedded in signed **Viggo Games 0.1.0 (12)**,
 built on **2026-10-05** from commit `89b1b9843c191da7d5e1ed090e8544ce3be22068`.
@@ -118,9 +132,11 @@ native fingerprint changes are included in TestFlight build (9); they have not b
 published as an Expo update to build (7). Install build (9) to receive these changes.
 The refreshed dependency set passes Expo Doctor's 20 checks and both native exports.
 
-All three native games have Android implementations and passing Android export
-checks. An Android device/store build has not been delivered. Gunny and Torpedo
-have preview detail pages in the native selector; they have not been ported.
+All four native games have Android implementations and passing Android export
+checks. An Android device/store build has not been delivered. Gunny and the About
+page were delivered in TestFlight build (13) on **2026-10-06**; their native device
+acceptance remains pending.
+Torpedo retains a preview detail page and has not been ported.
 
 ## Stack
 
@@ -164,13 +180,19 @@ The arcade and game detail pages use a solid black background, without decorativ
 glows, arcs or grid lines.
 
 The selector shows each full title image at its original aspect ratio. Only
-Gunny and Torpedo have a **Coming Soon** overlay; playable games have no text or
+Torpedo has a **Coming Soon** overlay; playable games have no text or
 shade over their artwork. Tap any image to open its detail page.
 
 Select a mission to open its detail page with artwork, instructions, touch controls
 and tips. Descriptions and gameplay instructions come from the website's shared
 `../src/data/games.json`; phone controls stay native. Only **Play now** opens a
 playable game. Missions not yet ported show details with **Coming to mobile**.
+
+An **About Viggo.games** button appears below the full game list and on each game
+detail page. About shares the website's `../src/data/about.json` copy and Viggo
+portrait. The source address is selectable text on native, preserving the app's
+existing restriction on external links. Back returns to the previous page, or the
+arcade when opened directly.
 
 Swipe-back navigation is disabled throughout the native stack, so horizontal drags
 remain game input. The top-left game arrow and Android back button show an exit
@@ -296,6 +318,41 @@ The engine, scene and input regressions in `../src/test/burb-*.test.ts` cover sp
 steering, collision recovery, pause, time clamping, portrait/landscape parity and
 graphics recreation. Continue native GPU, simultaneous touch, rotation and
 background/resume checks on iPhone during beta testing.
+
+## Gunny
+
+Open Gunny's details, tap **Play now**, then **Launch mission**. Hold the arrows to
+steer left/right/up/down and hold Fire at the same time. Destroy 12 two-hit raiders,
+dodge satellites and expanding blasts, and keep the hull above zero. The HUD shows
+hull, score, kills and distance. At displayed 10% hull, a red warning pulses and the
+browser's 740Hz warning repeats once per second; reduced-motion users see steady red.
+Pause, background, rotation, confirmed exit and mission completion stop held input
+and warning audio. Resume preserves the mission; Restart resets it.
+
+- `../games/gunny/core/`: platform-neutral flight, spawning, shots, collision damage,
+  score, blast windows, win/loss and pause/time rules. No Three.js or device APIs.
+- `../games/gunny/src/scene.js`: shared spacecraft, satellites, planet shaders,
+  starfield, lighting, camera and explosion projection.
+- `src/game/gunny/renderer.ts`: Expo GL and five locally bundled planet maps.
+- `src/game/gunny/touch-input.ts` and `src/components/gunny/`: simultaneous held input.
+- `src/game/gunny/hull-warning.ts`: Expo Audio and accessible warning motion.
+- `src/app/gunny.tsx`: native HUD, launch/restart, pause, confirmed exit and lifecycle.
+
+Native resolution is capped at 1.25 device pixels per point; controls/HUD keep full
+resolution. The shared engine survives graphics recreation. Rotation and background
+pause instead of advancing elapsed time, and paused scenes do not redraw. Metro
+uses the app's Three.js 0.160.0 instance for the renderer and all shared scene imports.
+Portrait framing follows the ship horizontally and widens its view so both flight
+bounds remain visible; landscape retains the browser's chase camera.
+Planet maps and source attribution are available offline. No new native module or
+permission is required. Regenerate the procedural warning with the root command
+`node scripts/bake-gunny-audio.mjs` and verify with `--check`.
+
+Root `gunny-engine`, Gunny's Node regressions, mobile navigation and About tests
+cover shared rules, seeded browser/native parity, multitouch cancellation, restart,
+scene disposal, portrait flight-bound framing and portrait/landscape recreation. iOS/Android exports and Expo
+Doctor pass. The installed simulator has no accessible Simulator.app UI, so native
+GPU, touch feel, rotation and background/resume still need iPhone verification.
 
 ## Expo and TestFlight beta delivery
 

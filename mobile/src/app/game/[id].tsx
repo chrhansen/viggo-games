@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArcadeBackdrop } from '@/components/arcade-backdrop';
+import { AboutLink } from '@/components/about-link';
 import { colors, fonts } from '@/constants/theme';
 import { gameDetails } from '@/data/games';
 
@@ -62,6 +63,7 @@ export default function GameDetailScreen() {
           </View>)}
         </View>
       </View>
+      <AboutLink />
     </ScrollView>
     <View style={styles.launchBar}>
       {game.route ? <Pressable accessibilityRole="button" accessibilityLabel={`Play ${game.title} now`}

@@ -1,40 +1,33 @@
-import * as THREE from "three";
-import { MISSION_KILLS } from "./config.js";
-import { createPlayerShip, createStars } from "./entities.js";
-import { createPlanet, SUN_DIRECTION } from "./planets.js";
-import { disposeExplosion } from "./explosions.js";
-import { createSpaceReflections } from "./vehicle-materials.js";
-import { runtimeMethods } from "./mission-runtime.js";
-import { HullWarning } from "./hull-warning.js";
+import * as THREE from 'three';
+import { GunnyEngine, MISSION_KILLS, emptyGunnyInput, isCriticalHull } from '../core/engine.js';
+import { createGunnyScene } from './scene.js';
+import { loadPlanetTexture } from './browser-textures.js';
+import { HullWarning } from './hull-warning.js';
 
 export class GunnyGame {
   constructor(dom) {
     this.dom = dom;
+    this.engine = new GunnyEngine();
     this.clock = new THREE.Clock();
     this.pointerFire = false;
     this.actions = new Set();
     this.touchPointers = new Map();
-    this.enemySpawnTimer = 0;
-    this.satelliteSpawnTimer = 0;
-    this.waveIntensity = 1;
-    this.backdropTime = 0;
     this.hullWarning = new HullWarning();
     this.missionCardTimer = null;
-
     this.setupRenderer();
     this.setupScene();
     this.bindEvents();
     this.resetMission();
-
     this.renderer.setAnimationLoop(this.animate);
   }
+  get state() { return this.engine.state; }
+  get started() { return this.state.started && !this.state.finished; }
+  set started(value) { this.state.started = value; }
+  get finished() { return this.state.finished; }
+  set finished(value) { this.state.finished = value; }
 
   setupRenderer() {
-    this.renderer = new THREE.WebGLRenderer({
-      canvas: this.dom.canvas,
-      antialias: true,
-      powerPreference: "high-performance",
-    });
+    this.renderer = new THREE.WebGLRenderer({ canvas: this.dom.canvas, antialias: true, powerPreference: 'high-performance' });
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.18;
@@ -42,302 +35,118 @@ export class GunnyGame {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
-
   setupScene() {
-    this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x020408);
-    this.spaceReflections = createSpaceReflections(this.renderer);
-    this.scene.environment = this.spaceReflections.texture;
-    this.scene.environmentIntensity = 0.85;
-
-    this.camera = new THREE.PerspectiveCamera(
-      60,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      2400
-    );
-
-    const hemi = new THREE.HemisphereLight(0x90d4ff, 0x09131d, 1.8);
-    const sun = new THREE.DirectionalLight(0xfff2cc, 1.65);
-    sun.position.copy(SUN_DIRECTION).multiplyScalar(150);
-    const rim = new THREE.PointLight(0x6ec5ff, 28, 300, 2);
-    rim.position.set(-120, -50, -320);
-    const cockpitFill = new THREE.PointLight(0x7fcfff, 10, 90, 2);
-    cockpitFill.position.set(0, 8, 12);
-    const forwardFill = new THREE.SpotLight(
-      0xc7e6ff,
-      120,
-      240,
-      Math.PI / 4.8,
-      0.68,
-      1.5
-    );
-    forwardFill.position.set(0, 5.4, 20);
-    forwardFill.target.position.set(0, 0.8, -120);
-
-    this.scene.add(hemi, sun, rim, cockpitFill, forwardFill, forwardFill.target);
-    this.forwardFill = forwardFill;
-    this.blastLight = new THREE.PointLight(0xffa15c, 0, 65, 2);
-    this.scene.add(this.blastLight);
-
-    this.player = {
-      mesh: createPlayerShip(),
-      shots: [],
-      velocity: new THREE.Vector3(),
-      cooldown: 0,
-      damageFlash: 0,
-    };
-    this.scene.add(this.player.mesh);
-
-    this.starField = createStars();
-    this.scene.add(this.starField);
-    this.nearStars = createStars(1100, true);
-    this.scene.add(this.nearStars);
-    this.lastStarPlayerZ = 0;
-
-    this.earth = createPlanet(58, "earth");
-    this.earth.position.set(-150, -52, -430);
-    this.scene.add(this.earth);
-
-    this.moon = createPlanet(16, "moon");
-    this.moon.position.set(-70, 45, -350);
-    this.scene.add(this.moon);
-
-    this.enemies = [];
-    this.enemyShots = [];
-    this.satellites = [];
-    this.explosions = [];
+    this.game = createGunnyScene({ aspect: window.innerWidth / window.innerHeight,
+      loadTexture: loadPlanetTexture, renderer: this.renderer, engine: this.engine });
   }
-
   bindEvents() {
-    window.addEventListener("resize", this.onResize);
-    window.addEventListener("keydown", this.onKeyDown);
-    window.addEventListener("keyup", this.onKeyUp);
-    window.addEventListener("mousedown", this.onPointerDown);
-    window.addEventListener("mouseup", this.onPointerUp);
-    window.addEventListener("blur", this.onBlur);
-
-    this.dom.launchButton.addEventListener("click", this.startMission);
-    this.dom.restartButton.addEventListener("click", this.startMission);
-    this.dom.dismissTitleCard?.addEventListener("click", this.dismissMissionCard);
-
-    this.dom.touchControls
-      .querySelectorAll("[data-action]")
-      .forEach((button) => this.bindTouchButton(button));
+    window.addEventListener('resize', this.onResize);
+    window.addEventListener('keydown', this.onKeyDown);
+    window.addEventListener('keyup', this.onKeyUp);
+    window.addEventListener('mousedown', this.onPointerDown);
+    window.addEventListener('mouseup', this.onPointerUp);
+    window.addEventListener('blur', this.onBlur);
+    window.addEventListener('focus', this.onFocus);
+    this.dom.launchButton.addEventListener('click', this.startMission);
+    this.dom.restartButton.addEventListener('click', this.startMission);
+    this.dom.dismissTitleCard?.addEventListener('click', this.dismissMissionCard);
+    this.dom.touchControls.querySelectorAll('[data-action]').forEach(button => this.bindTouchButton(button));
   }
-
   bindTouchButton(button) {
     const action = button.dataset.action;
-
-    button.addEventListener("pointerdown", (event) => {
+    button.addEventListener('pointerdown', event => {
       button.setPointerCapture(event.pointerId);
       this.touchPointers.set(event.pointerId, action);
       this.setAction(action, true);
     });
-
-    const release = (event) => {
-      const pointerAction = this.touchPointers.get(event.pointerId);
-      if (!pointerAction) {
-        return;
-      }
-
+    const release = event => {
+      const action = this.touchPointers.get(event.pointerId);
       this.touchPointers.delete(event.pointerId);
-      this.setAction(pointerAction, false);
+      if (action && ![...this.touchPointers.values()].includes(action)) this.setAction(action, false);
     };
-
-    button.addEventListener("pointerup", release);
-    button.addEventListener("pointercancel", release);
-    button.addEventListener("lostpointercapture", release);
+    button.addEventListener('pointerup', release);
+    button.addEventListener('pointercancel', release);
+    button.addEventListener('lostpointercapture', release);
   }
-
   resetMission() {
-    this.started = false;
-    this.finished = false;
-    this.result = null;
-    this.pointerFire = false;
-    this.actions.clear();
-    this.touchPointers.clear();
-    this.enemySpawnTimer = 1.1;
-    this.satelliteSpawnTimer = 1.35;
-    this.waveIntensity = 1;
-    this.backdropTime = 0;
-
-    this.state = {
-      health: 100,
-      score: 0,
-      kills: 0,
-      distance: 0,
-    };
-
-    this.player.mesh.position.set(0, 0, 0);
-    this.player.mesh.rotation.set(0, 0, 0);
-    this.player.velocity.set(0, 0, 0);
-    this.player.cooldown = 0;
-    this.player.damageFlash = 0;
-    this.clearDynamicObjects();
-    this.updateBackdrop(0);
-    this.camera.position.set(0, 4.2, 16);
-    this.camera.lookAt(0, 1.1, -34);
+    this.engine.reset();
+    this.onBlur();
+    this.game?.resetCamera();
     this.updateHud();
   }
-
-  clearDynamicObjects() {
-    this.player.shots.forEach(({ mesh }) => this.scene.remove(mesh));
-    this.enemyShots.forEach(({ mesh }) => this.scene.remove(mesh));
-    this.enemies.forEach(({ mesh }) => this.scene.remove(mesh));
-    this.satellites.forEach(({ mesh }) => this.scene.remove(mesh));
-    this.explosions.forEach(({ mesh }) => disposeExplosion(mesh));
-    this.blastLight.intensity = 0;
-
-    this.player.shots = [];
-    this.enemyShots = [];
-    this.enemies = [];
-    this.satellites = [];
-    this.explosions = [];
-  }
-
   startMission = () => {
     this.hullWarning.unlock();
-    this.dom.introPanel.classList.add("panel--hidden");
-    this.dom.statusPanel.classList.add("panel--hidden");
+    this.dom.introPanel.classList.add('panel--hidden');
+    this.dom.statusPanel.classList.add('panel--hidden');
     this.resetMission();
     this.started = true;
+    this.engine.setActive(true);
     this.clock.start();
     clearTimeout(this.missionCardTimer);
-    if (window.matchMedia("(max-width: 760px), (pointer: coarse)").matches) {
+    if (window.matchMedia('(max-width: 760px), (pointer: coarse)').matches) {
       this.missionCardTimer = setTimeout(this.dismissMissionCard, 5000);
     }
   };
-
   dismissMissionCard = () => {
     clearTimeout(this.missionCardTimer);
     this.missionCardTimer = null;
-    this.dom.missionCard?.classList.add("hud__block--hidden");
+    this.dom.missionCard?.classList.add('hud__block--hidden');
   };
-
   onResize = () => {
-    this.camera.aspect = window.innerWidth / window.innerHeight;
-    this.camera.updateProjectionMatrix();
+    this.game.resize(window.innerWidth, window.innerHeight);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   };
-
-  onKeyDown = (event) => {
+  onKeyDown = event => {
     const action = this.mapKey(event.code);
-    if (!action) {
-      return;
-    }
-
-    event.preventDefault();
-    this.setAction(action, true);
+    if (action) { event.preventDefault(); this.setAction(action, true); }
   };
-
-  onKeyUp = (event) => {
+  onKeyUp = event => {
     const action = this.mapKey(event.code);
-    if (!action) {
-      return;
-    }
-
-    event.preventDefault();
-    this.setAction(action, false);
+    if (action) { event.preventDefault(); this.setAction(action, false); }
   };
-
-  onPointerDown = () => {
-    this.pointerFire = true;
-  };
-
-  onPointerUp = () => {
-    this.pointerFire = false;
-  };
-
+  onPointerDown = () => { this.pointerFire = true; };
+  onPointerUp = () => { this.pointerFire = false; };
   onBlur = () => {
     this.pointerFire = false;
     this.actions.clear();
     this.touchPointers.clear();
+    this.engine.setActive(false);
+    this.hullWarning.update(false);
   };
-
+  onFocus = () => { this.engine.setActive(true); this.clock.start(); };
   mapKey(code) {
-    const mapping = {
-      ArrowUp: "up",
-      KeyW: "up",
-      ArrowDown: "down",
-      KeyS: "down",
-      ArrowLeft: "left",
-      KeyA: "left",
-      ArrowRight: "right",
-      KeyD: "right",
-      Space: "fire",
-    };
-
-    return mapping[code];
+    return { ArrowUp: 'up', KeyW: 'up', ArrowDown: 'down', KeyS: 'down',
+      ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right', Space: 'fire' }[code];
   }
-
-  setAction(action, active) {
-    if (active) {
-      this.actions.add(action);
-    } else {
-      this.actions.delete(action);
-    }
-  }
-
+  setAction(action, active) { if (active) this.actions.add(action); else this.actions.delete(action); }
   animate = () => {
-    const delta = Math.min(this.clock.getDelta() || 0.016, 0.033);
-
-    if (this.started && !this.finished) {
-      this.update(delta);
-    } else {
-      this.updateExplosions(delta);
-      this.updateBackdrop(delta);
-      this.updateCamera(delta);
-    }
-
-    this.renderer.render(this.scene, this.camera);
-  };
-
-  finishMission(won) {
-    this.finished = true;
-    this.started = false;
-    this.result = won ? "win" : "lose";
-
-    this.dom.statusEyebrow.textContent = won ? "Mission clear" : "Hull breach";
-    this.dom.statusTitle.textContent = won ? "Sector safe" : "Try another run";
-    this.dom.statusMessage.textContent = won
-      ? `Score ${this.state.score}. Earth still shining.`
-      : `You clipped too much metal. Score ${this.state.score}.`;
-    this.dom.statusPanel.classList.remove("panel--hidden");
+    const input = emptyGunnyInput();
+    for (const action of this.actions) input[action] = true;
+    input.fire ||= this.pointerFire;
+    const delta = this.clock.getDelta() || 0.016;
+    if (this.state.active) this.game.step(delta, input);
+    else if (!this.state.started || this.finished) this.game.preview(Math.min(delta, 0.033));
+    if (this.finished && this.dom.statusPanel.classList.contains('panel--hidden')) this.showResult();
     this.updateHud();
+    this.renderer.render(this.game.scene, this.game.camera);
+  };
+  showResult() {
+    const won = this.state.result === 'win';
+    this.dom.statusEyebrow.textContent = won ? 'Mission clear' : 'Hull breach';
+    this.dom.statusTitle.textContent = won ? 'Sector safe' : 'Try another run';
+    this.dom.statusMessage.textContent = won ? `Score ${this.state.score}. Earth still shining.`
+      : `You clipped too much metal. Score ${this.state.score}.`;
+    this.dom.statusPanel.classList.remove('panel--hidden');
   }
-
   updateHud() {
     const health = Math.max(0, Math.round(this.state.health));
-    const critical = this.started && !this.finished && this.state.health > 0 && health <= 10;
-    this.dom.healthValue.closest(".stat").classList.toggle("stat--critical", critical);
+    const critical = isCriticalHull({ ...this.state, started: this.started, finished: this.finished });
+    this.dom.healthValue.closest('.stat').classList.toggle('stat--critical', critical);
     this.hullWarning.update(critical && !document.hidden && document.hasFocus());
     this.dom.healthValue.textContent = `${health}%`;
     this.dom.scoreValue.textContent = this.state.score.toString();
     this.dom.killsValue.textContent = `${this.state.kills} / ${MISSION_KILLS}`;
     this.dom.distanceValue.textContent = `${Math.round(this.state.distance)} km`;
   }
-
-  removePlayerShot(index) {
-    this.scene.remove(this.player.shots[index].mesh);
-    this.player.shots.splice(index, 1);
-  }
-
-  removeEnemyShot(index) {
-    this.scene.remove(this.enemyShots[index].mesh);
-    this.enemyShots.splice(index, 1);
-  }
-
-  removeEnemy(index) {
-    this.scene.remove(this.enemies[index].mesh);
-    this.enemies.splice(index, 1);
-  }
-
-  removeSatellite(index) {
-    this.scene.remove(this.satellites[index].mesh);
-    this.satellites.splice(index, 1);
-  }
 }
-
-Object.assign(GunnyGame.prototype, runtimeMethods);

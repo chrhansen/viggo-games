@@ -1,17 +1,12 @@
 import * as THREE from "three";
 
 export const SUN_DIRECTION = new THREE.Vector3(-0.65, 0.5, 0.65).normalize();
-const textures = {};
-
-function loadMap(name, url, color = false) {
-  if (!textures[name]) {
-    const texture = new THREE.TextureLoader().load(url);
-    texture.colorSpace = color ? THREE.SRGBColorSpace : THREE.NoColorSpace;
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.anisotropy = 4;
-    textures[name] = texture;
-  }
-  return textures[name];
+function loadMap(loadTexture, name, color = false) {
+  const texture = loadTexture(name);
+  texture.colorSpace = color ? THREE.SRGBColorSpace : THREE.NoColorSpace;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.anisotropy = 4;
+  return texture;
 }
 
 const vertexShader = `
@@ -47,11 +42,11 @@ function sphere(radius, shader) {
   return new THREE.Mesh(new THREE.SphereGeometry(radius, 64, 48), shader);
 }
 
-export function createPlanet(radius, kind) {
+export function createPlanet(radius, kind, loadTexture) {
   const planet = new THREE.Group();
   if (kind === "moon") {
     const body = sphere(radius, material({
-      surface: { value: loadMap("moon", new URL("../assets/moon.jpg", import.meta.url).href, true) },
+      surface: { value: loadMap(loadTexture, "moon", true) },
     }, `
       uniform sampler2D surface;
       void main() {
@@ -67,11 +62,11 @@ export function createPlanet(radius, kind) {
     return planet;
   }
 
-  const cloudsMap = loadMap("clouds", new URL("../assets/earth-clouds.jpg", import.meta.url).href);
+  const cloudsMap = loadMap(loadTexture, "clouds");
   const body = sphere(radius, material({
-    surface: { value: loadMap("day", new URL("../assets/earth-day.jpg", import.meta.url).href, true) },
-    night: { value: loadMap("night", new URL("../assets/earth-night.jpg", import.meta.url).href, true) },
-    ocean: { value: loadMap("ocean", new URL("../assets/earth-ocean.jpg", import.meta.url).href) },
+    surface: { value: loadMap(loadTexture, "day", true) },
+    night: { value: loadMap(loadTexture, "night", true) },
+    ocean: { value: loadMap(loadTexture, "ocean") },
     clouds: { value: cloudsMap },
   }, `
     uniform sampler2D surface;

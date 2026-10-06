@@ -1,0 +1,10 @@
+{
+  "title": "About viggo.games",
+  "portraitAlt": "Viggo, the creator of viggo.games",
+  "intro": "is a collection of browser games made by Viggo, built for fun, learning, and a bit of arcade nostalgia.",
+  "story": "All games on this site are designed and developed by Viggo with a little help from his dad and Codex. Every mission is free to play in a modern browser, with no download required.",
+  "sourceIntro": "The site itself is open source. Check out the code, suggest improvements, or just poke around:",
+  "sourceUrl": "https://github.com/chrhansen/viggo-games",
+  "sourceLabel": "github.com/chrhansen/viggo-games",
+  "footer": "Made with heart and pixels"
+}

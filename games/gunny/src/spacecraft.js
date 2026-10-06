@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { PLAYER_MUZZLE, RAIDER_MUZZLE, RAIDER_SCALE } from './config.js';
 import { vehicleMaterials } from "./vehicle-materials.js";
 import { part, box, strut, hullGeometry, plateGeometry, finGeometry, panelLines, bakeStructure } from "./vehicle-geometry.js";
 import { getGlowTexture } from "./glow-texture.js";
@@ -120,7 +121,7 @@ function buildCraft(raider) {
   box(structure, raider ? m.redMarkings : m.markings, [0.2, 0.025, 1.3], [0, 0.445, 1.1], 0.005);
   ship.add(bakeStructure(structure), glow);
   if (raider) {
-    ship.scale.setScalar(0.82);
+    ship.scale.setScalar(RAIDER_SCALE);
     ship.rotation.y = Math.PI;
   }
   return ship;
@@ -131,7 +132,7 @@ function createCraft(raider) {
   templates[key] ??= buildCraft(raider);
   const ship = templates[key].clone(true);
   ship.userData.engineGlow = ship.getObjectByName("engine-glow");
-  ship.userData.muzzle = [0, 0, raider ? -4.0 : -5.1];
+  ship.userData.muzzle = [0, 0, raider ? RAIDER_MUZZLE : PLAYER_MUZZLE];
   ship.userData.damageMaterials = [];
   if (!raider) {
     ship.traverse((mesh) => {

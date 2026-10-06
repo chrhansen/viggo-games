@@ -1,10 +1,15 @@
 # Gunny
 
-Browser 3D space shooter. Kid-friendly prototype. Third-person camera. Fly past Earth and the moon. Blast raiders. Dodge satellites.
+Browser and native 3D space shooter. Kid-friendly prototype. Third-person camera. Fly past Earth and the moon. Blast raiders. Dodge satellites.
 
-Gunny has not been ported to the React Native app. Its card in Viggo Games is a
-detail preview marked **Coming to mobile**; phone/touch support here refers to the browser. See the
-[repository platform overview](../../README.md#game-availability).
+Gunny uses one platform-neutral engine and one Three.js scene in the browser and
+React Native app. Native **Play now** opens the mission with four-direction touch
+steering and a held Fire button. No WebView. Gunny is available in iOS TestFlight
+build (13); native device acceptance remains pending. See the
+[platform overview](../../README.md#game-availability).
+
+Read this when changing flight/combat rules, spacecraft, planet art, or either
+platform adapter.
 
 ## What The Game Is
 
@@ -91,8 +96,13 @@ Open `http://localhost:8080/games/gunny/`. A standalone server is available with
 
 ## Project Shape
 
-- `src/game.js`: renderer, scene setup, DOM wiring
-- `src/mission-runtime.js`: gameplay loop, spawning, combat, damage
+- `core/engine.js`: platform-neutral flight, spawning, combat, damage, scoring, mission results and pause/time rules
+- `core/math.js`: vector math and world-space shot muzzles without Three.js
+- `src/scene.js`: shared Three.js models, lighting, camera, planets, stars and effect projection
+- `src/game.js`: browser renderer, DOM HUD, keyboard/mouse/touch controls and audio
+- `src/browser-textures.js`: browser-only image loading
+- `../../mobile/src/game/gunny/`: Expo GL/assets, touch collection and native hull warning
+- `../../mobile/src/app/gunny.tsx`: native HUD, launch/restart, pause, confirmed exit and lifecycle
 - `src/flight-effects.js`: nearby star recycling and raider blast damage
 - `src/hull-warning.js`: low-hull warning sound
 - `src/entities.js`: star/projectile builders and craft exports
@@ -105,5 +115,20 @@ Open `http://localhost:8080/games/gunny/`. A standalone server is available with
 - `src/style.css`: HUD and menu styling
 
 ## Current Scope
+
+The engine accepts a random source and advances on mission time, so browser and
+native input timelines produce identical state. Flight speed, steering smoothing,
+spawn ranges/timers, two-hit raiders, damage, score and 12-kill goal retain their
+browser rules. Frames clamp to 33ms; paused/background missions do not advance.
+The shared scene projects engine state and has no platform input or gameplay rules.
+Graphics recreation retains the engine and pauses before continuing.
+
+The root `src/test/gunny-engine.test.ts` exercises the actual browser adapter against
+native touch input, movement, combat, pause, restart and portrait/landscape scene
+recreation. `npm test --workspace gunny` retains visual and browser HUD regressions.
+Native rendering uses the app's Three.js 0.160.0 through Metro's shared resolver;
+browser rendering keeps Gunny's own version. Planet maps are bundled locally.
+Regenerate native warning audio with `node scripts/bake-gunny-audio.mjs`; verify
+with `node scripts/bake-gunny-audio.mjs --check`.
 
 Prototype slice. Low-hull warning sound only; no levels, no save system, no multiplayer.
