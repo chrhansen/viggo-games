@@ -7,6 +7,11 @@ or delivering an iPhone beta or Expo update.
 
 ## Delivery status
 
+The updated About copy and tappable GitHub source link are present in source.
+Installed TestFlight build (15) still has the older About copy and selectable
+GitHub text. No new mobile build or Expo update has been published for these
+changes; pushing to `main` deploys the website only.
+
 Gunny and Burb's continuous rotation fix is embedded in signed **Viggo Games
 0.1.0 (15)**, available on **2026-10-06** from commit
 `bc6b4aaebf8e7400eae357f2fc1de7ac695c1411`.
