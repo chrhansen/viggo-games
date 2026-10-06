@@ -303,7 +303,9 @@ available. The paused landscape card can open motion settings.
 Rotation resizes the existing graphics view and clears held touch input while the
 ride keeps playing. Graphics recreation preserves the same engine and its running
 or paused state. Backgrounding and explicit pause stop the bike; Continue resumes
-from the same position.
+from the same position. The native layout event supplies pixel dimensions to the
+renderer and shared camera; Expo GL's initial JavaScript buffer dimensions are not
+used to detect later resizes.
 Sensors run only during an active landscape ride, at about 30 samples/second.
 Gravity is separated from hand acceleration; flat/invalid readings and samples
 older than 250ms clear tilt. Portrait, pause, background and exit stop sampling
@@ -352,10 +354,10 @@ Planet maps and source attribution are available offline. No new native module o
 permission is required. Regenerate the procedural warning with the root command
 `node scripts/bake-gunny-audio.mjs` and verify with `--check`.
 
-`../src/test/mobile-game-rotation.test.ts` exercises both native screens with their
-shared engines: portrait/landscape changes, graphics recreation, deliberate pause,
-background/resume and graphics failure. Native GL and sensor behavior still need
-iPhone verification during beta testing.
+`../src/test/mobile-game-rotation.test.ts` exercises both native screens and adapters
+with their real shared engines and scenes: portrait/landscape changes, viewport and
+camera sizing, graphics recreation, deliberate pause, background/resume and graphics
+failure. Native GL and sensor behavior still need iPhone verification during beta testing.
 
 Root `gunny-engine`, Gunny's Node regressions, mobile navigation and About tests
 cover shared rules, seeded browser/native parity, multitouch cancellation, restart,

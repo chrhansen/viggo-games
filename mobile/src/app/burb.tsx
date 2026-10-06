@@ -1,7 +1,7 @@
 import { GLView, type ExpoWebGLRenderingContext } from 'expo-gl';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { AppState, PixelRatio, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { AppState, PixelRatio, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions, type LayoutChangeEvent } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { BurbGame } from 'burb/core';
 import { BurbControls } from '@/components/burb/burb-controls';
@@ -16,6 +16,7 @@ export default function BurbScreen() {
   const { width, height } = useWindowDimensions();
   const surfaceScale = Math.max(1, PixelRatio.get() / 1.25);
   const runtime = useRef<NativeBurbRenderer | null>(null);
+  const surfaceSize = useRef<{ width: number; height: number } | null>(null);
   const engine = useRef<BurbGame | undefined>(undefined);
   const alive = useRef(true);
   const frame = useRef(0);
@@ -53,14 +54,22 @@ export default function BurbScreen() {
     };
   }, [pause]);
 
+  function onSurfaceLayout({ nativeEvent: { layout } }: LayoutChangeEvent) {
+    if (layout.width <= 0 || layout.height <= 0) return;
+    const size = { width: PixelRatio.getPixelSizeForLayoutSize(layout.width), height: PixelRatio.getPixelSizeForLayoutSize(layout.height) };
+    surfaceSize.current = size;
+  }
   function onContextCreate(gl: ExpoWebGLRenderingContext) {
     if (!assets || !alive.current) return;
     try {
       cancelAnimationFrame(frame.current);
+      const wasActive = engine.current?.state.active ?? false;
       runtime.current?.dispose();
       const renderer = createNativeBurbRenderer(gl, assets, engine.current);
+      if (surfaceSize.current) renderer.resize(surfaceSize.current.width, surfaceSize.current.height);
       runtime.current = renderer;
       engine.current = renderer.game.engine;
+      engine.current.setActive(wasActive);
       setError('');
       setReady(true);
       let previous = 0;
@@ -71,6 +80,7 @@ export default function BurbScreen() {
         try {
           const delta = previous ? (time - previous) / 1000 : 0;
           previous = time;
+          if (AppState.currentState === 'active' && surfaceSize.current) renderer.resize(surfaceSize.current.width, surfaceSize.current.height);
           if (AppState.currentState !== 'active' || (rendered && !renderer.game.engine.state.active)) {
             previous = 0;
             frame.current = requestAnimationFrame(tick);
@@ -112,7 +122,7 @@ export default function BurbScreen() {
 
   return <View style={styles.screen}>
     {assets && <View pointerEvents="none" style={{ position: 'absolute', width: width / surfaceScale, height: height / surfaceScale, transformOrigin: 'top left', transform: [{ scale: surfaceScale }] }}>
-      <GLView style={StyleSheet.absoluteFill} msaaSamples={0} onContextCreate={onContextCreate} />
+      <GLView style={StyleSheet.absoluteFill} msaaSamples={0} onLayout={onSurfaceLayout} onContextCreate={onContextCreate} />
     </View>}
     <View pointerEvents="box-none" style={[styles.interface, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 12, paddingLeft: insets.left + 12, paddingRight: insets.right + 12 }]}>
       <View style={styles.top}>

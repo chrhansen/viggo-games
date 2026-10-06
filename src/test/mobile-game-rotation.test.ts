@@ -4,8 +4,10 @@ import * as jsxRuntime from 'react/jsx-runtime';
 import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import ts from 'typescript';
+import * as THREE from 'three';
 import * as gunnyCore from '../../games/gunny/core/engine.js';
-import { createBurbGame } from '../../games/burb/core/engine';
+import { createBurbScene } from '../../games/burb/src/scene';
+import { createGunnyScene } from '../../games/gunny/src/scene.js';
 import { createGunnyTouchInput } from '../../mobile/src/game/gunny/touch-input';
 import { createBurbTouchInput } from '../../mobile/src/game/burb/touch-input';
 
@@ -17,32 +19,39 @@ type Touch = {
   input: { left: boolean };
   hold: (control: 'left', ids: string[]) => void;
 };
-type GL = { drawingBufferWidth: number; drawingBufferHeight: number };
+type GL = { drawingBufferWidth: number; drawingBufferHeight: number; endFrameEXP: () => void };
+type Layout = { nativeEvent: { layout: { width: number; height: number } } };
+type NativeRenderer = { game: { engine: Engine; camera: THREE.PerspectiveCamera }; render: () => void };
 type NativeProps = { children?: React.ReactNode; onPress?: () => void; disabled?: boolean; accessibilityLabel?: string };
 
-// Execute the native screen with real React hooks and engines; only device ports
-// are replaced, so dimension changes exercise the screen's actual lifecycle.
-function loadScreen(name: string, modules: Record<string, unknown>) {
-  const source = readFileSync(`mobile/src/app/${name}.tsx`, 'utf8');
+// Execute native screens and adapters with real hooks, engines and scenes.
+// Device ports are replaced; Expo's GL dimensions remain fixed at creation.
+function loadNative<T>(path: string, modules: Record<string, unknown>): T {
+  const source = readFileSync(path, 'utf8');
   const compiled = ts.transpileModule(source, {
     compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX },
   });
-  const module = { exports: {} as { default: React.ComponentType } };
+  const module = { exports: {} as T };
   const require = (id: string) => {
+    if (/^(gunny|burb)\/assets\//.test(id)) return id;
     if (!(id in modules)) throw new Error(`Unmocked native port: ${id}`);
     return modules[id];
   };
   new Function('require', 'module', 'exports', compiled.outputText)(require, module, module.exports);
-  return module.exports.default;
+  return module.exports;
 }
 
 function fixture(name: 'gunny' | 'burb') {
   let dimensions = { width: 390, height: 844 };
   let engine: Engine;
+  let native: NativeRenderer;
   let touch: Touch;
   let contextCreates = 0;
   let failContext = false;
+  let failResize = false;
   let onContextCreate: (gl: GL) => void;
+  const graphics: WebGLRenderer[] = [];
+  let initialGL: GL;
   let timestamp = 1000;
   let nextFrame = 0;
   const frames = new Map<number, FrameRequestCallback>();
@@ -62,31 +71,59 @@ function fixture(name: 'gunny' | 'burb') {
   const container = ({ children }: NativeProps) => React.createElement('div', null, children);
   const button = ({ children, onPress, disabled, accessibilityLabel }: NativeProps) =>
     React.createElement('button', { onClick: onPress, disabled, 'aria-label': accessibilityLabel }, children);
-  function GLView(props: { onContextCreate: (gl: GL) => void }) {
+  class WebGLRenderer {
+    capabilities = { getMaxAnisotropy: () => 4 };
+    shadowMap = {};
+    canvas: HTMLCanvasElement;
+    aspect = 0;
+    constructor({ canvas }: { canvas: HTMLCanvasElement }) { this.canvas = canvas; graphics.push(this); }
+    setSize(width: number, height: number) {
+      if (failResize) throw new Error('Resize unavailable');
+      this.canvas.width = width; this.canvas.height = height;
+    }
+    render(_scene: unknown, camera: THREE.PerspectiveCamera) { this.aspect = camera.aspect; }
+    dispose() {}
+  }
+  const deviceModules = {
+    three: { ...THREE, WebGLRenderer },
+    'expo-asset': { Asset: { fromModule: (source: string) => ({
+      downloadAsync: async () => ({ localUri: source, width: 4, height: 4 }),
+    }) } },
+    'burb/scene': { createBurbScene },
+    'gunny/scene': { createGunnyScene: (options: Parameters<typeof createGunnyScene>[0]) =>
+      createGunnyScene({ ...options, renderer: undefined }) },
+  };
+  const rendererPort = loadNative<Record<string, unknown>>(`mobile/src/game/${name}/renderer.ts`, deviceModules);
+  const rendererName = name === 'gunny' ? 'createNativeGunnyRenderer' : 'createNativeBurbRenderer';
+  const createRenderer = (gl: GL, assets: unknown, existing?: Engine) => {
+    if (failContext) throw new Error('Context unavailable');
+    const create = rendererPort[rendererName] as (gl: GL, assets: unknown, existing?: Engine) => NativeRenderer;
+    native = create(gl, assets, existing);
+    engine = native.game.engine;
+    return native;
+  };
+  function GLView(props: { onContextCreate: (gl: GL) => void; onLayout?: (event: Layout) => void }) {
     onContextCreate = props.onContextCreate;
     const createContext = React.useRef(props.onContextCreate);
-    const gl = React.useRef({ drawingBufferWidth: dimensions.width, drawingBufferHeight: dimensions.height });
-    React.useLayoutEffect(() => { Object.assign(gl.current, {
-      drawingBufferWidth: dimensions.width, drawingBufferHeight: dimensions.height,
-    }); });
-    React.useEffect(() => { contextCreates++; createContext.current(gl.current); }, []);
+    const layoutCallback = React.useRef(props.onLayout);
+    layoutCallback.current = props.onLayout;
+    const gl = React.useRef(Object.freeze({ drawingBufferWidth: Math.round(dimensions.width * 1.25),
+      drawingBufferHeight: Math.round(dimensions.height * 1.25), endFrameEXP: vi.fn() }));
+    const { width, height } = dimensions;
+    React.useLayoutEffect(() => { layoutCallback.current?.({ nativeEvent: {
+      layout: { width: width / 2.4, height: height / 2.4 },
+    } }); }, [width, height]);
+    React.useEffect(() => { contextCreates++; initialGL = gl.current; createContext.current(gl.current); }, []);
     return React.createElement('div', { 'data-testid': 'graphics' });
   }
   const controls = () => React.createElement('div', { 'data-testid': 'controls' });
-  const createRenderer = (_gl: GL, _assets: unknown, existing?: Engine) => {
-    if (failContext) throw new Error('Context unavailable');
-    engine = existing ?? createBurbGame() as unknown as Engine;
-    return {
-      game: { engine, step: (delta: number, input: never) => engine.step(delta, input), resetCamera() {} },
-      render: vi.fn(), dispose: vi.fn(),
-    };
-  };
   const modules = {
     react: React,
     'react/jsx-runtime': jsxRuntime,
     'react-native': {
       View: container, ScrollView: container, Text: container, Pressable: button, Animated: { View: container },
-      StyleSheet: { create: (styles: unknown) => styles, absoluteFill: {} }, PixelRatio: { get: () => 3 },
+      StyleSheet: { create: (styles: unknown) => styles, absoluteFill: {} },
+      PixelRatio: { get: () => 3, getPixelSizeForLayoutSize: (size: number) => Math.round(size * 3) },
       AppState: appState, useWindowDimensions: () => dimensions,
     },
     'expo-gl': { GLView },
@@ -98,15 +135,14 @@ function fixture(name: 'gunny' | 'burb') {
     '@/components/burb/burb-controls': { BurbControls: controls },
     '@/game/gunny/touch-input': { createGunnyTouchInput: () => { touch = createGunnyTouchInput(); return touch; } },
     '@/game/burb/touch-input': { createBurbTouchInput: () => { touch = createBurbTouchInput(); return touch; } },
-    '@/game/gunny/renderer': { createNativeGunnyRenderer: createRenderer, loadGunnyAssets: async () => ({}) },
-    '@/game/burb/renderer': { createNativeBurbRenderer: createRenderer, loadBurbAssets: async () => ({}) },
+    [`@/game/${name}/renderer`]: { ...rendererPort, [rendererName]: createRenderer },
     '@/game/gunny/hull-warning': { useGunnyHullWarning: () => 1 },
     '@/hooks/use-game-exit': { useGameExit: () => () => {} },
     '@/hooks/use-burb-motion': { useBurbMotion: (_touch: unknown, landscape: boolean, active: boolean) => ({
       enabled: landscape && active, status: 'granted', input: { apply() {} }, recenter() {}, enable() {},
     }) },
   };
-  const Screen = loadScreen(name, modules);
+  const { default: Screen } = loadNative<{ default: React.ComponentType }>(`mobile/src/app/${name}.tsx`, modules);
   const view = render(React.createElement(Screen));
   const startLabel = name === 'gunny' ? 'LAUNCH MISSION' : 'START RIDE';
   const continueLabel = name === 'gunny' ? 'CONTINUE MISSION' : 'CONTINUE RIDE';
@@ -126,6 +162,7 @@ function fixture(name: 'gunny' | 'burb') {
     get engine() { return engine; },
     get touch() { return touch; },
     get contexts() { return contextCreates; },
+    get initialGL() { return initialGL; },
     elapsed: () => engine.state.time ?? engine.state.elapsed,
     async start() {
       await waitFor(() => expect(view.getByRole('button', { name: startLabel })).toBeEnabled());
@@ -133,13 +170,15 @@ function fixture(name: 'gunny' | 'burb') {
       advance();
     },
     advance,
+    failResize() { failResize = true; },
     rotate(width: number, height: number) {
       dimensions = { width, height };
       view.rerender(React.createElement(Screen));
     },
     recreate(fail = false) {
       failContext = fail;
-      act(() => onContextCreate({ drawingBufferWidth: dimensions.width, drawingBufferHeight: dimensions.height }));
+      act(() => onContextCreate({ drawingBufferWidth: Math.round(dimensions.width * 1.25),
+        drawingBufferHeight: Math.round(dimensions.height * 1.25), endFrameEXP: vi.fn() }));
     },
     appState(state: string) {
       act(() => { appState.currentState = state; for (const listener of listeners) listener(state); });
@@ -155,6 +194,14 @@ function fixture(name: 'gunny' | 'burb') {
       expect(engine.state.active).toBe(false);
       expect(view.getByRole('button', { name: continueLabel })).toBeInTheDocument();
       expect(view.queryByTestId('controls')).not.toBeInTheDocument();
+    },
+    expectSize(width: number, height: number) {
+      const bufferWidth = Math.round(width * 1.25), bufferHeight = Math.round(height * 1.25);
+      const current = graphics[graphics.length - 1];
+      expect(current.canvas.width).toBe(bufferWidth);
+      expect(current.canvas.height).toBe(bufferHeight);
+      expect(native.game.camera.aspect).toBe(bufferWidth / bufferHeight);
+      expect(current.aspect).toBe(bufferWidth / bufferHeight);
     },
   };
 }
@@ -176,6 +223,9 @@ describe.each(['gunny', 'burb'] as const)('%s mobile rotation', name => {
       expect(game.contexts).toBe(1);
       game.advance();
       expect(game.elapsed()).toBeGreaterThan(elapsed);
+      game.expectSize(width, height);
+      expect(game.initialGL.drawingBufferWidth).toBe(Math.round(390 * 1.25));
+      expect(game.initialGL.drawingBufferHeight).toBe(Math.round(844 * 1.25));
     }
   });
 
@@ -234,6 +284,20 @@ describe.each(['gunny', 'burb'] as const)('%s mobile rotation', name => {
     expect(game.engine.state.active).toBe(false);
     expect(game.elapsed()).toBe(elapsed);
     expect(game.view.getByText(/This device could not open/)).toBeInTheDocument();
+    expect(game.view.queryByTestId('controls')).not.toBeInTheDocument();
+  });
+
+  it('pauses and shows the graphics error if resizing fails', async () => {
+    const game = fixture(name);
+    await game.start();
+    const elapsed = game.elapsed();
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    game.failResize();
+    game.rotate(844, 390);
+    game.advance();
+    expect(game.engine.state.active).toBe(false);
+    expect(game.elapsed()).toBe(elapsed);
+    expect(game.view.getByText(/Graphics stopped/)).toBeInTheDocument();
     expect(game.view.queryByTestId('controls')).not.toBeInTheDocument();
   });
 });
