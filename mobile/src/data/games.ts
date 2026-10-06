@@ -14,7 +14,7 @@ export interface GamePreview {
   color: string;
   image: number;
   status: "ready" | "locked";
-  route?: "/chicken-hop" | "/hunter-guy" | "/burb";
+  route?: "/chicken-hop" | "/hunter-guy" | "/burb" | "/gunny";
 }
 
 export const gamePreviews: readonly GamePreview[] = [
@@ -59,7 +59,8 @@ export const gamePreviews: readonly GamePreview[] = [
     genre: "Space shooter",
     color: "#63F3FF",
     image: gunnyImage,
-    status: "locked",
+    status: "ready",
+    route: "/gunny",
   },
   {
     id: "torpedo",
@@ -77,6 +78,7 @@ const touchControls: Record<string, readonly string[]> = {
   'chicken-hop': ['Hold left or right to move.', 'Tap Hop to jump; hold it in the air to fly.'],
   'hunter-guy': ['Left joystick to move; drag the forest to look.', 'Choose a belt tool, aim, then tap Use Tool.'],
   'burb': ['Portrait: hold Left or Right to steer.', 'Landscape: hold the phone upright and twist slightly left or right to steer. Tap Center tilt to recenter.', 'Hold Fast or Slow to change speed; release to cruise.'],
+  'gunny': ['Hold the directional buttons to steer left, right, up or down.', 'Hold Fire while steering to blast raiders. Clear 12 raiders and dodge satellites and explosions.'],
 };
 
 export const gameDetails = gamePreviews.map((preview) => {
