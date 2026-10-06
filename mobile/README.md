@@ -300,8 +300,10 @@ available. The paused landscape card can open motion settings.
   subscription, permission handling, calibration and orientation-aware input mode.
 - `src/app/burb.tsx`: HUD, start/pause, confirmed exit and app lifecycle.
 
-Backgrounding, rotation and surface recreation pause the bike and clear held input.
-The ride survives graphics recreation; resuming continues from the same position.
+Rotation resizes the existing graphics view and clears held touch input while the
+ride keeps playing. Graphics recreation preserves the same engine and its running
+or paused state. Backgrounding and explicit pause stop the bike; Continue resumes
+from the same position.
 Sensors run only during an active landscape ride, at about 30 samples/second.
 Gravity is separated from hand acceleration; flat/invalid readings and samples
 older than 250ms clear tilt. Portrait, pause, background and exit stop sampling
@@ -326,8 +328,9 @@ steer left/right/up/down and hold Fire at the same time. Destroy 12 two-hit raid
 dodge satellites and expanding blasts, and keep the hull above zero. The HUD shows
 hull, score, kills and distance. At displayed 10% hull, a red warning pulses and the
 browser's 740Hz warning repeats once per second; reduced-motion users see steady red.
-Pause, background, rotation, confirmed exit and mission completion stop held input
-and warning audio. Resume preserves the mission; Restart resets it.
+Pause, background, confirmed exit and mission completion stop held input and warning
+audio. Rotation clears held touch input while the mission and warning keep running.
+Resume preserves the mission; Restart resets it.
 
 - `../games/gunny/core/`: platform-neutral flight, spawning, shots, collision damage,
   score, blast windows, win/loss and pause/time rules. No Three.js or device APIs.
@@ -339,14 +342,20 @@ and warning audio. Resume preserves the mission; Restart resets it.
 - `src/app/gunny.tsx`: native HUD, launch/restart, pause, confirmed exit and lifecycle.
 
 Native resolution is capped at 1.25 device pixels per point; controls/HUD keep full
-resolution. The shared engine survives graphics recreation. Rotation and background
-pause instead of advancing elapsed time, and paused scenes do not redraw. Metro
+resolution. Rotation resizes the existing graphics view while play continues.
+The shared engine and its running or paused state survive graphics recreation.
+Backgrounding pauses the mission, and paused scenes do not redraw. Metro
 uses the app's Three.js 0.160.0 instance for the renderer and all shared scene imports.
 Portrait framing follows the ship horizontally and widens its view so both flight
 bounds remain visible; landscape retains the browser's chase camera.
 Planet maps and source attribution are available offline. No new native module or
 permission is required. Regenerate the procedural warning with the root command
 `node scripts/bake-gunny-audio.mjs` and verify with `--check`.
+
+`../src/test/mobile-game-rotation.test.ts` exercises both native screens with their
+shared engines: portrait/landscape changes, graphics recreation, deliberate pause,
+background/resume and graphics failure. Native GL and sensor behavior still need
+iPhone verification during beta testing.
 
 Root `gunny-engine`, Gunny's Node regressions, mobile navigation and About tests
 cover shared rules, seeded browser/native parity, multitouch cancellation, restart,

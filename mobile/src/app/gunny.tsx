@@ -15,16 +15,13 @@ export default function GunnyScreen() {
   const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
   const surfaceScale = Math.max(1, PixelRatio.get() / 1.25);
-  const surfaceKey = `${width}:${height}`;
-  const currentSurface = useRef(surfaceKey);
   const runtime = useRef<NativeGunnyRenderer | null>(null);
   const [engine] = useState(() => new GunnyEngine());
   const [touch] = useState(createGunnyTouchInput);
   const alive = useRef(true);
   const frame = useRef(0);
   const [assets, setAssets] = useState<Awaited<ReturnType<typeof loadGunnyAssets>> | null>(null);
-  const [readySurface, setReadySurface] = useState('');
-  const ready = readySurface === surfaceKey;
+  const [ready, setReady] = useState(false);
   const [running, setRunning] = useState(false);
   const active = running && ready;
   const [error, setError] = useState('');
@@ -34,10 +31,8 @@ export default function GunnyScreen() {
   const pause = useCallback(() => { engine.setActive(false); touch.reset(); setRunning(false); }, [engine, touch]);
   useFocusEffect(useCallback(() => pause, [pause]));
   useLayoutEffect(() => {
-    currentSurface.current = surfaceKey;
-    engine.setActive(false);
     touch.reset();
-  }, [surfaceKey, engine, touch]);
+  }, [width, height, touch]);
   useEffect(() => {
     alive.current = true;
     loadGunnyAssets().then(loaded => { if (alive.current) setAssets(loaded); })
@@ -49,14 +44,14 @@ export default function GunnyScreen() {
     };
   }, [engine, pause, touch]);
   function onContextCreate(gl: ExpoWebGLRenderingContext) {
-    if (!assets || !alive.current || currentSurface.current !== surfaceKey) return;
+    if (!assets || !alive.current) return;
     try {
-      cancelAnimationFrame(frame.current); pause(); runtime.current?.dispose();
+      cancelAnimationFrame(frame.current); runtime.current?.dispose();
       const renderer = createNativeGunnyRenderer(gl, assets, engine);
-      runtime.current = renderer; setError(''); setReadySurface(surfaceKey);
+      runtime.current = renderer; setError(''); setReady(true);
       let previous = 0, rendered = false, lastHud = '';
       function tick(time: number) {
-        if (!alive.current || runtime.current !== renderer || currentSurface.current !== surfaceKey) return;
+        if (!alive.current || runtime.current !== renderer) return;
         try {
           const delta = previous ? (time - previous) / 1000 : 0;
           previous = time;
@@ -75,16 +70,16 @@ export default function GunnyScreen() {
       }
       frame.current = requestAnimationFrame(tick);
     } catch (error) {
-      console.error('[Gunny graphics]', error); setError('This device could not open space. Return to the arcade and try again.');
+      console.error('[Gunny graphics]', error); pause(); setError('This device could not open space. Return to the arcade and try again.');
     }
   }
   const start = useCallback(() => {
-    if (!ready || error || currentSurface.current !== surfaceKey || AppState.currentState !== 'active') return;
+    if (!ready || error || AppState.currentState !== 'active') return;
     touch.reset();
     if (!engine.state.started || engine.state.finished) { engine.start(); runtime.current?.game.resetCamera(); }
     else engine.setActive(true);
     setHud({ ...engine.state }); setRunning(true);
-  }, [engine, error, ready, surfaceKey, touch]);
+  }, [engine, error, ready, touch]);
   const pauseForExit = useCallback(() => {
     const wasActive = engine.state.active; pause();
     return () => { if (wasActive) start(); };
@@ -92,7 +87,7 @@ export default function GunnyScreen() {
   const requestExit = useGameExit('Gunny', pauseForExit);
   return <View style={styles.screen}>
     {assets && <View pointerEvents="none" style={{ position: 'absolute', width: width / surfaceScale, height: height / surfaceScale, transformOrigin: 'top left', transform: [{ scale: surfaceScale }] }}>
-      <GLView key={surfaceKey} style={StyleSheet.absoluteFill} msaaSamples={0} onContextCreate={onContextCreate} />
+      <GLView style={StyleSheet.absoluteFill} msaaSamples={0} onContextCreate={onContextCreate} />
     </View>}
     <View pointerEvents="box-none" style={[styles.interface, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 12, paddingLeft: insets.left + 12, paddingRight: insets.right + 12 }]}>
       <View style={styles.top}>

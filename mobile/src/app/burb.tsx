@@ -15,16 +15,13 @@ export default function BurbScreen() {
   const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
   const surfaceScale = Math.max(1, PixelRatio.get() / 1.25);
-  const surfaceKey = `${width}:${height}`;
-  const currentSurface = useRef(surfaceKey);
   const runtime = useRef<NativeBurbRenderer | null>(null);
   const engine = useRef<BurbGame | undefined>(undefined);
   const alive = useRef(true);
   const frame = useRef(0);
   const [touch] = useState(createBurbTouchInput);
   const [assets, setAssets] = useState<Awaited<ReturnType<typeof loadBurbAssets>> | null>(null);
-  const [readySurface, setReadySurface] = useState('');
-  const ready = readySurface === surfaceKey;
+  const [ready, setReady] = useState(false);
   const [running, setActive] = useState(false);
   const active = running && ready;
   const landscape = width > height;
@@ -40,10 +37,8 @@ export default function BurbScreen() {
   }, [touch]);
   useFocusEffect(useCallback(() => pause, [pause]));
   useLayoutEffect(() => {
-    currentSurface.current = surfaceKey;
-    engine.current?.setActive(false);
     touch.reset();
-  }, [surfaceKey, touch]);
+  }, [width, height, touch]);
   useEffect(() => {
     alive.current = true;
     loadBurbAssets().then((loaded) => { if (alive.current) setAssets(loaded); })
@@ -59,21 +54,20 @@ export default function BurbScreen() {
   }, [pause]);
 
   function onContextCreate(gl: ExpoWebGLRenderingContext) {
-    if (!assets || !alive.current || currentSurface.current !== surfaceKey) return;
+    if (!assets || !alive.current) return;
     try {
       cancelAnimationFrame(frame.current);
-      pause();
       runtime.current?.dispose();
       const renderer = createNativeBurbRenderer(gl, assets, engine.current);
       runtime.current = renderer;
       engine.current = renderer.game.engine;
       setError('');
-      setReadySurface(surfaceKey);
+      setReady(true);
       let previous = 0;
       let rendered = false;
       let lastSpeed = -1;
       function tick(time: number) {
-        if (!alive.current || runtime.current !== renderer || currentSurface.current !== surfaceKey) return;
+        if (!alive.current || runtime.current !== renderer) return;
         try {
           const delta = previous ? (time - previous) / 1000 : 0;
           previous = time;
@@ -98,6 +92,7 @@ export default function BurbScreen() {
       frame.current = requestAnimationFrame(tick);
     } catch (error) {
       console.error('[Burb graphics]', error);
+      pause();
       setError('This device could not open the road. Return to the arcade and try again.');
     }
   }
@@ -117,7 +112,7 @@ export default function BurbScreen() {
 
   return <View style={styles.screen}>
     {assets && <View pointerEvents="none" style={{ position: 'absolute', width: width / surfaceScale, height: height / surfaceScale, transformOrigin: 'top left', transform: [{ scale: surfaceScale }] }}>
-      <GLView key={surfaceKey} style={StyleSheet.absoluteFill} msaaSamples={0} onContextCreate={onContextCreate} />
+      <GLView style={StyleSheet.absoluteFill} msaaSamples={0} onContextCreate={onContextCreate} />
     </View>}
     <View pointerEvents="box-none" style={[styles.interface, { paddingTop: insets.top + 8, paddingBottom: insets.bottom + 12, paddingLeft: insets.left + 12, paddingRight: insets.right + 12 }]}>
       <View style={styles.top}>
