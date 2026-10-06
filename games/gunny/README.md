@@ -4,8 +4,9 @@ Browser and native 3D space shooter. Kid-friendly prototype. Third-person camera
 
 Gunny uses one platform-neutral engine and one Three.js scene in the browser and
 React Native app. Native **Play now** opens the mission with four-direction touch
-steering and a held Fire button. No WebView. Native device testing and TestFlight
-delivery are pending; see the [platform overview](../../README.md#game-availability).
+steering and a held Fire button. No WebView. Gunny is available in iOS TestFlight
+build (13); native device acceptance remains pending. See the
+[platform overview](../../README.md#game-availability).
 
 Read this when changing flight/combat rules, spacecraft, planet art, or either
 platform adapter.

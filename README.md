@@ -32,11 +32,17 @@ Each game's README describes its controls, architecture, and maintenance. Native
 | [Chicken Hop](games/chicken-hop/README.md) | Playable | Playable on iOS/Android; shared rules, separate renderers |
 | [Hunter Guy](games/hunter-guy/README.md) | Playable | Playable on iOS/Android; shared rules, Three.js scene, models and assets |
 | [Burb](games/burb/README.md) | Playable | Playable on iOS/Android; shared engine and Three.js scene; landscape tilt in iOS TestFlight build (12) |
-| [Gunny](games/gunny/README.md) | Playable | Native iOS/Android implementation; shared engine and Three.js scene; device testing and beta delivery pending |
+| [Gunny](games/gunny/README.md) | Playable | Native iOS/Android implementation; shared engine and Three.js scene; iOS TestFlight build (13), device acceptance pending |
 | [Torpedo](games/torpedo/README.md) | Playable | Detail preview; not ported |
 
-Chicken Hop, Hunter Guy and Burb are included in one **Viggo Games** iOS app.
-Internal TestFlight beta **0.1.0 (12)** is available as of **2026-10-05**, with
+Chicken Hop, Hunter Guy, Burb and Gunny are included in one **Viggo Games** iOS app.
+Internal TestFlight beta **0.1.0 (13)** is available as of **2026-10-06**, with
+Gunny's native mission and touch controls, plus About below the game list and on
+every game detail page. The signed installer and bundled assets were verified;
+Apple reports `VALID` and `IN_BETA_TESTING` for the internal **Team (Expo)** group.
+Install through **TestFlight → Viggo Games → Update**. Gunny's physical iPhone
+acceptance remains pending.
+Internal TestFlight beta **0.1.0 (12)** was delivered on **2026-10-05**, with
 Burb landscape roll steering, portrait buttons and **Center Tilt**. Install through
 **TestFlight → Viggo Games → Update**. The signed installer includes the native
 motion module and permission prompt. Christian tested build (12) on his iPhone

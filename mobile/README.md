@@ -7,6 +7,20 @@ or delivering an iPhone beta or Expo update.
 
 ## Delivery status
 
+Gunny and About are embedded in signed **Viggo Games 0.1.0 (13)**, built on
+**2026-10-06** from commit `7d010e5d33978f31472dbbf3df2becd9dadb795e`.
+EAS build ID: `52175aa7-940d-4607-92a4-ee72fc880812`. The archive was checked for
+build (13), Gunny's mission and shared engine, About's copy, all five planet maps,
+warning audio and Viggo's portrait with matching asset hashes. Its native runtime
+is `2d12d4f252db8585180dff1ba16c1e66bc2e25b8`, on the `testflight` channel.
+Apple accepted the direct `altool` upload with no errors, delivery ID
+`cfa89875-7fbb-470e-81b8-43cf7728c0ab`, and reports `VALID` and `IN_BETA_TESTING`.
+The automatic internal **Team (Expo)** group includes build (13); its testing
+notes are saved and verified. Install through **TestFlight → Viggo Games → Update**.
+The full web/mobile gates passed, including 183 tests, both native exports and
+Expo Doctor's 20 checks. Gunny's GPU, touch feel, rotation and background/resume
+still need physical iPhone acceptance.
+
 Burb's landscape motion steering is embedded in signed **Viggo Games 0.1.0 (12)**,
 built on **2026-10-05** from commit `89b1b9843c191da7d5e1ed090e8544ce3be22068`.
 EAS build ID: `1402e533-e880-4c6f-ae1f-9c5df315e544`. The archive was checked for
@@ -120,8 +134,8 @@ The refreshed dependency set passes Expo Doctor's 20 checks and both native expo
 
 All four native games have Android implementations and passing Android export
 checks. An Android device/store build has not been delivered. Gunny and the About
-page were added on **2026-10-06**; their native device testing and beta delivery
-remain pending. The current TestFlight build (12) predates these changes.
+page were delivered in TestFlight build (13) on **2026-10-06**; their native device
+acceptance remains pending.
 Torpedo retains a preview detail page and has not been ported.
 
 ## Stack
