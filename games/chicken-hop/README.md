@@ -4,7 +4,7 @@ Browser and native game with one shared rules engine and separate platform rende
 
 Source of truth: `chrhansen/viggo-games`.
 
-Chicken Hop and Hunter Guy are the two playable games in the **Viggo Games** React
+Chicken Hop and Hunter Guy are playable games in the **Viggo Games** React
 Native/Expo app. Both are included in the internal iOS TestFlight beta **0.1.0 (10)**,
 available as of **2026-10-04**. Christian installed build (10) and reported that it
 looked good on iPhone, providing basic device acceptance. Native game cards open

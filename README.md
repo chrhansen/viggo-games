@@ -93,7 +93,7 @@ The build also prepares and validates descriptive route pages, canonical tags, `
 
 ## Native app
 
-The native app uses Expo SDK 57, React Native and TypeScript, without a WebView. It consumes the local shared Chicken Hop core, Hunter Guy engine/scene and Burb engine/scene and keeps a separate dependency lockfile to isolate Expo/React Native versions:
+The native app uses Expo SDK 57, React Native and TypeScript, without a WebView. It consumes the local shared Chicken Hop core and Hunter Guy, Burb and Gunny engines/scenes and keeps a separate dependency lockfile to isolate Expo/React Native versions:
 
 ```sh
 cd mobile
@@ -102,10 +102,10 @@ npm run ios
 # or: npm run android
 ```
 
-The entire repository must be checked out; local game dependencies resolve to `../games/chicken-hop/core/`, `../games/hunter-guy/` and `../games/burb/` within it. See [mobile/README.md](mobile/README.md) for platform requirements, native checks, and child-directed product constraints.
+The entire repository must be checked out; local game dependencies resolve to `../games/chicken-hop/core/`, `../games/hunter-guy/`, `../games/burb/` and `../games/gunny/` within it. See [mobile/README.md](mobile/README.md) for platform requirements, native checks, and child-directed product constraints.
 
 For iPhone installation, accept the internal TestFlight invitation and install
-**Viggo Games**, then select Hunter Guy or Chicken Hop and tap **Play now** on its
+**Viggo Games**, then select Chicken Hop, Hunter Guy, Burb or Gunny and tap **Play now** on its
 detail page. See [beta delivery](mobile/README.md#expo-and-testflight-beta-delivery)
 for EAS Build, TestFlight submission and compatible JavaScript/asset updates.
 
@@ -115,9 +115,11 @@ for EAS Build, TestFlight submission and compatible JavaScript/asset updates.
 - Shared Chicken Hop rules: `games/chicken-hop/core/`; retain browser/native parity coverage.
 - Shared Hunter Guy rules and 3D scene: `games/hunter-guy/core/` and `games/hunter-guy/scene.js`.
 - Shared Burb rules and 3D scene: `games/burb/core/` and `games/burb/src/scene.ts`; regenerate native textures after editing `games/burb/src/texture-art.ts`.
+- Shared Gunny rules and 3D scene: `games/gunny/core/` and `games/gunny/src/scene.js`; regenerate native warning audio with `node scripts/bake-gunny-audio.mjs`.
 - Native rendering and phone lifecycle: `mobile/src/`.
 - Website layout, navigation, and embedded-player behavior: `src/`.
 - Shared website/mobile descriptions, how-to steps and tips, plus website routes and SEO copy: `src/data/games.json`; website artwork mapping: `src/data/games.ts`.
+- Shared website/mobile About copy: `src/data/about.json`; portrait: `src/assets/viggo-portrait.webp`.
 - Website card art: optimized WebP files in `src/assets/`.
 - Website favicon: `public/favicon.ico`, resized from the iPhone VG artwork in
   `mobile/assets/app-icon.png`. Regenerate with ImageMagick:
