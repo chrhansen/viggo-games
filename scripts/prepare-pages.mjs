@@ -29,6 +29,7 @@ if (!existsSync(indexPath)) {
 
 const baseHtml = readFileSync(indexPath, "utf8");
 const games = JSON.parse(readFileSync(gameRecordsPath, "utf8"));
+const about = JSON.parse(readFileSync(resolve("src/data/about.json"), "utf8"));
 
 copySeoImages();
 
@@ -335,10 +336,11 @@ function renderHomeBody() {
 function renderAboutBody() {
   return `
     <main data-seo-fallback>
-      <h1>About viggo.games</h1>
-      <p>viggo.games is a collection of browser games made by Viggo, built for fun, learning, and arcade nostalgia.</p>
-      <p>Every current game is free to play in a modern browser, with no download required.</p>
-      <p>The site is open source at <a href="https://github.com/chrhansen/viggo-games">github.com/chrhansen/viggo-games</a>.</p>
+      <h1>${escapeHtml(about.title)}</h1>
+      <p>${escapeHtml(SITE_NAME)} ${escapeHtml(about.intro)}</p>
+      <p>${escapeHtml(about.story)}</p>
+      <p>${escapeHtml(about.sourceIntro)}</p>
+      <p><a href="${escapeAttribute(about.sourceUrl)}">${escapeHtml(about.sourceLabel)}</a></p>
       <p><a href="/">Browse all games</a></p>
     </main>
   `;
