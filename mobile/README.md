@@ -7,6 +7,27 @@ or delivering an iPhone beta or Expo update.
 
 ## Delivery status
 
+Gunny and Burb's continuous rotation fix is embedded in signed **Viggo Games
+0.1.0 (15)**, available on **2026-10-06** from commit
+`bc6b4aaebf8e7400eae357f2fc1de7ac695c1411`.
+EAS build ID: `4fa02f4a-4ede-42b8-a1db-7623f15e1fab`. Apple build/delivery ID:
+`ffdf38f5-733d-4eb7-97d0-d5133a2dd3b9`, with `VALID` and `IN_BETA_TESTING` status
+for the internal **Team (Expo)** group. Install through **TestFlight → Viggo Games
+→ Update**. Its embedded runtime is `2d12d4f252db8585180dff1ba16c1e66bc2e25b8`
+on the `testflight` channel. Archive checks verified the version/runtime, all 14
+asset hashes (portrait, five Gunny planet maps, warning audio and seven Burb textures),
+and bytecode for both native layout handlers, protected frame resizing and Burb
+activity restoration. The source gates pass 195 tests, both native exports and
+Expo Doctor's 20 checks. Physical iPhone GPU and rotation acceptance remain pending.
+
+After build (15) started, GitHub CI required six newer Expo SDK 57 patches:
+Expo, Asset, Constants, Linking, Router and Updates. Commit `a165ddb` updates the
+source manifest and lockfile; these patches are for a future installer and are
+not included in build (15). The refreshed source's native fingerprint is
+`c07de1a62efffa5a5086a2723987628d119329cd`, different from build (15)'s runtime.
+No Expo update has been published from this changed runtime. Build (15) includes
+the full rotation fix.
+
 Gunny and About are embedded in signed **Viggo Games 0.1.0 (13)**, built on
 **2026-10-06** from commit `7d010e5d33978f31472dbbf3df2becd9dadb795e`.
 EAS build ID: `52175aa7-940d-4607-92a4-ee72fc880812`. The archive was checked for
@@ -300,8 +321,12 @@ available. The paused landscape card can open motion settings.
   subscription, permission handling, calibration and orientation-aware input mode.
 - `src/app/burb.tsx`: HUD, start/pause, confirmed exit and app lifecycle.
 
-Backgrounding, rotation and surface recreation pause the bike and clear held input.
-The ride survives graphics recreation; resuming continues from the same position.
+Rotation resizes the existing graphics view and clears held touch input while the
+ride keeps playing. Graphics recreation preserves the same engine and its running
+or paused state. Backgrounding and explicit pause stop the bike; Continue resumes
+from the same position. The native layout event supplies pixel dimensions to the
+renderer and shared camera; Expo GL's initial JavaScript buffer dimensions are not
+used to detect later resizes.
 Sensors run only during an active landscape ride, at about 30 samples/second.
 Gravity is separated from hand acceleration; flat/invalid readings and samples
 older than 250ms clear tilt. Portrait, pause, background and exit stop sampling
@@ -326,8 +351,9 @@ steer left/right/up/down and hold Fire at the same time. Destroy 12 two-hit raid
 dodge satellites and expanding blasts, and keep the hull above zero. The HUD shows
 hull, score, kills and distance. At displayed 10% hull, a red warning pulses and the
 browser's 740Hz warning repeats once per second; reduced-motion users see steady red.
-Pause, background, rotation, confirmed exit and mission completion stop held input
-and warning audio. Resume preserves the mission; Restart resets it.
+Pause, background, confirmed exit and mission completion stop held input and warning
+audio. Rotation clears held touch input while the mission and warning keep running.
+Resume preserves the mission; Restart resets it.
 
 - `../games/gunny/core/`: platform-neutral flight, spawning, shots, collision damage,
   score, blast windows, win/loss and pause/time rules. No Three.js or device APIs.
@@ -339,14 +365,20 @@ and warning audio. Resume preserves the mission; Restart resets it.
 - `src/app/gunny.tsx`: native HUD, launch/restart, pause, confirmed exit and lifecycle.
 
 Native resolution is capped at 1.25 device pixels per point; controls/HUD keep full
-resolution. The shared engine survives graphics recreation. Rotation and background
-pause instead of advancing elapsed time, and paused scenes do not redraw. Metro
+resolution. Rotation resizes the existing graphics view while play continues.
+The shared engine and its running or paused state survive graphics recreation.
+Backgrounding pauses the mission, and paused scenes do not redraw. Metro
 uses the app's Three.js 0.160.0 instance for the renderer and all shared scene imports.
 Portrait framing follows the ship horizontally and widens its view so both flight
 bounds remain visible; landscape retains the browser's chase camera.
 Planet maps and source attribution are available offline. No new native module or
 permission is required. Regenerate the procedural warning with the root command
 `node scripts/bake-gunny-audio.mjs` and verify with `--check`.
+
+`../src/test/mobile-game-rotation.test.ts` exercises both native screens and adapters
+with their real shared engines and scenes: portrait/landscape changes, viewport and
+camera sizing, graphics recreation, deliberate pause, background/resume and graphics
+failure. Native GL and sensor behavior still need iPhone verification during beta testing.
 
 Root `gunny-engine`, Gunny's Node regressions, mobile navigation and About tests
 cover shared rules, seeded browser/native parity, multitouch cancellation, restart,

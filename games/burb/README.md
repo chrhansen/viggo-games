@@ -88,8 +88,9 @@ upright, twist slightly left/right around the axis through the screen, and use
 Center tilt to recenter. Native motion uses the shared tilt math with 2°/18°
 dead-zone/full-steer angles; browser sensitivity remains 4°/36°. Fast/Slow remain
 touch controls in both orientations. Native asks for motion permission in landscape
-and falls back to buttons if denied or unavailable. Pause or background to freeze the ride;
-rotation recreates graphics without resetting the bike and waits for Resume.
+and falls back to buttons if denied or unavailable. Pause or background to freeze the ride.
+Native rotation resizes the existing graphics view and clears held touch input while
+the ride keeps playing. Graphics recreation preserves the engine and its running or paused state.
 
 ## Current behavior
 

@@ -47,12 +47,13 @@ export function createNativeGunnyRenderer(gl: ExpoWebGLRenderingContext, assets:
   let disposed = false;
   return {
     game,
+    resize(width: number, height: number) {
+      if (disposed || width <= 0 || height <= 0 || (canvas.width === width && canvas.height === height)) return;
+      renderer.setSize(width, height, false);
+      game.resize(width, height);
+    },
     render() {
       if (disposed) return;
-      if (canvas.width !== gl.drawingBufferWidth || canvas.height !== gl.drawingBufferHeight) {
-        renderer.setSize(gl.drawingBufferWidth, gl.drawingBufferHeight, false);
-        game.resize(gl.drawingBufferWidth, gl.drawingBufferHeight);
-      }
       renderer.render(game.scene, game.camera);
       gl.endFrameEXP();
     },

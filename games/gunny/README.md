@@ -121,7 +121,9 @@ native input timelines produce identical state. Flight speed, steering smoothing
 spawn ranges/timers, two-hit raiders, damage, score and 12-kill goal retain their
 browser rules. Frames clamp to 33ms; paused/background missions do not advance.
 The shared scene projects engine state and has no platform input or gameplay rules.
-Graphics recreation retains the engine and pauses before continuing.
+Native rotation resizes the existing graphics view and clears held touch input while
+the mission keeps playing. Graphics recreation preserves the engine and its running
+or paused state.
 
 The root `src/test/gunny-engine.test.ts` exercises the actual browser adapter against
 native touch input, movement, combat, pause, restart and portrait/landscape scene
