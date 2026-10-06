@@ -7,6 +7,27 @@ or delivering an iPhone beta or Expo update.
 
 ## Delivery status
 
+Gunny and Burb's continuous rotation fix is embedded in signed **Viggo Games
+0.1.0 (15)**, available on **2026-10-06** from commit
+`bc6b4aaebf8e7400eae357f2fc1de7ac695c1411`.
+EAS build ID: `4fa02f4a-4ede-42b8-a1db-7623f15e1fab`. Apple build/delivery ID:
+`ffdf38f5-733d-4eb7-97d0-d5133a2dd3b9`, with `VALID` and `IN_BETA_TESTING` status
+for the internal **Team (Expo)** group. Install through **TestFlight → Viggo Games
+→ Update**. Its embedded runtime is `2d12d4f252db8585180dff1ba16c1e66bc2e25b8`
+on the `testflight` channel. Archive checks verified the version/runtime, all 14
+asset hashes (portrait, five Gunny planet maps, warning audio and seven Burb textures),
+and bytecode for both native layout handlers, protected frame resizing and Burb
+activity restoration. The source gates pass 195 tests, both native exports and
+Expo Doctor's 20 checks. Physical iPhone GPU and rotation acceptance remain pending.
+
+After build (15) started, GitHub CI required six newer Expo SDK 57 patches:
+Expo, Asset, Constants, Linking, Router and Updates. Commit `a165ddb` updates the
+source manifest and lockfile; these patches are for a future installer and are
+not included in build (15). The refreshed source's native fingerprint is
+`c07de1a62efffa5a5086a2723987628d119329cd`, different from build (15)'s runtime.
+No Expo update has been published from this changed runtime. Build (15) includes
+the full rotation fix.
+
 Gunny and About are embedded in signed **Viggo Games 0.1.0 (13)**, built on
 **2026-10-06** from commit `7d010e5d33978f31472dbbf3df2becd9dadb795e`.
 EAS build ID: `52175aa7-940d-4607-92a4-ee72fc880812`. The archive was checked for
