@@ -17,12 +17,12 @@ describe('native About navigation and shared content', () => {
     const screen = fs.readFileSync('mobile/src/app/about.tsx', 'utf8');
     expect(screen).toContain("../../../src/data/about.json");
     expect(screen).toContain("../../../src/assets/viggo-portrait.webp");
-    for (const key of ['title', 'portraitAlt', 'intro', 'story', 'sourceIntro', 'sourceLabel', 'footer']) {
+    for (const key of ['title', 'portraitAlt', 'intro', 'story', 'sourceIntro', 'sourceUrl', 'sourceLabel', 'footer']) {
       expect(screen).toContain(`about.${key}`);
       expect(about[key as keyof typeof about]).toBeTruthy();
     }
     expect(screen).toContain('router.canGoBack()');
     expect(screen).toContain("router.replace('/')");
-    expect(screen).not.toMatch(/Linking|WebView|fetch\(/);
+    expect(screen).not.toMatch(/WebView|fetch\(/);
   });
 });
