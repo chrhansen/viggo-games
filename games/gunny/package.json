@@ -20,5 +20,10 @@
   "main": "index.js",
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "exports": {
+    "./core": "./core/engine.js",
+    "./scene": "./src/scene.js",
+    "./assets/*": "./assets/*"
+  }
 }

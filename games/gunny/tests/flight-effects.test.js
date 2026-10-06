@@ -3,7 +3,8 @@ import test from "node:test";
 import * as THREE from "three";
 import { advanceStars, STAR_DEPTH, STAR_BEHIND, raiderBlastDamage } from "../src/flight-effects.js";
 import { createStars } from "../src/entities.js";
-import { runtimeMethods } from "../src/mission-runtime.js";
+import { GunnyEngine } from "../core/engine.js";
+import { createGunnyScene } from "../src/scene.js";
 import { GunnyGame } from "../src/game.js";
 
 test("nearby star pool stays populated through hours of travel and a restart", () => {
@@ -28,16 +29,16 @@ test("nearby star pool stays populated through hours of travel and a restart", (
 });
 
 test("backdrop follows the ship, near stars move locally and far stars stay fixed", () => {
-  const game = {
-    player: { mesh: { position: { z: -42000 } } },
-    starField: createStars(), nearStars: createStars(1100, true), lastStarPlayerZ: -41958,
-    earth: new THREE.Object3D(), moon: new THREE.Object3D(),
-  };
-  const farPositions = game.starField.geometry.attributes.position.array.slice();
-  runtimeMethods.updateBackdrop.call(game, 1);
-  assert.equal(game.starField.position.z, -42000);
-  assert.equal(game.nearStars.position.z, -42000);
-  assert.deepEqual(game.starField.geometry.attributes.position.array, farPositions);
+  const engine = new GunnyEngine();
+  const game = createGunnyScene({ aspect: 1, engine, loadTexture: () => new THREE.Texture() });
+  const fields = game.scene.children.filter(child => child.isPoints);
+  const farPositions = fields[0].geometry.attributes.position.array.slice();
+  engine.player.position.z = -42000;
+  game.sync(1);
+  assert.equal(fields[0].position.z, -42000);
+  assert.equal(fields[1].position.z, -42000);
+  assert.deepEqual(fields[0].geometry.attributes.position.array, farPositions);
+  game.dispose();
 });
 
 test("blast damage falls off and expires; escaped ships stay safe", () => {
@@ -48,40 +49,34 @@ test("blast damage falls off and expires; escaped ships stay safe", () => {
 });
 
 test("raider blast damages once, decorative explosions never damage, expiry cleans up", () => {
-  let health = 100;
-  const game = {
-    scene: new THREE.Scene(), explosions: [],
-    player: { mesh: new THREE.Object3D() },
-    damagePlayer: (damage) => { health -= damage; },
-  };
-  runtimeMethods.spawnExplosion.call(game, new THREE.Vector3(), 0xffb96e, 3.8, true);
-  runtimeMethods.updateExplosions.call(game, 0.02);
-  assert.equal(health, 86);
-  runtimeMethods.updateExplosions.call(game, 0.3);
-  assert.equal(health, 86);
-  runtimeMethods.spawnExplosion.call(game, new THREE.Vector3(), 0xffffff, 1.4);
-  runtimeMethods.updateExplosions.call(game, 0.1);
-  assert.equal(health, 86);
-  runtimeMethods.updateExplosions.call(game, 1);
+  const game = new GunnyEngine();
+  game.spawnExplosion({ x: 0, y: 0, z: 0 }, 0xffb96e, 3.8, true);
+  game.updateExplosions(0.02);
+  assert.equal(game.state.health, 86);
+  game.updateExplosions(0.3);
+  assert.equal(game.state.health, 86);
+  game.spawnExplosion({ x: 0, y: 0, z: 0 }, 0xffffff, 1.4);
+  game.updateExplosions(0.1);
+  assert.equal(game.state.health, 86);
+  game.updateExplosions(1);
   assert.equal(game.explosions.length, 0);
-  assert.equal(game.scene.children.length, 0);
 });
 
 test("final raider blast resolves before mission success; lethal blast loses", () => {
-  let result;
-  const game = {
-    state: { health: 10, kills: 12 }, explosions: [{ raiderBlast: true, age: 0 }],
-    finishMission: (won) => { result = won; },
-  };
-  runtimeMethods.checkMissionState.call(game);
-  assert.equal(result, undefined);
+  const game = new GunnyEngine();
+  game.start();
+  game.state.health = 10;
+  game.state.kills = 12;
+  game.spawnExplosion({ x: 100, y: 0, z: 0 }, 0xffb96e, 3.8, true);
+  game.checkMissionState();
+  assert.equal(game.state.result, null);
   game.state.health = 0;
-  runtimeMethods.checkMissionState.call(game);
-  assert.equal(result, false);
+  game.checkMissionState();
+  assert.equal(game.state.result, 'lose');
   game.state.health = 10;
   game.explosions = [];
-  runtimeMethods.checkMissionState.call(game);
-  assert.equal(result, true);
+  game.checkMissionState();
+  assert.equal(game.state.result, 'win');
 });
 
 test("hull warning covers 10% threshold, stops at mission end and silences on blur", () => {

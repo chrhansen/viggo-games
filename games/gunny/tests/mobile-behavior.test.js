@@ -10,7 +10,7 @@ class HudGame extends GunnyGame {
   resetMission() {
     this.started = false;
     this.finished = false;
-    this.state = { health: 100, score: 0, kills: 0, distance: 0 };
+    this.engine.reset();
   }
 }
 

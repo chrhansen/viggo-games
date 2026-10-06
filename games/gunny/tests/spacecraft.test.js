@@ -3,7 +3,8 @@ import test from "node:test";
 import * as THREE from "three";
 import { createPlayerShip, createEnemyShip, updateCraftAppearance } from "../src/spacecraft.js";
 import { createSatellite } from "../src/satellite.js";
-import { runtimeMethods } from "../src/mission-runtime.js";
+import { GunnyEngine } from "../core/engine.js";
+import { muzzlePosition } from "../core/math.js";
 
 test("solar cells remain exposed from either side of the satellite's open frames", () => {
   const satellite = createSatellite();
@@ -46,16 +47,26 @@ test("player damage flashes do not change other craft or leave the cockpit glowi
 });
 
 test("shots emerge from the craft nose in world space, including a turned raider", () => {
-  const ship = createPlayerShip();
-  ship.position.set(4, 2, -120);
-  const game = { scene: new THREE.Scene(), player: { mesh: ship, shots: [], velocity: new THREE.Vector3() }, enemyShots: [] };
-  runtimeMethods.firePlayerShot.call(game);
-  assert.deepEqual(game.player.shots[0].mesh.position.toArray(), [4, 2, -125.1]);
-  const raider = createEnemyShip();
-  raider.position.set(0, 0, -150);
-  runtimeMethods.fireEnemyShot.call(game, { mesh: raider });
-  assert.ok(Math.abs(game.enemyShots[0].mesh.position.z + 146.72) < 1e-10);
+  const game = new GunnyEngine();
+  game.player.position = { x: 4, y: 2, z: -120 };
+  game.firePlayerShot();
+  assert.deepEqual(Object.values(game.playerShots[0].position), [4, 2, -125.1]);
+  game.spawnEnemy();
+  const raider = game.enemies[0];
+  raider.position = { x: 0, y: 0, z: -150 };
+  game.fireEnemyShot(raider);
+  assert.ok(Math.abs(game.enemyShots[0].position.z + 146.72) < 1e-10);
   assert.ok(game.enemyShots[0].velocity.z > 0);
+  for (const factory of [createPlayerShip, createEnemyShip]) {
+    const mesh = factory();
+    mesh.position.set(4, 2, -120);
+    for (const angles of [[0.2, -0.3, 0.4], [-0.2, Math.PI, -0.5]]) {
+      mesh.rotation.set(...angles);
+      const expected = mesh.localToWorld(new THREE.Vector3().fromArray(mesh.userData.muzzle));
+      const actual = muzzlePosition({ position: mesh.position, rotation: mesh.rotation, scale: mesh.scale.x }, mesh.userData.muzzle[2]);
+      assert.ok(expected.distanceTo(new THREE.Vector3().copy(actual)) < 1e-10);
+    }
+  }
 });
 
 test("repeated spawns reuse baked geometry while retaining independent transforms", () => {
