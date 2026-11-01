@@ -7,10 +7,27 @@ or delivering an iPhone beta or Expo update.
 
 ## Delivery status
 
-The updated About copy and tappable GitHub source link are present in source.
-Installed TestFlight build (15) still has the older About copy and selectable
-GitHub text. No new mobile build or Expo update has been published for these
-changes; pushing to `main` deploys the website only.
+Torpedo and the updated About page were published as an **iOS Expo update on
+2026-11-01** to `testflight`. Update group:
+[`ec48660d-198c-4d64-9079-2e142e030b0b`](https://expo.dev/accounts/viggo-games/projects/viggo-games/updates/ec48660d-198c-4d64-9079-2e142e030b0b).
+Update ID: `01a19835-04e9-7d15-8784-f127217b34e8`. Torpedo implementation commit:
+`a0d67aa`. All five arcade entries now offer **Play now**.
+
+The release snapshot uses build (15)'s exact mobile dependencies from `bc6b4aa`
+plus the repository-local Torpedo package. Its native fingerprint exactly matches
+build (15): `2d12d4f252db8585180dff1ba16c1e66bc2e25b8`; no runtime override was used.
+The app's update endpoint serves this update for that runtime and channel. The
+published bundle and all 61 assets were downloaded and hash-verified, including
+all five room images; the bundle matches the tested release export. Open
+Viggo Games online, allow the download, then fully close and reopen it. The
+TestFlight build number stays **0.1.0 (15)**.
+
+Validation: root lint/typecheck/tests/build, desktop and phone-browser smoke,
+mobile lint/typecheck, iOS/Android exports, and native lifecycle tests pass
+(210 tests total). Expo Doctor reports 19/20 checks: newer SDK patches are
+recommended, a pre-existing dependency advisory. Those upgrades require a future
+installer. The local simulator's old development app lacks Expo GL, so physical
+GPU/touch acceptance remains pending on the iPhone.
 
 Gunny and Burb's continuous rotation fix is embedded in signed **Viggo Games
 0.1.0 (15)**, available on **2026-10-06** from commit

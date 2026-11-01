@@ -35,6 +35,11 @@ Each game's README describes its controls, architecture, and maintenance. Native
 | [Gunny](games/gunny/README.md) | Playable | Native iOS/Android implementation; shared engine and Three.js scene; continuous rotation in iOS TestFlight build (15), device acceptance pending |
 | [Torpedo](games/torpedo/README.md) | Playable | Playable on iOS/Android; shared combat, Three.js scene, bosses and room actions |
 
+All five games now have native implementations. Torpedo was delivered by an
+[iOS Expo update on 2026-11-01](mobile/README.md#delivery-status), targeting the
+existing TestFlight build (15). Open the app online, then fully close and reopen
+it to apply the update. Phone gameplay acceptance remains pending.
+
 Chicken Hop, Hunter Guy, Burb and Gunny are included in one **Viggo Games** iOS app.
 Internal TestFlight beta **0.1.0 (15)** is available as of **2026-10-06**, with
 Gunny and Burb continuing play through portrait/landscape rotation. The signed
