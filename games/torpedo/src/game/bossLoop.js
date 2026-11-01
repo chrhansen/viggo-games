@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createEnemySubmarineMesh, quaternionFacing } from './meshes.js';
+import { quaternionFacing } from './meshes.js';
 import { PLAYER_BOUNDS } from './combatConfig.js';
 
 const BOSSES_PER_LEVEL = 5;
@@ -59,7 +59,7 @@ export class BossLoop {
   }
 
   spawnBoss() {
-    const mesh = createEnemySubmarineMesh();
+    const mesh = this.combat.meshes.createEnemySubmarineMesh();
     const lane = this.bossesDefeated % 2 === 0 ? -10 : 10;
     mesh.position.set(
       clamp(this.combat.player.position.x + lane + randomBetween(-4, 4), -PLAYER_BOUNDS.x + 8, PLAYER_BOUNDS.x - 8),
@@ -132,7 +132,7 @@ export class BossLoop {
   }
 
   spawnPickupSub(position, rotation) {
-    const mesh = createEnemySubmarineMesh();
+    const mesh = this.combat.meshes.createEnemySubmarineMesh();
     mesh.position.copy(position);
     mesh.quaternion.copy(rotation);
     mesh.scale.setScalar(0.42);

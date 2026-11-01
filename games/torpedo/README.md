@@ -2,9 +2,33 @@
 
 Torpedo is a browser-based first-person submarine game prototype. It is a kid-friendly arcade game: you lead a submarine patrol under the ocean while enemy submarines approach from the front and fire torpedoes.
 
-Torpedo has not been ported to the React Native app. Its card in Viggo Games is a
-detail preview marked **Coming to mobile**; phone/touch support here refers to the browser. See the
-[repository platform overview](../../README.md#game-availability).
+Torpedo also runs natively on iOS and Android in the Viggo Games app, without a
+WebView. Both platforms use the same combat, enemies, helpers, bosses, scoring,
+interior actions, Three.js scene, procedural textures, and room artwork.
+Read this when changing Torpedo gameplay or either platform adapter.
+
+## Shared architecture
+
+- `src/game/TorpedoGame.js`: renderer-independent game and scene; advances with
+  `step(delta)`, exposes a plain HUD snapshot, and owns pause/restart/disposal.
+- `src/game/OceanCombat.js`: browser WebGL renderer, animation clock, keyboard
+  events, and DOM HUD adapter around that shared game.
+- `src/game/rooms.js` and `interiorActions.js`: shared room definitions and actions.
+  `InteriorWalk.js` presents the browser cutaway; the app uses native room tabs.
+- `mobile/src/game/torpedo/`: Expo GL renderer and multitouch adapter. Metro uses
+  the app's existing Three.js version. No new native module or outside checkout.
+- `mobile/src/hooks/use-torpedo.ts`: screen lifecycle, safe resize, pause on
+  background/navigation, and preservation of the patrol across GL recreation.
+
+Native controls: hold arrows to steer and Fire to shoot; select Front, Port,
+Starboard, or Scope. Scope has separate turning arrows. Rooms pauses the patrol
+and opens all five rooms with the same actions as the browser. Pause/Continue,
+restart after hull breach, and confirmed exits follow the other mobile games.
+Rotation clears held touches and resizes the scene without restarting the patrol.
+
+Shared and native integration tests live in `src/test/torpedo-*.test.ts` at the
+repository root. Run the root gate plus the mobile lint/typecheck/native exports
+and the browser smoke test below before release.
 
 The player submarine has fictional windows, even though real military submarines do not. The front window is the main combat view, the side windows let you look port or starboard, and the periscope gives a tighter forward view.
 

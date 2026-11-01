@@ -1,6 +1,6 @@
 # Viggo Games Mobile
 
-Native iOS and Android app built with React Native and Expo. It includes the native splash, game selector, game detail pages, and playable native Chicken Hop, Hunter Guy, Burb and Gunny. It does not embed the website.
+Native iOS and Android app built with React Native and Expo. It includes the native splash, game selector, game detail pages, and playable native Chicken Hop, Hunter Guy, Burb, Gunny and Torpedo. It does not embed the website.
 
 Read this when developing a native game, checking browser/native ownership,
 or delivering an iPhone beta or Expo update.
@@ -205,9 +205,8 @@ Mobile CI runs this gate plus the root web/test gate for changes to the mobile a
 The arcade and game detail pages use a solid black background, without decorative
 glows, arcs or grid lines.
 
-The selector shows each full title image at its original aspect ratio. Only
-Torpedo has a **Coming Soon** overlay; playable games have no text or
-shade over their artwork. Tap any image to open its detail page.
+The selector shows each full title image at its original aspect ratio. All five
+games are playable; there is no text or shade over their artwork. Tap any image to open its detail page.
 
 Select a mission to open its detail page with artwork, instructions, touch controls
 and tips. Descriptions and gameplay instructions come from the website's shared
@@ -390,6 +389,26 @@ cover shared rules, seeded browser/native parity, multitouch cancellation, resta
 scene disposal, portrait flight-bound framing and portrait/landscape recreation. iOS/Android exports and Expo
 Doctor pass. The installed simulator has no accessible Simulator.app UI, so native
 GPU, touch feel, rotation and background/resume still need iPhone verification.
+
+## Torpedo
+
+Torpedo uses `torpedo/game` from `../games/torpedo` for the same combat, helpers,
+straight-course enemies, boss progression, prizes, camera views, and procedural
+underwater scene as the website. `torpedo/rooms` shares all five room definitions;
+room art is bundled from the same repository-local assets. Nothing loads from
+another checkout or a hosted game.
+
+The native adapter adds Expo GL rendering, held multitouch steering/fire, native
+view selectors, periscope turning, HUD, room tabs/actions, and pause/restart cards.
+Visiting rooms pauses combat. Backgrounding and confirmed exits clear controls.
+Rotation and replacement GL contexts preserve the patrol; an inactive scene only
+redraws when its size/view changes. GPU resources belong to each patrol and are
+released on exit. Tests cover shared combat and room behavior plus the mounted
+native screen's rotation, background/resume, room visits and graphics failures.
+
+No native dependencies were added. Expo updates still need the dependency
+versions and fingerprint of the target installed build; the repository's newer
+SDK patches belong to a future installer.
 
 ## Expo and TestFlight beta delivery
 

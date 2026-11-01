@@ -14,7 +14,7 @@ export interface GamePreview {
   color: string;
   image: number;
   status: "ready" | "locked";
-  route?: "/chicken-hop" | "/hunter-guy" | "/burb" | "/gunny";
+  route?: "/chicken-hop" | "/hunter-guy" | "/burb" | "/gunny" | "/torpedo";
 }
 
 export const gamePreviews: readonly GamePreview[] = [
@@ -70,7 +70,8 @@ export const gamePreviews: readonly GamePreview[] = [
     genre: "Submarine combat",
     color: "#8FE7FF",
     image: torpedoImage,
-    status: "locked",
+    status: "ready",
+    route: "/torpedo",
   },
 ];
 
@@ -78,6 +79,7 @@ const touchControls: Record<string, readonly string[]> = {
   'chicken-hop': ['Hold left or right to move.', 'Tap Hop to jump; hold it in the air to fly.'],
   'hunter-guy': ['Left joystick to move; drag the forest to look.', 'Choose a belt tool, aim, then tap Use Tool.'],
   'burb': ['Portrait: hold Left or Right to steer.', 'Landscape: hold the phone upright and twist slightly left or right to steer. Tap Center tilt to recenter.', 'Hold Fast or Slow to change speed; release to cruise.'],
+  'torpedo': ['Hold the arrows to steer and hold Fire to launch torpedoes.', 'Switch windows or use Scope and its turning arrows to look around.', 'Visit Rooms to rest, ping sonar, or repair the engine while the patrol is paused.'],
   'gunny': ['Hold the directional buttons to steer left, right, up or down.', 'Hold Fire while steering to blast raiders. Clear 12 raiders and dodge satellites and explosions.'],
 };
 
