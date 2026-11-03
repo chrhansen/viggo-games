@@ -4,6 +4,7 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { createRequire } from 'node:module';
+import { BOSS_SAVE_KEY } from '../src/game/bossProgress.js';
 
 const root = resolve(new URL('..', import.meta.url).pathname);
 const require = createRequire(import.meta.url);
@@ -51,7 +52,8 @@ try {
     mobile: true
   });
   const mobile = await runScenario(mobileClient, 'mobile');
-  const report = { desktop, mobile };
+  await checkReturningPatrol();
+  const report = { desktop, mobile, returningPatrol: 'resumed 2 bosses, started fresh, reopened at 0' };
 
   const failures = [...scenarioFailures('desktop', desktop), ...scenarioFailures('mobile', mobile)];
 
@@ -85,6 +87,32 @@ async function createPageClient() {
   await client.send('Page.enable');
   await client.send('Runtime.enable');
   return client;
+}
+
+async function checkReturningPatrol() {
+  const client = await createPageClient();
+  const seed = await client.send('Page.addScriptToEvaluateOnNewDocument', {
+    source: `localStorage.setItem(${JSON.stringify(BOSS_SAVE_KEY)}, '2')`,
+  });
+  await client.send('Page.navigate', { url: appUrl });
+  const choiceVisible = count => `
+    document.querySelector('#splash-screen:not(.hidden) #resume-button:not([hidden])') &&
+    document.querySelector('#patrol-briefing').textContent.includes('${count} bosses')
+  `;
+  await waitForExpression(client, choiceVisible(2));
+  await client.send('Page.removeScriptToEvaluateOnNewDocument', { identifier: seed.identifier });
+  await evaluate(client, "document.querySelector('#resume-button').click()");
+  await waitForExpression(client, `
+    document.querySelector('#level-meter').textContent === 'Boss 2/5' &&
+    document.querySelector('#score-meter').textContent === 'Score 0' &&
+    document.querySelector('#health-meter').textContent === 'Hull 160'
+  `);
+  await client.send('Page.reload');
+  await waitForExpression(client, choiceVisible(2));
+  await evaluate(client, "document.querySelector('#start-button').click()");
+  await waitForExpression(client, "document.querySelector('#level-meter').textContent === 'Boss 0/5'");
+  await client.send('Page.reload');
+  await waitForExpression(client, choiceVisible(0));
 }
 
 function scenarioFailures(label, report) {

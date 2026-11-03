@@ -26,6 +26,13 @@ and opens all five rooms with the same actions as the browser. Pause/Continue,
 restart after hull breach, and confirmed exits follow the other mobile games.
 Rotation clears held touches and resizes the scene without restarting the patrol.
 
+Torpedo remembers one boss count on each device or browser. On returning, choose
+**Resume boss count** or **Start fresh**. A new patrol starts with full hull,
+zero score, and a clear ocean. Starting fresh replaces the previous count with
+zero. Sinking a boss records it immediately, even before collecting its prize.
+A count of five resumes at level two. Leaving the welcome screen without
+starting a patrol preserves the previous save.
+
 Shared and native integration tests live in `src/test/torpedo-*.test.ts` at the
 repository root. Run the root gate plus the mobile lint/typecheck/native exports
 and the browser smoke test below before release.

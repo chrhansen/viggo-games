@@ -86,13 +86,24 @@ export class TorpedoGame {
     this.paused = false;
   }
 
-  restart() {
+  startPatrol(bossesDefeated = 0) {
+    if (this.disposed) return;
+    this.restart(bossesDefeated);
+    this.start();
+    this.saveBossCount();
+  }
+
+  saveBossCount() {
+    if (this.running && !this.disposed) this.callbacks.onSaveBossCount?.(this.bossLoop.bossesDefeated);
+  }
+
+  restart(bossesDefeated = 0) {
     for (const enemy of this.enemies) this.world.remove(enemy.mesh);
     for (const torpedo of this.playerTorpedoes) this.world.remove(torpedo.mesh);
     for (const torpedo of this.enemyTorpedoes) this.world.remove(torpedo.mesh);
     this.effects.clear();
     this.clearKeys();
-    this.bossLoop.removeAll();
+    this.bossLoop.removeAll(bossesDefeated);
 
     this.enemies = [];
     this.playerTorpedoes = [];
@@ -363,6 +374,7 @@ export class TorpedoGame {
   getSnapshot() {
     return {
       started: this.running, active: this.active, gameOver: this.isGameOver,
+      bossesDefeated: this.bossLoop.bossesDefeated,
       score: this.player.score, hull: this.player.hull, maxHull: PLAYER_MAX_HULL,
       engineBroken: this.player.engineBroken, ready: this.player.cooldown <= 0,
       view: this.view, viewTitle: VIEW_CONFIG[this.view].title,

@@ -7,6 +7,7 @@ import ts from 'typescript';
 import * as THREE from 'three';
 import { TorpedoGame } from '../../games/torpedo/src/game/TorpedoGame.js';
 import { ROOMS } from '../../games/torpedo/src/game/rooms.js';
+import * as bossProgress from '../../games/torpedo/src/game/bossProgress.js';
 import { createTorpedoTouchInput } from '../../mobile/src/game/torpedo/touch-input';
 
 type GL = { drawingBufferWidth: number; drawingBufferHeight: number; endFrameEXP: () => void };
@@ -21,7 +22,7 @@ function loadNative<T>(path: string, modules: Record<string, unknown>): T {
   }, module, module.exports);
   return module.exports as T;
 }
-function fixture() {
+function fixture(slot: { value: string | null } = { value: null }) {
   let dimensions = { width: 390, height: 844 };
   let game: TorpedoGame;
   let touch: ReturnType<typeof createTorpedoTouchInput>;
@@ -73,12 +74,21 @@ function fixture() {
     'expo-gl': { GLView }, 'expo-image': { Image: () => null },
     'expo-router': { useFocusEffect(callback: React.EffectCallback) { React.useEffect(callback, [callback]); } },
     'react-native-safe-area-context': { useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }) },
-    'torpedo/game': { TorpedoGame: class extends TorpedoGame { constructor() { super(); captureGame(this); } } },
+    'torpedo/game': { TorpedoGame: class extends TorpedoGame {
+      constructor(callbacks: ConstructorParameters<typeof TorpedoGame>[0]) { super(callbacks); captureGame(this); }
+    } },
+    'torpedo/boss-progress': bossProgress,
+    'expo-file-system': { Paths: { document: 'documents' }, File: class {
+      get exists() { return slot.value !== null; }
+      textSync() { return slot.value; }
+      write(value: string) { slot.value = value; }
+    } },
     'torpedo/rooms': { ROOMS }, '@/constants/theme': { fonts: {} },
     '@/game/torpedo/touch-input': { createTorpedoTouchInput: () => { touch = createTorpedoTouchInput(); return touch; } },
     '@/components/torpedo/torpedo-controls': { TorpedoControls: () => React.createElement('div', { 'data-testid': 'controls' }) },
     '@/hooks/use-game-exit': { useGameExit: (_title: string, pause: () => () => void) => () => { pause()(); } },
   };
+  modules['@/game/torpedo/boss-progress'] = loadNative('mobile/src/game/torpedo/boss-progress.ts', modules);
   modules['@/game/torpedo/renderer'] = loadNative('mobile/src/game/torpedo/renderer.ts', modules);
   modules['@/hooks/use-torpedo'] = loadNative('mobile/src/hooks/use-torpedo.ts', modules);
   modules['@/components/torpedo/torpedo-rooms'] = loadNative('mobile/src/components/torpedo/torpedo-rooms.tsx', modules);
@@ -104,6 +114,55 @@ function fixture() {
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 
 describe('Torpedo native screen', () => {
+  it('keeps only the latest boss count across exit, resume, and a fresh patrol', () => {
+    const slot = { value: '2' };
+    const menu = fixture(slot);
+    expect(menu.view.getByText(/Your last patrol sank 2 bosses/)).toBeInTheDocument();
+    menu.view.unmount();
+    expect(slot.value).toBe('2');
+
+    const resumed = fixture(slot);
+    resumed.click('RESUME BOSS COUNT');
+    expect(resumed.game.getSnapshot()).toMatchObject({ status: 'Boss 2/5', hull: 160, score: 0 });
+    resumed.game.bossLoop.regularKills = resumed.game.bossLoop.regularKillsNeeded();
+    resumed.game.bossLoop.update(0);
+    const boss = resumed.game.bossLoop.boss!;
+    for (let hits = boss.health; hits > 0; hits--) resumed.game.bossLoop.hitBoss({ mesh: boss.mesh });
+    resumed.game.damagePlayer(12);
+    expect(resumed.game.getSnapshot()).toMatchObject({ bossesDefeated: 3, score: 500, hull: 148 });
+    resumed.view.unmount();
+    expect(slot.value).toBe('3');
+
+    const next = fixture(slot);
+    next.click('RESUME BOSS COUNT');
+    expect(next.game.getSnapshot()).toMatchObject({ status: 'Boss 3/5', hull: 160, score: 0 });
+    expect(next.game.bossLoop.waitingForPickup).toBe(false);
+    next.view.unmount();
+
+    const fresh = fixture(slot);
+    fresh.click('START FRESH');
+    expect(fresh.game.getSnapshot()).toMatchObject({ status: 'Boss 0/5', hull: 160, score: 0 });
+    fresh.view.unmount();
+    expect(slot.value).toBe('0');
+    const reopened = fixture(slot);
+    expect(reopened.view.getByText(/Your last patrol sank 0 bosses/)).toBeInTheDocument();
+  });
+
+  it('resumes a completed boss ladder at level two and offers both choices after a hull breach', () => {
+    const app = fixture({ value: '5' });
+    app.click('RESUME BOSS COUNT');
+    expect(app.game.getSnapshot()).toMatchObject({ status: 'Level 2', score: 0, hull: 160 });
+    app.game.damagePlayer(160); app.advance();
+    app.click('START FRESH');
+    expect(app.game.getSnapshot()).toMatchObject({ status: 'Boss 0/5', score: 0, hull: 160, gameOver: false });
+  });
+
+  it.each([null, '', 'null', '-1', '6', '1.5', '{"score":900}'])('offers a first patrol for missing or invalid storage (%s)', value => {
+    const app = fixture({ value });
+    expect(app.view.getByRole('button', { name: 'START PATROL' })).toBeEnabled();
+    expect(app.view.queryByRole('button', { name: 'RESUME BOSS COUNT' })).not.toBeInTheDocument();
+  });
+
   it('keeps its patrol and GL surface through portrait/landscape changes, clearing held controls', () => {
     const app = fixture(); app.start(); const game = app.game;
     for (const [width, height] of [[844, 390], [390, 844]]) {

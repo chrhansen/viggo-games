@@ -409,6 +409,12 @@ GPU, touch feel, rotation and background/resume still need iPhone verification.
 
 ## Torpedo
 
+After **Play now**, a returning captain can resume the latest boss count or start
+fresh. Only that number is stored in the app’s documents directory. Starting a
+patrol, sinking a boss, backgrounding, and exiting save the current count. Score,
+hull, enemies, and prizes reset for each new patrol. Pausing and visiting rooms
+continue the current patrol.
+
 Torpedo uses `torpedo/game` from `../games/torpedo` for the same combat, helpers,
 straight-course enemies, boss progression, prizes, camera views, and procedural
 underwater scene as the website. `torpedo/rooms` shares all five room definitions;

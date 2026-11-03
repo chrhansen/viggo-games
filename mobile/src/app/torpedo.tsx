@@ -2,6 +2,7 @@ import { GLView } from 'expo-gl';
 import { PixelRatio, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { TorpedoView } from 'torpedo/game';
+import { resumePrompt } from 'torpedo/boss-progress';
 import { TorpedoControls } from '@/components/torpedo/torpedo-controls';
 import { TorpedoRooms } from '@/components/torpedo/torpedo-rooms';
 import { fonts } from '@/constants/theme';
@@ -16,7 +17,12 @@ export default function TorpedoScreen() {
   const patrol = useTorpedo();
   const { hud, ready, error, rooms } = patrol;
   const active = hud.active && ready && !error;
-  const requestExit = useGameExit('Torpedo', patrol.pauseForExit);
+  const requestExit = useGameExit('Torpedo', patrol.pauseForExit,
+    hud.started ? 'Your boss count carries over to your next patrol.' : 'Return to the arcade?');
+  const previousCount = hud.gameOver ? hud.bossesDefeated : hud.started ? null : patrol.savedBossCount;
+  const description = previousCount !== null ? resumePrompt(previousCount)
+    : hud.started ? 'Patrol paused. Your submarine stays right where you left it.'
+      : 'Lead your fleet through the deep. Dodge incoming torpedoes and keep the hull together.';
   const landscape = width > height;
   return <View style={styles.screen}>
     <View pointerEvents="none" style={{ position: 'absolute', width: width / surfaceScale, height: height / surfaceScale, transformOrigin: 'top left', transform: [{ scale: surfaceScale }] }}>
@@ -29,13 +35,13 @@ export default function TorpedoScreen() {
         <Pressable accessibilityRole="button" accessibilityLabel="Exit Torpedo" onPress={requestExit} style={styles.button}><Text style={styles.buttonText}>‹ BACK</Text></Pressable>
         <Text style={styles.mission}>TORPEDO · 05</Text>
         <Pressable accessibilityRole="button" accessibilityLabel={active ? 'Pause patrol' : 'Resume patrol'} disabled={!ready || !!error || !hud.started || hud.gameOver || rooms}
-          onPress={active ? patrol.pause : patrol.start} style={styles.button}><Text style={styles.buttonText}>{active ? 'PAUSE' : 'RESUME'}</Text></Pressable>
+          onPress={active ? patrol.pause : patrol.resume} style={styles.button}><Text style={styles.buttonText}>{active ? 'PAUSE' : 'RESUME'}</Text></Pressable>
       </View>
-      <View pointerEvents="none" style={styles.stats}>
+      {(hud.started || previousCount === null) && <View pointerEvents="none" style={styles.stats}>
         <Text style={[styles.stat, hud.hull <= 55 && styles.critical]}>HULL {hud.hull}/{hud.maxHull}</Text>
         <Text style={styles.stat}>SCORE {hud.score}</Text>
         <Text style={styles.stat}>{hud.status.toUpperCase()}</Text>
-      </View>
+      </View>}
       {rooms ? <TorpedoRooms game={patrol.game} onReturn={patrol.leaveRooms} onChange={patrol.sync} /> : <>
         {active && <View style={styles.views}>
           {views.map(([view, label]) => <Pressable key={view} accessibilityRole="button" accessibilityLabel={`${label.toLowerCase()} view`} accessibilityState={{ selected: hud.view === view }}
@@ -52,11 +58,22 @@ export default function TorpedoScreen() {
     {!active && !rooms && <View style={[styles.overlay, { top: insets.top + 96, bottom: insets.bottom + 12 }]} pointerEvents="box-none">
       <ScrollView style={styles.card} contentContainerStyle={styles.cardContent}>
         <Text style={styles.eyebrow}>{hud.gameOver ? 'HULL BREACHED' : 'SUBMARINE PATROL · 05'}</Text>
-        <Text accessibilityRole="header" style={styles.title}>{hud.gameOver ? 'Dive again' : 'Torpedo'}</Text>
-        <Text style={styles.description}>{error || (hud.gameOver ? `Score ${hud.score}. Start a fresh patrol and try a sneakier dodge.` : hud.started ? 'Patrol paused. Your submarine stays right where you left it.' : 'Lead your fleet through the deep. Dodge incoming torpedoes and keep the hull together.')}</Text>
+        <Text accessibilityRole="header" style={styles.title}>{hud.gameOver ? 'Dive again' : previousCount !== null ? 'Welcome back, Captain' : 'Torpedo'}</Text>
+        <Text style={styles.description}>{error || description}</Text>
         {!error && <>
-          <Text style={styles.instructions}>Hold the arrows to steer. Hold Fire to launch torpedoes.{ '\n' }Switch windows or use Scope and its turning arrows.{ '\n' }Visit Rooms to rest, ping sonar, and repair the engine.</Text>
-          <Pressable accessibilityRole="button" disabled={!ready} onPress={patrol.start} style={[styles.start, !ready && styles.loading]}><Text style={styles.startText}>{!ready ? 'OPENING OCEAN…' : hud.gameOver ? 'RESTART PATROL' : hud.started ? 'CONTINUE PATROL' : 'START PATROL'}</Text></Pressable>
+          {previousCount !== null ? <View style={styles.choices}>
+            <Pressable accessibilityRole="button" disabled={!ready} onPress={() => patrol.startPatrol(previousCount)} style={[styles.start, !ready && styles.loading]}>
+              <Text style={styles.startText}>RESUME BOSS COUNT</Text>
+            </Pressable>
+            <Pressable accessibilityRole="button" disabled={!ready} onPress={() => patrol.startPatrol(0)} style={[styles.fresh, !ready && styles.loading]}>
+              <Text style={styles.buttonText}>START FRESH</Text>
+            </Pressable>
+          </View> : <>
+            <Text style={styles.instructions}>Hold the arrows to steer. Hold Fire to launch torpedoes.{ '\n' }Switch windows or use Scope and its turning arrows.{ '\n' }Visit Rooms to rest, ping sonar, and repair the engine.</Text>
+            <Pressable accessibilityRole="button" disabled={!ready} onPress={hud.started ? patrol.resume : () => patrol.startPatrol(0)} style={[styles.start, !ready && styles.loading]}>
+              <Text style={styles.startText}>{!ready ? 'OPENING OCEAN…' : hud.started ? 'CONTINUE PATROL' : 'START PATROL'}</Text>
+            </Pressable>
+          </>}
         </>}
       </ScrollView>
     </View>}
@@ -81,4 +98,6 @@ const styles = StyleSheet.create({
   description: { color: '#C1DCE0', fontSize: 15, lineHeight: 21, marginTop: 8, fontFamily: fonts.regular },
   instructions: { color: '#A8C8CA', fontSize: 13, lineHeight: 21, marginVertical: 14, fontFamily: fonts.regular },
   start: { minHeight: 50, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F5D360', borderRadius: 10 }, startText: { color: '#102F36', fontFamily: fonts.extraBold, fontSize: 13 }, loading: { opacity: 0.6 },
+  choices: { gap: 8, marginTop: 18 },
+  fresh: { minHeight: 48, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#8FE7FF80', borderRadius: 10 },
 });

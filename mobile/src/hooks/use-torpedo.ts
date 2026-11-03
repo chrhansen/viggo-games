@@ -3,12 +3,14 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { AppState, PixelRatio, useWindowDimensions, type LayoutChangeEvent } from 'react-native';
 import { TorpedoGame, type TorpedoView } from 'torpedo/game';
+import { bossProgress } from '@/game/torpedo/boss-progress';
 import { createNativeTorpedoRenderer, type NativeTorpedoRenderer } from '@/game/torpedo/renderer';
 import { createTorpedoTouchInput } from '@/game/torpedo/touch-input';
 
 export function useTorpedo() {
   const { width, height } = useWindowDimensions();
-  const [game] = useState(() => new TorpedoGame());
+  const [savedBossCount] = useState(bossProgress.load);
+  const [game] = useState(() => new TorpedoGame({ onSaveBossCount: bossProgress.save }));
   const [touch] = useState(createTorpedoTouchInput);
   const [hud, setHud] = useState(() => game.getSnapshot());
   const [ready, setReady] = useState(false);
@@ -24,8 +26,12 @@ export function useTorpedo() {
   useLayoutEffect(() => { touch.reset(); game.clearKeys(); }, [width, height, game, touch]);
   useEffect(() => {
     alive.current = true;
-    const subscription = AppState.addEventListener('change', state => { if (state !== 'active') pause(); });
+    const subscription = AppState.addEventListener('change', state => {
+      if (state !== 'active') pause();
+      if (state === 'background') game.saveBossCount();
+    });
     return () => {
+      game.saveBossCount();
       alive.current = false; subscription.remove(); cancelAnimationFrame(frame.current);
       touch.reset(); runtime.current?.dispose(); runtime.current = null; game.dispose();
     };
@@ -76,20 +82,25 @@ export function useTorpedo() {
       setError('This device could not open the ocean. Return to the arcade and try again.');
     }
   }
-  const start = useCallback(() => {
+  const resume = useCallback(() => {
     if (!ready || error || AppState.currentState !== 'active') return;
     touch.reset(); game.clearKeys();
-    if (game.isGameOver) game.restart();
-    game.start(); sync();
+    game.resume(); sync();
   }, [error, game, ready, sync, touch]);
   const pauseForExit = useCallback(() => {
     const wasActive = game.active; pause();
-    return () => { if (wasActive) start(); };
-  }, [game, pause, start]);
+    return () => { if (wasActive) resume(); };
+  }, [game, pause, resume]);
   return {
-    game, touch, hud, ready, error, rooms, start, pause, pauseForExit, sync, onSurfaceLayout, onContextCreate,
+    game, touch, hud, ready, error, rooms, savedBossCount, resume, pause, pauseForExit, sync, onSurfaceLayout, onContextCreate,
+    startPatrol(count: number) {
+      if (!ready || error || AppState.currentState !== 'active') return;
+      touch.reset();
+      game.startPatrol(count);
+      sync();
+    },
     enterRooms() { if (!game.active) return; pause(); setRooms(true); },
-    leaveRooms(view: TorpedoView) { game.setView(view); setRooms(false); start(); sync(); },
+    leaveRooms(view: TorpedoView) { game.setView(view); setRooms(false); resume(); },
     setView(view: TorpedoView) { touch.reset(); game.clearKeys(); game.setView(view); sync(); },
   };
 }

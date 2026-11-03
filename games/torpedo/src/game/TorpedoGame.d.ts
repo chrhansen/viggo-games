@@ -3,12 +3,12 @@ import type { Group, Mesh, PerspectiveCamera, Scene, Texture, Vector3 } from 'th
 export type TorpedoView = 'front' | 'port' | 'starboard' | 'periscope';
 export type RoomAction = 'steer' | 'sonar' | 'rest' | 'eat' | 'repair';
 export interface TorpedoSnapshot {
-  started: boolean; active: boolean; gameOver: boolean; score: number;
+  started: boolean; active: boolean; gameOver: boolean; score: number; bossesDefeated: number;
   hull: number; maxHull: number; engineBroken: boolean; ready: boolean;
   view: TorpedoView; viewTitle: string; status: string; hit: boolean;
 }
 export class TorpedoGame {
-  constructor(callbacks?: { onChange?: (state: TorpedoSnapshot) => void; onDamage?: () => void; onGameOver?: () => void });
+  constructor(callbacks?: { onChange?: (state: TorpedoSnapshot) => void; onDamage?: () => void; onGameOver?: () => void; onSaveBossCount?: (count: number) => void });
   scene: Scene;
   camera: PerspectiveCamera;
   world: Group;
@@ -39,7 +39,9 @@ export class TorpedoGame {
   start(): void;
   pause(): void;
   resume(): void;
-  restart(): void;
+  restart(bossesDefeated?: number): void;
+  startPatrol(bossesDefeated?: number): void;
+  saveBossCount(): void;
   clearKeys(): void;
   setTouchInput(x: number, y: number): void;
   clearTouchInput(): void;

@@ -15,6 +15,7 @@
   },
   "exports": {
     "./game": "./src/game/TorpedoGame.js",
+    "./boss-progress": "./src/game/bossProgress.js",
     "./rooms": "./src/game/rooms.js",
     "./assets/*": "./src/assets/*"
   }
