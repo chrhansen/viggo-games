@@ -104,9 +104,9 @@ describe('shared Torpedo game', () => {
     expect(game.effects.bursts).toHaveLength(0);
     const geometry = game.environment.floorChunks[0].geometry;
     const disposed = vi.fn(); geometry.addEventListener('dispose', disposed);
-    const oldTexture = game.textures.get('sand');
+    const oldTextureId = game.textures.get('sand').id;
     game.dispose(); game.dispose(); expect(disposed).toHaveBeenCalledOnce();
     next.start(); next.step(0.02); expect(next.active).toBe(true);
-    expect(next.textures.get('sand')).not.toBe(oldTexture);
+    expect(next.textures.get('sand').id).not.toBe(oldTextureId);
   });
 });
