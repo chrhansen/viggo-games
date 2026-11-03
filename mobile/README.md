@@ -13,6 +13,9 @@ The build's update endpoint served iOS update `01a1a24b-5889-77d6-a354-5679132cc
 its bundle and all 61 assets matched the local export. Open Viggo Games online,
 then fully close and reopen it. Start a Torpedo patrol, exit, and tap **Play now**
 again to see **Resume Boss Count** and **Start Fresh**, even with zero bosses sunk.
+Christian approved merging Torpedo after this iPhone update. Commit `6cce4c1`
+updates eight Expo SDK 57 packages for future native builds. All 219 tests, all
+20 Expo Doctor checks, and the iOS and Android exports passed.
 
 Torpedo and the updated About page were published as an **iOS Expo update on
 2026-11-01** to `testflight`. Update group:
@@ -29,12 +32,9 @@ all five room images; the bundle matches the tested release export. Open
 Viggo Games online, allow the download, then fully close and reopen it. The
 TestFlight build number stays **0.1.0 (15)**.
 
-Validation: root lint/typecheck/tests/build, desktop and phone-browser smoke,
-mobile lint/typecheck, iOS/Android exports, and native lifecycle tests pass
-(210 tests total). Expo Doctor reports 19/20 checks: newer SDK patches are
-recommended, a pre-existing dependency advisory. Those upgrades require a future
-installer. The local simulator's old development app lacks Expo GL, so physical
-GPU/touch acceptance remains pending on the iPhone.
+The November 1 release passed 210 tests, web and mobile lint and typechecks,
+the website build, desktop and phone browser checks, and both native exports.
+Expo Doctor passed 19 of 20 checks and recommended SDK patches.
 
 Gunny and Burb's continuous rotation fix is embedded in signed **Viggo Games
 0.1.0 (15)**, available on **2026-10-06** from commit
@@ -182,11 +182,8 @@ native fingerprint changes are included in TestFlight build (9); they have not b
 published as an Expo update to build (7). Install build (9) to receive these changes.
 The refreshed dependency set passes Expo Doctor's 20 checks and both native exports.
 
-All four native games have Android implementations and passing Android export
-checks. An Android device/store build has not been delivered. Gunny and the About
-page were delivered in TestFlight build (13) on **2026-10-06**; their native device
-acceptance remains pending.
-Torpedo retains a preview detail page and has not been ported.
+All five games have native Android implementations and passing Android exports.
+Android device testing and store distribution remain pending.
 
 ## Stack
 
@@ -436,9 +433,8 @@ redraws when its size/view changes. GPU resources belong to each patrol and are
 released on exit. Tests cover shared combat and room behavior plus the mounted
 native screen's rotation, background/resume, room visits and graphics failures.
 
-No native dependencies were added. Expo updates still need the dependency
-versions and fingerprint of the target installed build; the repository's newer
-SDK patches belong to a future installer.
+Torpedo saves the boss count with `expo-file-system`, which TestFlight build (15)
+already includes. Expo updates must match the target build's native fingerprint.
 
 ## Expo and TestFlight beta delivery
 
