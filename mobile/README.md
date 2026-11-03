@@ -7,6 +7,13 @@ or delivering an iPhone beta or Expo update.
 
 ## Delivery status
 
+On **2026-11-03**, [Torpedo boss-count saves](https://expo.dev/accounts/viggo-games/projects/viggo-games/updates/00dc5c4c-bce8-4347-b46c-509ffbb0d18e)
+shipped to the iOS `testflight` channel for **0.1.0 (15)**, from `2a572c8`.
+The build's update endpoint served iOS update `01a1a24b-5889-77d6-a354-5679132ccf40`;
+its bundle and all 61 assets matched the local export. Open Viggo Games online,
+then fully close and reopen it. Start a Torpedo patrol, exit, and tap **Play now**
+again to see **Resume Boss Count** and **Start Fresh**, even with zero bosses sunk.
+
 Torpedo and the updated About page were published as an **iOS Expo update on
 2026-11-01** to `testflight`. Update group:
 [`ec48660d-198c-4d64-9079-2e142e030b0b`](https://expo.dev/accounts/viggo-games/projects/viggo-games/updates/ec48660d-198c-4d64-9079-2e142e030b0b).
@@ -16,7 +23,7 @@ Update ID: `01a19835-04e9-7d15-8784-f127217b34e8`. Torpedo implementation commit
 The release snapshot uses build (15)'s exact mobile dependencies from `bc6b4aa`
 plus the repository-local Torpedo package. Its native fingerprint exactly matches
 build (15): `2d12d4f252db8585180dff1ba16c1e66bc2e25b8`; no runtime override was used.
-The app's update endpoint serves this update for that runtime and channel. The
+The app's update endpoint served this update for that runtime and channel. The
 published bundle and all 61 assets were downloaded and hash-verified, including
 all five room images; the bundle matches the tested release export. Open
 Viggo Games online, allow the download, then fully close and reopen it. The
