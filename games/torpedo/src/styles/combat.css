@@ -353,6 +353,13 @@
   cursor: pointer;
 }
 
+#resume-button:not([hidden]) + #start-button {
+  margin-top: 8px;
+  border: 1px solid var(--muted);
+  background: transparent;
+  color: var(--ink);
+}
+
 @media (max-width: 760px) {
   .front-pane {
     left: 8vw;

@@ -8,6 +8,7 @@ on:
       - "games/hunter-guy/**"
       - "games/burb/**"
       - "games/gunny/**"
+      - "games/torpedo/**"
       - "src/data/about.json"
       - "src/assets/viggo-portrait.webp"
       - "scripts/bake-gunny-audio.mjs"
@@ -18,6 +19,7 @@ on:
       - "src/test/hunter-*.test.ts"
       - "src/test/burb-*.test.ts"
       - "src/test/gunny-*.test.ts"
+      - "src/test/torpedo-*.test.ts"
       - "src/test/mobile-*.test.ts"
       - ".github/workflows/mobile.yml"
   push:
@@ -28,6 +30,7 @@ on:
       - "games/hunter-guy/**"
       - "games/burb/**"
       - "games/gunny/**"
+      - "games/torpedo/**"
       - "src/data/about.json"
       - "src/assets/viggo-portrait.webp"
       - "scripts/bake-gunny-audio.mjs"
@@ -38,6 +41,7 @@ on:
       - "src/test/hunter-*.test.ts"
       - "src/test/burb-*.test.ts"
       - "src/test/gunny-*.test.ts"
+      - "src/test/torpedo-*.test.ts"
       - "src/test/mobile-*.test.ts"
       - ".github/workflows/mobile.yml"
   workflow_dispatch:

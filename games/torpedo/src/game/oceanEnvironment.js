@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { surfaceTexture } from './surfaceTextures.js';
 
 const randomBetween = (min, max) => min + Math.random() * (max - min);
 const FLOOR_SIZE = 320;
@@ -10,11 +9,11 @@ function seafloorHeight(x, z) {
     + Math.cos(phase * 3) * 0.65 + Math.sin(x * 0.14 + phase * 6) * 0.22;
 }
 
-export function createOceanEnvironment(world) {
+export function createOceanEnvironment(world, surfaceTexture) {
   const environment = { floorChunks: [], bubbles: [], details: [], elapsed: 0 };
-  createSeafloor(world, environment);
+  createSeafloor(world, environment, surfaceTexture);
   createBubbles(world, environment);
-  createOceanDetails(world, environment);
+  createOceanDetails(world, environment, surfaceTexture);
   return environment;
 }
 
@@ -43,7 +42,7 @@ export function updateOceanEnvironment(environment, player, delta) {
   }
 }
 
-function createSeafloor(world, environment) {
+function createSeafloor(world, environment, surfaceTexture) {
   const geometry = new THREE.PlaneGeometry(FLOOR_SIZE, FLOOR_SIZE, 96, 96);
   geometry.rotateX(-Math.PI / 2);
   const positions = geometry.attributes.position;
@@ -100,7 +99,7 @@ function kelpGeometry() {
   return geometry;
 }
 
-function createOceanDetails(world, environment) {
+function createOceanDetails(world, environment, surfaceTexture) {
   const rockMaterial = new THREE.MeshStandardMaterial({
     color: '#667970', map: surfaceTexture('steel'), bumpMap: surfaceTexture('steel'), bumpScale: 0.12, roughness: 0.97
   });

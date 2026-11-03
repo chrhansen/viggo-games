@@ -1,8 +1,8 @@
 import * as THREE from 'three';
-import { createEnemySubmarineMesh, quaternionFacing } from './meshes.js';
+import { quaternionFacing } from './meshes.js';
 import { PLAYER_BOUNDS } from './combatConfig.js';
+import { BOSS_TARGET } from './bossProgress.js';
 
-const BOSSES_PER_LEVEL = 5;
 const PICKUP_SCORE = 350;
 const BOSS_SCORE = 500;
 
@@ -16,19 +16,19 @@ export class BossLoop {
     this.reset();
   }
 
-  reset() {
-    this.level = 1;
-    this.bossesDefeated = 0;
+  reset(bossesDefeated = 0) {
+    this.level = bossesDefeated >= BOSS_TARGET ? 2 : 1;
+    this.bossesDefeated = bossesDefeated;
     this.regularKills = 0;
     this.waitingForPickup = false;
     this.boss = null;
     this.pickups = [];
   }
 
-  removeAll() {
+  removeAll(bossesDefeated = 0) {
     if (this.boss) this.combat.world.remove(this.boss.mesh);
     for (const pickup of this.pickups) this.combat.world.remove(pickup.mesh);
-    this.reset();
+    this.reset(bossesDefeated);
   }
 
   canSpawnRegular() {
@@ -40,7 +40,7 @@ export class BossLoop {
   }
 
   recordRegularKill() {
-    if (this.canSpawnRegular() && this.bossesDefeated < BOSSES_PER_LEVEL) {
+    if (this.canSpawnRegular() && this.bossesDefeated < BOSS_TARGET) {
       this.regularKills += 1;
     }
   }
@@ -54,12 +54,12 @@ export class BossLoop {
   }
 
   regularKillsNeeded() {
-    if (this.bossesDefeated >= BOSSES_PER_LEVEL) return Number.POSITIVE_INFINITY;
+    if (this.bossesDefeated >= BOSS_TARGET) return Number.POSITIVE_INFINITY;
     return 6 + this.bossesDefeated;
   }
 
   spawnBoss() {
-    const mesh = createEnemySubmarineMesh();
+    const mesh = this.combat.meshes.createEnemySubmarineMesh();
     const lane = this.bossesDefeated % 2 === 0 ? -10 : 10;
     mesh.position.set(
       clamp(this.combat.player.position.x + lane + randomBetween(-4, 4), -PLAYER_BOUNDS.x + 8, PLAYER_BOUNDS.x - 8),
@@ -127,12 +127,13 @@ export class BossLoop {
     this.combat.player.score += BOSS_SCORE;
     this.boss = null;
     this.bossesDefeated += 1;
+    this.combat.saveBossCount();
     this.spawnPickupSub(position, rotation);
     this.waitingForPickup = true;
   }
 
   spawnPickupSub(position, rotation) {
-    const mesh = createEnemySubmarineMesh();
+    const mesh = this.combat.meshes.createEnemySubmarineMesh();
     mesh.position.copy(position);
     mesh.quaternion.copy(rotation);
     mesh.scale.setScalar(0.42);
@@ -168,13 +169,13 @@ export class BossLoop {
     this.pickups.splice(index, 1);
     if (this.pickups.length) return;
     this.waitingForPickup = false;
-    if (this.bossesDefeated >= BOSSES_PER_LEVEL) this.level = 2;
+    if (this.bossesDefeated >= BOSS_TARGET) this.level = 2;
   }
 
   statusText() {
     if (this.boss) return `Boss ${this.boss.health}/${this.boss.maxHealth}`;
     if (this.waitingForPickup) return 'Prize Below';
-    if (this.bossesDefeated < BOSSES_PER_LEVEL) return `Boss ${this.bossesDefeated}/${BOSSES_PER_LEVEL}`;
+    if (this.bossesDefeated < BOSS_TARGET) return `Boss ${this.bossesDefeated}/${BOSS_TARGET}`;
     return `Level ${this.level}`;
   }
 }

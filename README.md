@@ -16,14 +16,14 @@ Self-contained source repository for the website, all five games, and the native
 | `games/gunny/core/` | Platform-neutral Gunny flight, combat, spawning and mission rules |
 | `games/torpedo/` | Torpedo source, submarine combat, interior rooms, and artwork |
 | `src/` | React website, game cards, descriptive landing pages, and iframe player |
-| `mobile/` | Native Expo shell, About page, and four games with native rendering/controls |
+| `mobile/` | Native Expo shell, About page, and all five games with native rendering/controls |
 | `public/` | Website static files, including `CNAME`; no copied game builds |
 | `scripts/` | Build and deployment validation |
 | `.github/workflows/` | Website deployment and mobile checks |
 | `docs/seo.md` | Search metadata, canonical URLs, and indexing rules |
 | `dist/` | Generated website and all five games; ignored by Git |
 
-Each game's README describes its controls, architecture, and maintenance. Native platform adapters stay under `mobile/`; shared gameplay rules live under each ported game’s `core/` directory.
+Each game's README describes its controls, architecture, and maintenance. Native platform adapters stay under `mobile/`; shared gameplay rules live under each game’s `core/` directory or Torpedo’s `src/game/TorpedoGame.js`.
 
 ## Game availability
 
@@ -33,7 +33,12 @@ Each game's README describes its controls, architecture, and maintenance. Native
 | [Hunter Guy](games/hunter-guy/README.md) | Playable | Playable on iOS/Android; shared rules, Three.js scene, models and assets |
 | [Burb](games/burb/README.md) | Playable | Playable on iOS/Android; shared engine and Three.js scene; continuous rotation in iOS TestFlight build (15), device acceptance pending |
 | [Gunny](games/gunny/README.md) | Playable | Native iOS/Android implementation; shared engine and Three.js scene; continuous rotation in iOS TestFlight build (15), device acceptance pending |
-| [Torpedo](games/torpedo/README.md) | Playable | Detail preview; not ported |
+| [Torpedo](games/torpedo/README.md) | Playable | Playable on iOS/Android; shared combat, Three.js scene, bosses and room actions |
+
+All five games have native implementations. Torpedo reached TestFlight build (15)
+on 2026-11-01. The 2026-11-03 update lets players resume their latest boss count
+or start fresh. Open the app online, then fully close and reopen it to apply the
+update. See [mobile delivery status](mobile/README.md#delivery-status).
 
 Chicken Hop, Hunter Guy, Burb and Gunny are included in one **Viggo Games** iOS app.
 Internal TestFlight beta **0.1.0 (15)** is available as of **2026-10-06**, with
@@ -101,7 +106,7 @@ The build also prepares and validates descriptive route pages, canonical tags, `
 
 ## Native app
 
-The native app uses Expo SDK 57, React Native and TypeScript, without a WebView. It consumes the local shared Chicken Hop core and Hunter Guy, Burb and Gunny engines/scenes and keeps a separate dependency lockfile to isolate Expo/React Native versions:
+The native app uses Expo SDK 57, React Native and TypeScript. It shares gameplay with all five browser games and uses a separate lockfile for native dependencies.
 
 ```sh
 cd mobile
@@ -110,10 +115,10 @@ npm run ios
 # or: npm run android
 ```
 
-The entire repository must be checked out; local game dependencies resolve to `../games/chicken-hop/core/`, `../games/hunter-guy/`, `../games/burb/` and `../games/gunny/` within it. See [mobile/README.md](mobile/README.md) for platform requirements, native checks, and child-directed product constraints.
+Check out the entire repository so the mobile app can resolve all five local game packages under `games/`. Platform requirements, native checks and child-directed product constraints are in the [mobile README](mobile/README.md).
 
 For iPhone installation, accept the internal TestFlight invitation and install
-**Viggo Games**, then select Chicken Hop, Hunter Guy, Burb or Gunny and tap **Play now** on its
+**Viggo Games**, then select a game and tap **Play now** on its
 detail page. See [beta delivery](mobile/README.md#expo-and-testflight-beta-delivery)
 for EAS Build, TestFlight submission and compatible JavaScript/asset updates.
 

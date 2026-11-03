@@ -1,8 +1,4 @@
 import * as THREE from 'three';
-import { surfaceTexture } from './surfaceTextures.js';
-
-let submarineTemplate;
-const torpedoTemplates = new Map();
 
 function addMesh(group, geometry, material, position = [0, 0, 0]) {
   const mesh = new THREE.Mesh(geometry, material);
@@ -48,7 +44,7 @@ function propeller(radius, material) {
   return group;
 }
 
-function buildSubmarine() {
+function buildSubmarine(surfaceTexture) {
   const group = new THREE.Group();
   const steel = new THREE.MeshStandardMaterial({
     color: '#526166', map: surfaceTexture('steel'), bumpMap: surfaceTexture('steel'),
@@ -117,43 +113,60 @@ function buildSubmarine() {
   return group;
 }
 
-export function createEnemySubmarineMesh() {
-  submarineTemplate ??= buildSubmarine();
-  const group = submarineTemplate.clone(true);
-  group.userData.propeller = group.getObjectByName('propeller');
-  return group;
-}
-
-export function createTorpedoMesh(color, glow) {
-  const key = `${color}:${glow}`;
-  if (!torpedoTemplates.has(key)) {
-    const group = new THREE.Group();
-    const steel = new THREE.MeshStandardMaterial({
-      color: '#a0aaa8', map: surfaceTexture('steel'), bumpMap: surfaceTexture('steel'),
-      bumpScale: 0.008, roughness: 0.46, metalness: 0.7
-    });
-    const dark = new THREE.MeshStandardMaterial({ color: '#26363b', roughness: 0.6, metalness: 0.5 });
-    const marking = new THREE.MeshStandardMaterial({ color, emissive: glow, emissiveIntensity: 0.12, roughness: 0.62 });
-    group.add(turnedHull([
-      [-1.18, 0], [-1.05, 0.09], [-0.8, 0.16], [0.7, 0.18], [0.95, 0.16], [1.12, 0.1], [1.19, 0]
-    ], steel));
-    const nose = addMesh(group, new THREE.SphereGeometry(1, 20, 12), dark, [0.94, 0, 0]);
-    nose.scale.set(0.26, 0.151, 0.151);
-    ring(group, 0.65, 0.18, 0.027, marking);
-    ring(group, -0.58, 0.168, 0.016, marking);
-    const fins = finGeometry(0.4, 0.3, 0.025);
-    for (let i = 0; i < 4; i += 1) {
-      const fin = addMesh(group, fins, dark, [-0.85, 0, 0]);
-      fin.rotation.x = i * Math.PI / 2;
-    }
-    const screw = propeller(0.16, steel);
-    screw.position.x = -1.2;
-    group.add(screw);
-    torpedoTemplates.set(key, group);
+export function createMeshLibrary(surfaceTexture) {
+  let submarineTemplate;
+  const torpedoTemplates = new Map();
+  function createEnemySubmarineMesh() {
+    submarineTemplate ??= buildSubmarine(surfaceTexture);
+    const group = submarineTemplate.clone(true);
+    group.userData.propeller = group.getObjectByName('propeller');
+    return group;
   }
-  const group = torpedoTemplates.get(key).clone(true);
-  group.userData.propeller = group.getObjectByName('propeller');
-  return group;
+
+  function createTorpedoMesh(color, glow) {
+    const key = `${color}:${glow}`;
+    if (!torpedoTemplates.has(key)) {
+      const group = new THREE.Group();
+      const steel = new THREE.MeshStandardMaterial({
+        color: '#a0aaa8', map: surfaceTexture('steel'), bumpMap: surfaceTexture('steel'),
+        bumpScale: 0.008, roughness: 0.46, metalness: 0.7
+      });
+      const dark = new THREE.MeshStandardMaterial({ color: '#26363b', roughness: 0.6, metalness: 0.5 });
+      const marking = new THREE.MeshStandardMaterial({ color, emissive: glow, emissiveIntensity: 0.12, roughness: 0.62 });
+      group.add(turnedHull([
+        [-1.18, 0], [-1.05, 0.09], [-0.8, 0.16], [0.7, 0.18], [0.95, 0.16], [1.12, 0.1], [1.19, 0]
+      ], steel));
+      const nose = addMesh(group, new THREE.SphereGeometry(1, 20, 12), dark, [0.94, 0, 0]);
+      nose.scale.set(0.26, 0.151, 0.151);
+      ring(group, 0.65, 0.18, 0.027, marking);
+      ring(group, -0.58, 0.168, 0.016, marking);
+      const fins = finGeometry(0.4, 0.3, 0.025);
+      for (let i = 0; i < 4; i += 1) {
+        const fin = addMesh(group, fins, dark, [-0.85, 0, 0]);
+        fin.rotation.x = i * Math.PI / 2;
+      }
+      const screw = propeller(0.16, steel);
+      screw.position.x = -1.2;
+      group.add(screw);
+      torpedoTemplates.set(key, group);
+    }
+    const group = torpedoTemplates.get(key).clone(true);
+    group.userData.propeller = group.getObjectByName('propeller');
+    return group;
+  }
+
+  return { createEnemySubmarineMesh, createTorpedoMesh, dispose() {
+    const resources = new Set();
+    for (const template of [submarineTemplate, ...torpedoTemplates.values()]) {
+      template?.traverse(object => {
+        if (object.geometry) resources.add(object.geometry);
+        if (object.material) resources.add(object.material);
+      });
+    }
+    for (const resource of resources) resource.dispose();
+    submarineTemplate = null;
+    torpedoTemplates.clear();
+  } };
 }
 
 export function quaternionFacing(direction) {

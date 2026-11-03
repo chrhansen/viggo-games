@@ -2,10 +2,13 @@ import { describe, expect, it, vi } from 'vitest';
 import * as THREE from 'three';
 import { OceanCombat } from '../../games/torpedo/src/game/OceanCombat.js';
 import { BossLoop } from '../../games/torpedo/src/game/bossLoop.js';
+import { createMeshLibrary } from '../../games/torpedo/src/game/meshes.js';
+import { createSurfaceTextures } from '../../games/torpedo/src/game/surfaceTextures.js';
 
 function combatFixture() {
   const combat = Object.assign(Object.create(OceanCombat.prototype), {
     world: new THREE.Group(),
+    meshes: createMeshLibrary(createSurfaceTextures().get),
     player: { position: new THREE.Vector3(0, 0, 0) },
     enemies: [],
     spawnTimer: 100,

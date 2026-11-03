@@ -1,11 +1,14 @@
 import './styles.css';
 import { OceanCombat } from './game/OceanCombat.js';
 import { InteriorWalk } from './game/InteriorWalk.js';
+import { BOSS_SAVE_KEY, createBossCountStore, resumePrompt } from './game/bossProgress.js';
 
 const canvas = document.querySelector('#combat-canvas');
 const combatUi = document.querySelector('#combat-ui');
 const interiorScreen = document.querySelector('#interior-screen');
 const startButton = document.querySelector('#start-button');
+const resumeButton = document.querySelector('#resume-button');
+const briefing = document.querySelector('#patrol-briefing');
 const splashScreen = document.querySelector('#splash-screen');
 const fireButton = document.querySelector('#fire-button');
 const roomsButton = document.querySelector('#rooms-button');
@@ -40,13 +43,26 @@ let motionEnabled = false;
 let motionSignalSeen = false;
 let motionSignalTimer = 0;
 
+const bossProgress = createBossCountStore({
+  read: () => window.localStorage.getItem(BOSS_SAVE_KEY),
+  write: value => window.localStorage.setItem(BOSS_SAVE_KEY, value),
+});
+let previousCount = bossProgress.load();
+function showPatrolChoices(count) {
+  previousCount = count;
+  briefing.textContent = resumePrompt(count);
+  resumeButton.hidden = false;
+  startButton.textContent = 'Start fresh';
+}
+if (previousCount !== null) showPatrolChoices(previousCount);
+
 const combat = new OceanCombat(canvas, hud, {
+  onSaveBossCount: bossProgress.save,
   onEnterInterior: () => switchToInterior(),
   onGameOver: () => {
     splashScreen.classList.remove('hidden');
     splashScreen.querySelector('h2').textContent = 'Hull Breached';
-    splashScreen.querySelector('p').textContent = 'Start a new patrol and try a sneakier dodge.';
-    startButton.textContent = 'Restart Patrol';
+    showPatrolChoices(combat.getSnapshot().bossesDefeated);
   }
 });
 window.__torpedoDebugMotion = () => ({ ...combat.input.motion });
@@ -72,13 +88,13 @@ function switchToCombat(view = 'front') {
   combat.resume();
 }
 
-startButton.addEventListener('click', () => {
+function startPatrol(count) {
   splashScreen.classList.add('hidden');
-  if (combat.isGameOver) {
-    combat.restart();
-  }
-  combat.start();
-});
+  combat.startPatrol(count);
+}
+startButton.addEventListener('click', () => startPatrol(0));
+resumeButton.addEventListener('click', () => startPatrol(previousCount));
+window.addEventListener('pagehide', () => combat.saveBossCount());
 
 window.addEventListener('keydown', (event) => {
   if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.code)) {
@@ -87,7 +103,10 @@ window.addEventListener('keydown', (event) => {
 
   if (!splashScreen.classList.contains('hidden')) {
     if (event.code === 'Enter' || event.code === 'Space') {
-      startButton.click();
+      event.preventDefault();
+      if (event.repeat) return;
+      const button = resumeButton.hidden || document.activeElement === startButton ? startButton : resumeButton;
+      button.click();
     }
     return;
   }

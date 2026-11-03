@@ -1,16 +1,40 @@
 # Viggo Games Mobile
 
-Native iOS and Android app built with React Native and Expo. It includes the native splash, game selector, game detail pages, and playable native Chicken Hop, Hunter Guy, Burb and Gunny. It does not embed the website.
+Native iOS and Android app built with React Native and Expo. It includes the native splash, game selector, game detail pages, and playable native Chicken Hop, Hunter Guy, Burb, Gunny and Torpedo. It does not embed the website.
 
 Read this when developing a native game, checking browser/native ownership,
 or delivering an iPhone beta or Expo update.
 
 ## Delivery status
 
-The updated About copy and tappable GitHub source link are present in source.
-Installed TestFlight build (15) still has the older About copy and selectable
-GitHub text. No new mobile build or Expo update has been published for these
-changes; pushing to `main` deploys the website only.
+On **2026-11-03**, [Torpedo boss-count saves](https://expo.dev/accounts/viggo-games/projects/viggo-games/updates/00dc5c4c-bce8-4347-b46c-509ffbb0d18e)
+shipped to the iOS `testflight` channel for **0.1.0 (15)**, from `2a572c8`.
+The build's update endpoint served iOS update `01a1a24b-5889-77d6-a354-5679132ccf40`;
+its bundle and all 61 assets matched the local export. Open Viggo Games online,
+then fully close and reopen it. Start a Torpedo patrol, exit, and tap **Play now**
+again to see **Resume Boss Count** and **Start Fresh**, even with zero bosses sunk.
+Christian approved merging Torpedo after this iPhone update. Commit `6cce4c1`
+updates eight Expo SDK 57 packages for future native builds. All 219 tests, all
+20 Expo Doctor checks, and the iOS and Android exports passed.
+
+Torpedo and the updated About page were published as an **iOS Expo update on
+2026-11-01** to `testflight`. Update group:
+[`ec48660d-198c-4d64-9079-2e142e030b0b`](https://expo.dev/accounts/viggo-games/projects/viggo-games/updates/ec48660d-198c-4d64-9079-2e142e030b0b).
+Update ID: `01a19835-04e9-7d15-8784-f127217b34e8`. Torpedo implementation commit:
+`a0d67aa`. All five arcade entries now offer **Play now**.
+
+The release snapshot uses build (15)'s exact mobile dependencies from `bc6b4aa`
+plus the repository-local Torpedo package. Its native fingerprint exactly matches
+build (15): `2d12d4f252db8585180dff1ba16c1e66bc2e25b8`; no runtime override was used.
+The app's update endpoint served this update for that runtime and channel. The
+published bundle and all 61 assets were downloaded and hash-verified, including
+all five room images; the bundle matches the tested release export. Open
+Viggo Games online, allow the download, then fully close and reopen it. The
+TestFlight build number stays **0.1.0 (15)**.
+
+The November 1 release passed 210 tests, web and mobile lint and typechecks,
+the website build, desktop and phone browser checks, and both native exports.
+Expo Doctor passed 19 of 20 checks and recommended SDK patches.
 
 Gunny and Burb's continuous rotation fix is embedded in signed **Viggo Games
 0.1.0 (15)**, available on **2026-10-06** from commit
@@ -158,11 +182,8 @@ native fingerprint changes are included in TestFlight build (9); they have not b
 published as an Expo update to build (7). Install build (9) to receive these changes.
 The refreshed dependency set passes Expo Doctor's 20 checks and both native exports.
 
-All four native games have Android implementations and passing Android export
-checks. An Android device/store build has not been delivered. Gunny and the About
-page were delivered in TestFlight build (13) on **2026-10-06**; their native device
-acceptance remains pending.
-Torpedo retains a preview detail page and has not been ported.
+All five games have native Android implementations and passing Android exports.
+Android device testing and store distribution remain pending.
 
 ## Stack
 
@@ -205,9 +226,8 @@ Mobile CI runs this gate plus the root web/test gate for changes to the mobile a
 The arcade and game detail pages use a solid black background, without decorative
 glows, arcs or grid lines.
 
-The selector shows each full title image at its original aspect ratio. Only
-Torpedo has a **Coming Soon** overlay; playable games have no text or
-shade over their artwork. Tap any image to open its detail page.
+The selector shows each full title image at its original aspect ratio. All five
+games are playable; there is no text or shade over their artwork. Tap any image to open its detail page.
 
 Select a mission to open its detail page with artwork, instructions, touch controls
 and tips. Descriptions and gameplay instructions come from the website's shared
@@ -390,6 +410,31 @@ cover shared rules, seeded browser/native parity, multitouch cancellation, resta
 scene disposal, portrait flight-bound framing and portrait/landscape recreation. iOS/Android exports and Expo
 Doctor pass. The installed simulator has no accessible Simulator.app UI, so native
 GPU, touch feel, rotation and background/resume still need iPhone verification.
+
+## Torpedo
+
+After **Play now**, a returning captain can resume the latest boss count or start
+fresh. Only that number is stored in the app’s documents directory. Starting a
+patrol, sinking a boss, backgrounding, and exiting save the current count. Score,
+hull, enemies, and prizes reset for each new patrol. Pausing and visiting rooms
+continue the current patrol.
+
+Torpedo uses `torpedo/game` from `../games/torpedo` for the same combat, helpers,
+straight-course enemies, boss progression, prizes, camera views, and procedural
+underwater scene as the website. `torpedo/rooms` shares all five room definitions;
+room art is bundled from the same repository-local assets. Nothing loads from
+another checkout or a hosted game.
+
+The native adapter adds Expo GL rendering, held multitouch steering/fire, native
+view selectors, periscope turning, HUD, room tabs/actions, and pause/restart cards.
+Visiting rooms pauses combat. Backgrounding and confirmed exits clear controls.
+Rotation and replacement GL contexts preserve the patrol; an inactive scene only
+redraws when its size/view changes. GPU resources belong to each patrol and are
+released on exit. Tests cover shared combat and room behavior plus the mounted
+native screen's rotation, background/resume, room visits and graphics failures.
+
+Torpedo saves the boss count with `expo-file-system`, which TestFlight build (15)
+already includes. Expo updates must match the target build's native fingerprint.
 
 ## Expo and TestFlight beta delivery
 
